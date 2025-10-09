@@ -1,0 +1,12 @@
+databaseChangeLog:
+  - changeSet:
+      id: 002-add-index-to-email
+      author: lqwd
+      changes:
+        - createIndex:
+            tableName: users
+            indexName: idx_users_login
+            columns:
+              - column:
+                  name: login
+                  descending: true

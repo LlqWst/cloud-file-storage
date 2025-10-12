@@ -38,3 +38,5 @@ out/
 /src/main/resources/application.properties
 /src/main/java/dev/lqwd/cloudfilestorage/TestRest.java
 /gradle/
+/.env
+/src/main/java/dev/lqwd/cloudfilestorage/controller/ForTesting.java

@@ -1,0 +1,45 @@
+databaseChangeLog:
+  - changeSet:
+      id: 001-create-users-table
+      author: lqwd
+      changes:
+        - createTable:
+            tableName: users
+            columns:
+              - column:
+                  name: id
+                  type: BIGSERIAL
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: username
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: password
+                  type: VARCHAR(150)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_disabled
+                  type: BOOLEAN
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_locked
+                  type: BOOLEAN
+                  constraints:
+                    nullable: false
+              - column:
+                  name: credentials_expire_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: account_expires_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false

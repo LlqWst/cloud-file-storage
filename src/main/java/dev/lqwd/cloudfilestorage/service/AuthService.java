@@ -4,7 +4,7 @@ import dev.lqwd.cloudfilestorage.dto.RegistrationRequestDTO;
 import dev.lqwd.cloudfilestorage.entity.Role;
 import dev.lqwd.cloudfilestorage.entity.User;
 import dev.lqwd.cloudfilestorage.entity.UserRole;
-import dev.lqwd.cloudfilestorage.exception.user_validation.RegistrationException;
+import dev.lqwd.cloudfilestorage.exception.user_validation.UserAlreadyExist;
 import dev.lqwd.cloudfilestorage.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -30,7 +30,7 @@ public class AuthService {
 
             UserRole role = UserRole.builder()
                     .user(user)
-                    .role(Role.USER)
+                    .role(Role.ROLE_USER)
                     .build();
 
             user.getUserRoles().add(role);
@@ -38,7 +38,7 @@ public class AuthService {
             return userRepository.save(user);
 
         } catch (DataIntegrityViolationException e) {
-            throw new RegistrationException(ERROR_MESSAGE_USER_EXISTS, e);
+            throw new UserAlreadyExist(ERROR_MESSAGE_USER_EXISTS, e);
         }
     }
 

@@ -3,9 +3,11 @@ package dev.lqwd.cloudfilestorage.exception_handler;
 import dev.lqwd.cloudfilestorage.dto.ErrorResponseDTO;
 import dev.lqwd.cloudfilestorage.exception.BadRequestException;
 import dev.lqwd.cloudfilestorage.exception.user_validation.AuthException;
-import dev.lqwd.cloudfilestorage.exception.user_validation.RegistrationException;
+import dev.lqwd.cloudfilestorage.exception.user_validation.UserAlreadyExist;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -32,16 +34,22 @@ public class GlobalExceptionHandler {
                 .collect(Collectors.joining("; "));
 
         ErrorResponseDTO errorResponse = new ErrorResponseDTO(message);
-        return ResponseEntity.badRequest().body(errorResponse);
+        return ResponseEntity
+                .badRequest()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(errorResponse);
     }
 
-    @ExceptionHandler(RegistrationException.class)
-    public ResponseEntity<ErrorResponseDTO> handleUserAlreadyExistsException(RegistrationException e) {
+    @ExceptionHandler(UserAlreadyExist.class)
+    public ResponseEntity<ErrorResponseDTO> handleUserAlreadyExistsException(UserAlreadyExist e) {
 
         log.error("Exception occurred:  {}", e.getMessage(), e);
 
         ErrorResponseDTO errorResponse = new ErrorResponseDTO(e.getMessage());
-        return ResponseEntity.badRequest().body(errorResponse);
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(errorResponse);
     }
 
     @ExceptionHandler(AuthException.class)
@@ -50,7 +58,10 @@ public class GlobalExceptionHandler {
         log.warn("Exception occurred:  {}", e.getMessage(), e);
 
         ErrorResponseDTO errorResponse = new ErrorResponseDTO(e.getMessage());
-        return ResponseEntity.badRequest().body(errorResponse);
+        return ResponseEntity
+                .badRequest()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(errorResponse);
     }
 
     @ExceptionHandler(BadRequestException.class)
@@ -59,7 +70,10 @@ public class GlobalExceptionHandler {
         log.warn("Exception occurred:  {}", e.getMessage(), e);
 
         ErrorResponseDTO errorResponse = new ErrorResponseDTO(e.getMessage());
-        return ResponseEntity.badRequest().body(errorResponse);
+        return ResponseEntity
+                .badRequest()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(errorResponse);
     }
 
     @ExceptionHandler(Exception.class)
@@ -68,7 +82,10 @@ public class GlobalExceptionHandler {
         log.error("Exception occurred:  {}", e.getMessage(), e);
 
         ErrorResponseDTO errorResponse = new ErrorResponseDTO("Internal error");
-        return ResponseEntity.internalServerError().body(errorResponse);
+        return ResponseEntity
+                .internalServerError()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(errorResponse);
     }
 
 }

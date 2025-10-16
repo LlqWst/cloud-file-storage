@@ -11,12 +11,19 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/auth")
 public class AuthController {
 
+    @GetMapping("/sign-in")
+    public String HiFromSignIn(){
+
+        return "hi";
+    }
+
+
     @PostMapping("/sign-in")
     public ResponseEntity<UserResponseDTO> validateUserCredentials(@Valid @RequestBody AuthRequestDTO authRequestDTO){
 
         return ResponseEntity
                 .ok()
-                .body(new UserResponseDTO("123"));
+                .body(new UserResponseDTO(authRequestDTO.username()));
     }
 
 }

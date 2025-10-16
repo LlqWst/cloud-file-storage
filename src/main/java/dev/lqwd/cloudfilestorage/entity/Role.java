@@ -2,8 +2,7 @@ package dev.lqwd.cloudfilestorage.entity;
 
 public enum Role {
 
-    USER,
-    MODERATOR,
-    ADMIN;
-
+    ROLE_USER,
+    ROLE_MODERATOR,
+    ROLE_ADMIN;
 }

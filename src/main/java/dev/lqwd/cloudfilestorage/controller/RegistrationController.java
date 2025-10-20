@@ -1,9 +1,9 @@
-package dev.lqwd.cloudfilestorage.controller.auth;
+package dev.lqwd.cloudfilestorage.controller;
 
 import dev.lqwd.cloudfilestorage.dto.RegistrationRequestDTO;
 import dev.lqwd.cloudfilestorage.dto.UserResponseDTO;
 import dev.lqwd.cloudfilestorage.entity.User;
-import dev.lqwd.cloudfilestorage.service.AuthService;
+import dev.lqwd.cloudfilestorage.service.RegistrationService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -15,13 +15,12 @@ import org.springframework.web.bind.annotation.*;
 @AllArgsConstructor
 public class RegistrationController {
 
-    AuthService authService;
+    RegistrationService registrationService;
 
     @PostMapping("/sign-up")
     public ResponseEntity<UserResponseDTO> createUser(@Valid @RequestBody RegistrationRequestDTO registrationRequest){
 
-        User user = authService.registration(registrationRequest);
-
+        User user = registrationService.registration(registrationRequest);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(new UserResponseDTO(user.getUsername()));

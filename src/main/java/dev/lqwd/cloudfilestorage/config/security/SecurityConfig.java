@@ -1,7 +1,8 @@
 package dev.lqwd.cloudfilestorage.config.security;
 
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.lqwd.cloudfilestorage.config.security.json_auth.JsonAuthenticationFilter;
+import dev.lqwd.cloudfilestorage.service.CustomUserDetailsService;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,10 +11,13 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.RequestCacheConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+import org.springframework.security.web.context.SecurityContextRepository;
 
 
 @Configuration
@@ -21,11 +25,17 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @AllArgsConstructor
 public class SecurityConfig {
 
-    private final UserDetailsServiceImpl userDetailsServiceImpl;
-    private final JsonAuthenticationSuccessHandler successHandler;
-    private final JsonAuthenticationFailureHandler failureHandler;
-    private final ObjectMapper objectMapper;
+    public static final String POST = "POST";
+    public static final String SIGN_OUT_URL = "/api/auth/sign-out";
 
+    private final CustomUserDetailsService customUserDetailsService;
+    private final CustomLogoutSuccessHandler customLogoutSuccessHandler;
+
+
+    @Bean
+    public SecurityContextRepository securityContextRepository() {
+        return new HttpSessionSecurityContextRepository();
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -37,22 +47,10 @@ public class SecurityConfig {
 
         AuthenticationManagerBuilder builder = http.getSharedObject(AuthenticationManagerBuilder.class);
         builder
-                .userDetailsService(userDetailsServiceImpl)
+                .userDetailsService(customUserDetailsService)
                 .passwordEncoder(passwordEncoder());
 
         return builder.build();
-    }
-
-    @Bean
-    public JsonAuthenticationFilter jsonAuthenticationFilter(
-            AuthenticationManager authenticationManager) {
-
-        JsonAuthenticationFilter filter = new JsonAuthenticationFilter(objectMapper);
-        filter.setAuthenticationManager(authenticationManager);
-        filter.setFilterProcessesUrl("/api/auth/sign-in");
-        filter.setAuthenticationSuccessHandler(successHandler);
-        filter.setAuthenticationFailureHandler(failureHandler);
-        return filter;
     }
 
     @Bean
@@ -62,11 +60,27 @@ public class SecurityConfig {
 
         return http
                 .csrf(AbstractHttpConfigurer::disable)
+                .requestCache(RequestCacheConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/error/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/").permitAll()
                         .anyRequest().authenticated()
+                )
+                .securityContext(securityContext -> securityContext
+                        .securityContextRepository(securityContextRepository())
+                        .requireExplicitSave(false)
+                )
+                .formLogin(AbstractHttpConfigurer::disable)
+                .httpBasic(AbstractHttpConfigurer::disable)
+                .logout(conf -> conf
+                        .logoutRequestMatcher(request ->
+                                SIGN_OUT_URL.equals(request.getServletPath()) &&
+                                POST.equalsIgnoreCase(request.getMethod())
+                        )
+                        .logoutSuccessHandler(customLogoutSuccessHandler)
+                        .deleteCookies("JSESSIONID")
+                        .invalidateHttpSession(true)
                 )
                 .addFilterBefore(jsonAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();

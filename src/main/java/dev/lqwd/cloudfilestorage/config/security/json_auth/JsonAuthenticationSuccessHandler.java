@@ -1,4 +1,4 @@
-package dev.lqwd.cloudfilestorage.config.security;
+package dev.lqwd.cloudfilestorage.config.security.json_auth;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,7 +29,6 @@ public class JsonAuthenticationSuccessHandler implements AuthenticationSuccessHa
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
         UserResponseDTO userResponseDTO = new UserResponseDTO(authentication.getName());
-
         objectMapper.writeValue(response.getWriter(), userResponseDTO);
     }
 

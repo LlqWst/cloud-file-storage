@@ -17,6 +17,8 @@ import java.util.Set;
 @Table(name = "users")
 public class User {
 
+    public static final int TIME_TO_EXPIRE = 30;
+
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -40,11 +42,11 @@ public class User {
 
     @Column(name = "credentials_expire_at", nullable = false)
     @Builder.Default
-    private LocalDateTime credentialsExpireAt = LocalDateTime.now().plusMinutes(5);
+    private LocalDateTime credentialsExpireAt = LocalDateTime.now().plusMonths(TIME_TO_EXPIRE);
 
     @Column(name = "account_expires_at", nullable = false)
     @Builder.Default
-    private LocalDateTime accountExpiresAt = LocalDateTime.now().plusMinutes(5);
+    private LocalDateTime accountExpiresAt = LocalDateTime.now().plusMinutes(TIME_TO_EXPIRE);
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @Builder.Default

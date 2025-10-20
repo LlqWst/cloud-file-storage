@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @AllArgsConstructor
-public class AuthService {
+public class RegistrationService {
 
     private static final String ERROR_MESSAGE_USER_EXISTS = "User already exists";
 
@@ -34,7 +34,6 @@ public class AuthService {
                     .build();
 
             user.getUserRoles().add(role);
-
             return userRepository.save(user);
 
         } catch (DataIntegrityViolationException e) {

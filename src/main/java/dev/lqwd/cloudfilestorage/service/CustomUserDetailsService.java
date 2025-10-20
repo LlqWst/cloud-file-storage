@@ -1,4 +1,4 @@
-package dev.lqwd.cloudfilestorage.config.security;
+package dev.lqwd.cloudfilestorage.service;
 
 import dev.lqwd.cloudfilestorage.entity.User;
 import dev.lqwd.cloudfilestorage.repository.UserRepository;
@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
-public class UserDetailsServiceImpl implements UserDetailsService {
+public class CustomUserDetailsService implements UserDetailsService {
 
     private final UserRepository userRepository;
 

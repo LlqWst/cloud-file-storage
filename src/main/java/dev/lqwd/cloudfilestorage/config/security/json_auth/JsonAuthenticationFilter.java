@@ -26,6 +26,7 @@ public class JsonAuthenticationFilter extends OncePerRequestFilter {
     private static final String POST = "POST";
     private static final String SIGN_IN_URL = "/api/auth/sign-in";
     private static final String FAILED_TO_PARSE_REQUEST = "Failed to parse authentication request";
+    private static final String METHOD_IS_NOT_ALLOWED = "Method is not allowed";
 
     private final ObjectMapper objectMapper;
     private final AuthenticationManager authenticationManager;
@@ -37,22 +38,22 @@ public class JsonAuthenticationFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
-        if (isNotLoginRequest(request)) {
+        if (!SIGN_IN_URL.equals(request.getServletPath())) {
             filterChain.doFilter(request, response);
             return;
         }
 
         try {
+            if (!POST.equals(request.getMethod())) {
+                throw new BadRequestException(METHOD_IS_NOT_ALLOWED);
+            }
+
             Authentication authentication = attemptAuthentication(request);
             SecurityContextHolder.getContext().setAuthentication(authentication);
             successHandler.onAuthenticationSuccess(request, response, authentication);
 
-        } catch (AuthenticationException e) {
-            failureHandler.onAuthenticationFailure(request, response, e);
-        } catch (BadRequestException e) {
-            failureHandler.onBadRequest(request, response, e);
         } catch (Exception e) {
-            failureHandler.onInternalException(request, response, e);
+            failureHandler.onException(request, response, e);
         }
     }
 
@@ -70,16 +71,9 @@ public class JsonAuthenticationFilter extends OncePerRequestFilter {
         return authenticationManager.authenticate(authToken);
     }
 
-    private static boolean isNotLoginRequest(HttpServletRequest request) {
-        return !SIGN_IN_URL.equals(request.getServletPath()) ||
-               !POST.equals(request.getMethod());
-    }
-
     private AuthRequestDTO getAuthRequest(HttpServletRequest request) {
         try {
-            return objectMapper.readValue(
-                    request.getInputStream(), AuthRequestDTO.class);
-
+            return objectMapper.readValue(request.getInputStream(), AuthRequestDTO.class);
         } catch (IOException e) {
             throw new BadRequestException(FAILED_TO_PARSE_REQUEST, e);
         }

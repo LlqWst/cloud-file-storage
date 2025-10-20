@@ -4,7 +4,6 @@ package dev.lqwd.cloudfilestorage.config.security.json_auth;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.lqwd.cloudfilestorage.dto.ErrorResponseDTO;
 import dev.lqwd.cloudfilestorage.exception.BadRequestException;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
@@ -12,7 +11,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -20,44 +18,29 @@ import java.io.IOException;
 @Component
 @Slf4j
 @AllArgsConstructor
-public class JsonAuthenticationFailureHandler implements AuthenticationFailureHandler {
+public class JsonAuthenticationFailureHandler {
 
     private final ObjectMapper objectMapper;
 
-    @Override
-    public void onAuthenticationFailure(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            AuthenticationException exception) throws IOException, ServletException {
+    public void onException(HttpServletRequest request,
+                            HttpServletResponse response,
+                            Exception ex) throws IOException {
 
-        onException(request, response, exception, HttpStatus.UNAUTHORIZED.value());
-    }
+        int httpStatus;
+        if (ex instanceof AuthenticationException) {
+            httpStatus = HttpStatus.UNAUTHORIZED.value();
+        } else if (ex instanceof BadRequestException) {
+            httpStatus = HttpStatus.BAD_REQUEST.value();
+        } else {
+            httpStatus = HttpStatus.INTERNAL_SERVER_ERROR.value();
+        }
 
-    public void onBadRequest(HttpServletRequest request,
-                             HttpServletResponse response,
-                             BadRequestException exception) throws IOException {
-
-        onException(request, response, exception, HttpStatus.BAD_REQUEST.value());
-    }
-
-    public void onInternalException(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    Exception exception) throws IOException {
-
-        onException(request, response, exception, HttpStatus.INTERNAL_SERVER_ERROR.value());
-    }
-
-    private void onException(HttpServletRequest request,
-                             HttpServletResponse response,
-                             Exception exception,
-                             int httpStatus) throws IOException {
-
-        log.warn("Exception occurred:  {}", exception.getMessage(), exception);
+        log.warn("Exception occurred:  {}", ex.getMessage(), ex);
 
         response.setStatus(httpStatus);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
-        ErrorResponseDTO errorResponseDTO = new ErrorResponseDTO(exception.getMessage());
+        ErrorResponseDTO errorResponseDTO = new ErrorResponseDTO(ex.getMessage());
         objectMapper.writeValue(response.getWriter(), errorResponseDTO);
     }
 

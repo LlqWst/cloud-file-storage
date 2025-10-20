@@ -6,6 +6,7 @@ import dev.lqwd.cloudfilestorage.service.CustomUserDetailsService;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -71,12 +72,15 @@ public class SecurityConfig {
                         .securityContextRepository(securityContextRepository())
                         .requireExplicitSave(false)
                 )
+                .exceptionHandling(conf ->
+                        conf.authenticationEntryPoint((req, res, authException) ->
+                                res.sendError(HttpStatus.UNAUTHORIZED.value())))
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .logout(conf -> conf
-                        .logoutRequestMatcher(request ->
-                                SIGN_OUT_URL.equals(request.getServletPath()) &&
-                                POST.equalsIgnoreCase(request.getMethod())
+                        .logoutRequestMatcher(req ->
+                                SIGN_OUT_URL.equals(req.getServletPath()) &&
+                                POST.equalsIgnoreCase(req.getMethod())
                         )
                         .logoutSuccessHandler(customLogoutSuccessHandler)
                         .deleteCookies("JSESSIONID")

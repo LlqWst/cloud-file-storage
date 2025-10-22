@@ -1,4 +1,4 @@
-package dev.lqwd.cloudfilestorage.config.security.json_auth;
+package dev.lqwd.cloudfilestorage.security.json_auth;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;

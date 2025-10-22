@@ -4,7 +4,7 @@ import dev.lqwd.cloudfilestorage.dto.RegistrationRequestDTO;
 import dev.lqwd.cloudfilestorage.entity.Role;
 import dev.lqwd.cloudfilestorage.entity.User;
 import dev.lqwd.cloudfilestorage.entity.UserRole;
-import dev.lqwd.cloudfilestorage.exception.user_validation.UserAlreadyExist;
+import dev.lqwd.cloudfilestorage.exception.UserAlreadyExist;
 import dev.lqwd.cloudfilestorage.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;

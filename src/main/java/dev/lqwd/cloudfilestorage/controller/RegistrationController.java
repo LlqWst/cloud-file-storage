@@ -25,5 +25,4 @@ public class RegistrationController {
                 .status(HttpStatus.CREATED)
                 .body(new UserResponseDTO(user.getUsername()));
     }
-
 }

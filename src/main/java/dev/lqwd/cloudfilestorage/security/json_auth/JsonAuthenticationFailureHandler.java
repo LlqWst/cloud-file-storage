@@ -1,4 +1,4 @@
-package dev.lqwd.cloudfilestorage.config.security.json_auth;
+package dev.lqwd.cloudfilestorage.security.json_auth;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -26,6 +26,8 @@ public class JsonAuthenticationFailureHandler {
                             HttpServletResponse response,
                             Exception ex) throws IOException {
 
+        log.warn("Exception occurred:  {}", ex.getMessage(), ex);
+
         int httpStatus;
         if (ex instanceof AuthenticationException) {
             httpStatus = HttpStatus.UNAUTHORIZED.value();
@@ -34,8 +36,6 @@ public class JsonAuthenticationFailureHandler {
         } else {
             httpStatus = HttpStatus.INTERNAL_SERVER_ERROR.value();
         }
-
-        log.warn("Exception occurred:  {}", ex.getMessage(), ex);
 
         response.setStatus(httpStatus);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);

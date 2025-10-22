@@ -1,4 +1,4 @@
-package dev.lqwd.cloudfilestorage.exception.user_validation;
+package dev.lqwd.cloudfilestorage.exception;
 
 import lombok.Getter;
 

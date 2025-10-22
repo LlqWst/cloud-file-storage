@@ -1,4 +1,4 @@
-package dev.lqwd.cloudfilestorage.config.security;
+package dev.lqwd.cloudfilestorage.security;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

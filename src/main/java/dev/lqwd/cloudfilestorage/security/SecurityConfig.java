@@ -1,7 +1,7 @@
-package dev.lqwd.cloudfilestorage.config.security;
+package dev.lqwd.cloudfilestorage.security;
 
 
-import dev.lqwd.cloudfilestorage.config.security.json_auth.JsonAuthenticationFilter;
+import dev.lqwd.cloudfilestorage.security.json_auth.JsonAuthenticationFilter;
 import dev.lqwd.cloudfilestorage.service.CustomUserDetailsService;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;

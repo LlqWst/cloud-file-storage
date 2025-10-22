@@ -1,4 +1,4 @@
-package dev.lqwd.cloudfilestorage.config.security.json_auth;
+package dev.lqwd.cloudfilestorage.security.json_auth;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.lqwd.cloudfilestorage.dto.AuthRequestDTO;
@@ -47,12 +47,12 @@ public class JsonAuthenticationFilter extends OncePerRequestFilter {
             if (!POST.equals(request.getMethod())) {
                 throw new BadRequestException(METHOD_IS_NOT_ALLOWED);
             }
-
             Authentication authentication = attemptAuthentication(request);
             SecurityContextHolder.getContext().setAuthentication(authentication);
             successHandler.onAuthenticationSuccess(request, response, authentication);
 
         } catch (Exception e) {
+            SecurityContextHolder.clearContext();
             failureHandler.onException(request, response, e);
         }
     }

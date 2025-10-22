@@ -2,8 +2,7 @@ package dev.lqwd.cloudfilestorage.exception_handler;
 
 import dev.lqwd.cloudfilestorage.dto.ErrorResponseDTO;
 import dev.lqwd.cloudfilestorage.exception.BadRequestException;
-import dev.lqwd.cloudfilestorage.exception.user_validation.AuthException;
-import dev.lqwd.cloudfilestorage.exception.user_validation.UserAlreadyExist;
+import dev.lqwd.cloudfilestorage.exception.UserAlreadyExist;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
@@ -19,7 +18,7 @@ import java.util.stream.Collectors;
 
 @RestControllerAdvice
 @Slf4j
-public class GlobalExceptionHandler {
+public class ApplicationExceptionHandler {
 
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -33,59 +32,40 @@ public class GlobalExceptionHandler {
                 .map(DefaultMessageSourceResolvable::getDefaultMessage)
                 .collect(Collectors.joining("; "));
 
-        ErrorResponseDTO errorResponse = new ErrorResponseDTO(message);
         return ResponseEntity
                 .badRequest()
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(errorResponse);
+                .body(new ErrorResponseDTO(message));
     }
 
     @ExceptionHandler(UserAlreadyExist.class)
     public ResponseEntity<ErrorResponseDTO> handleUserAlreadyExistsException(UserAlreadyExist e) {
 
         log.error("Exception occurred:  {}", e.getMessage(), e);
-
-        ErrorResponseDTO errorResponse = new ErrorResponseDTO(e.getMessage());
         return ResponseEntity
                 .status(HttpStatus.CONFLICT)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(errorResponse);
-    }
-
-    @ExceptionHandler(AuthException.class)
-    public ResponseEntity<ErrorResponseDTO> handleUserAuthExceptionException(Exception e) {
-
-        log.warn("Exception occurred:  {}", e.getMessage(), e);
-
-        ErrorResponseDTO errorResponse = new ErrorResponseDTO(e.getMessage());
-        return ResponseEntity
-                .badRequest()
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(errorResponse);
+                .body(new ErrorResponseDTO(e.getMessage()));
     }
 
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<ErrorResponseDTO> handleBadRequestException(Exception e) {
 
         log.warn("Exception occurred:  {}", e.getMessage(), e);
-
-        ErrorResponseDTO errorResponse = new ErrorResponseDTO(e.getMessage());
         return ResponseEntity
                 .badRequest()
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(errorResponse);
+                .body(new ErrorResponseDTO(e.getMessage()));
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponseDTO> handleUniversalException(Exception e) {
 
         log.error("Exception occurred:  {}", e.getMessage(), e);
-
-        ErrorResponseDTO errorResponse = new ErrorResponseDTO("Internal error");
         return ResponseEntity
                 .internalServerError()
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(errorResponse);
+                .body(new ErrorResponseDTO(e.getMessage()));
     }
 
 }

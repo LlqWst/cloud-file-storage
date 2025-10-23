@@ -8,12 +8,13 @@ import lombok.experimental.UtilityClass;
 public final class Validator {
 
     public static final int MIN_LENGTH = 6;
-    public static final int MAX_LENGTH = 20;
+    public static final int MAX_LENGTH_USERNAME = 20;
+    public static final int MAX_LENGTH_PASSWORD = 64;
 
     public static void validateCredentials(String username, String password) {
 
-        if (isBlank(username) || isIncorrectLength(username)
-            || isBlank(password) || isIncorrectLength(password)) {
+        if (isBlank(username) || isIncorrectUsernameLength(username)
+            || isBlank(password) || isIncorrectPasswordLength(password)) {
 
             throw new BadRequestException("Bad credentials");
         }
@@ -23,7 +24,11 @@ public final class Validator {
         return username == null || username.isBlank();
     }
 
-    private static boolean isIncorrectLength(String username) {
-        return username.length() < MIN_LENGTH || username.length() > MAX_LENGTH;
+    private static boolean isIncorrectUsernameLength(String username) {
+        return username.length() < MIN_LENGTH || username.length() > MAX_LENGTH_USERNAME;
+    }
+
+    private static boolean isIncorrectPasswordLength(String username) {
+        return username.length() < MIN_LENGTH || username.length() > MAX_LENGTH_PASSWORD;
     }
 }

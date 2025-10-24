@@ -19,6 +19,8 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.context.SecurityContextRepository;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 
 
 @Configuration
@@ -28,6 +30,10 @@ public class SecurityConfig {
 
     public static final String POST = "POST";
     public static final String SIGN_OUT_URL = "/api/auth/sign-out";
+
+    private final RequestMatcher LogoutMatcher = PathPatternRequestMatcher
+            .withDefaults()
+            .matcher(SIGN_OUT_URL);
 
     private final CustomUserDetailsService customUserDetailsService;
     private final CustomLogoutSuccessHandler customLogoutSuccessHandler;
@@ -79,7 +85,7 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .logout(conf -> conf
                         .logoutRequestMatcher(req ->
-                                SIGN_OUT_URL.equals(req.getServletPath()) &&
+                                LogoutMatcher.matches(req) &&
                                 POST.equalsIgnoreCase(req.getMethod())
                         )
                         .logoutSuccessHandler(customLogoutSuccessHandler)
@@ -89,5 +95,6 @@ public class SecurityConfig {
                 .addFilterBefore(jsonAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
+
 
 }

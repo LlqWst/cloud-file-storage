@@ -43,77 +43,88 @@ public class RegistrationControllerTest {
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @Test
-    void shouldRegister_WithAppropriateEmail() throws Exception {
+    void shouldRegister_With_AppropriateEmail() throws Exception {
 
         String username = "test@gmail.com";
         registerWithAppropriateUsername(username);
     }
 
     @Test
-    void shouldRegister_WithAppropriateUsername() throws Exception {
+    void shouldThrowException_When_DuplicateUserName() throws Exception {
+
+        String username = "username124";
+        String password = "test_password";
+        String jsonPath = "$.message";
+        String jsonPathValue = "User already exists";
+        registerWithAppropriateUsername(username);
+        doSignUp(username, password, HttpStatus.CONFLICT.value(), jsonPath, jsonPathValue);
+    }
+
+    @Test
+    void shouldRegister_With_AppropriateUsername() throws Exception {
 
         String username = "test_username";
         registerWithAppropriateUsername(username);
     }
 
     @Test
-    void shouldReturnJsonErrorMessage_WithInappropriateUsername() throws Exception {
+    void shouldReturnJsonErrorMessage_With_InappropriateUsername() throws Exception {
 
         String username = "test";
         signUpWithInappropriateUsername(username);
     }
 
     @Test
-    void shouldReturnJsonErrorMessage_WithNullUsername() throws Exception {
+    void shouldReturnJsonErrorMessage_With_NullUsername() throws Exception {
 
         String username = null;
         signUpWithInappropriateUsername(username);
     }
 
     @Test
-    void shouldReturnJsonErrorMessage_WithEmptyUsername() throws Exception {
+    void shouldReturnJsonErrorMessage_With_EmptyUsername() throws Exception {
 
         String username = "";
         signUpWithInappropriateUsername(username);
     }
 
     @Test
-    void shouldReturnJsonErrorMessage_WithBlankUsername() throws Exception {
+    void shouldReturnJsonErrorMessage_With_BlankUsername() throws Exception {
 
         String username = "             ";
         signUpWithInappropriateUsername(username);
     }
 
     @Test
-    void shouldReturnJsonErrorMessage_WithInappropriateEmail() throws Exception {
+    void shouldReturnJsonErrorMessage_With_InappropriateEmail() throws Exception {
 
         String username = "test@gmail...com";
         signUpWithInappropriateUsername(username);
     }
 
     @Test
-    void shouldReturnJsonErrorMessage_WithInappropriatePassword() throws Exception {
+    void shouldReturnJsonErrorMessage_With_InappropriatePassword() throws Exception {
 
         String password = "test";
         signUpWithInappropriatePassword(password);
     }
 
     @Test
-    void shouldReturnJsonErrorMessage_WithNullPassword() throws Exception {
+    void shouldReturnJsonErrorMessage_With_NullPassword() throws Exception {
 
         String password = null;
         signUpWithInappropriatePassword(password);
     }
 
     @Test
-    void shouldReturnJsonErrorMessage_WithEmptyPassword() throws Exception {
+    void shouldReturnJsonErrorMessage_With_EmptyPassword() throws Exception {
 
         String password = "";
         signUpWithInappropriatePassword(password);
     }
 
     @Test
-    void shouldReturnJsonErrorMessage_WithBlankPassword() throws Exception {
+    void shouldReturnJsonErrorMessage_With_BlankPassword() throws Exception {
 
         String password = "          ";
         signUpWithInappropriatePassword(password);

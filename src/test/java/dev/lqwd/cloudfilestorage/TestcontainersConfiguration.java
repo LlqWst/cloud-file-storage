@@ -17,6 +17,7 @@ class TestcontainersConfiguration {
                 .withDatabaseName("testdb")
                 .withUsername("testuser")
                 .withPassword("testpass");
+
     }
 
     @Bean

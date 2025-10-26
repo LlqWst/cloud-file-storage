@@ -47,6 +47,7 @@ dependencies {
     testImplementation 'org.testcontainers:junit-jupiter'
     testImplementation 'org.testcontainers:postgresql'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    implementation("io.minio:minio:8.6.0")
     implementation("commons-validator:commons-validator:1.10.0")
 }
 

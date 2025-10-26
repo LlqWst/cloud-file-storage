@@ -33,6 +33,7 @@ public class JsonAuthenticationFilter extends OncePerRequestFilter {
     private final AuthenticationManager authenticationManager;
     private final JsonAuthenticationSuccessHandler successHandler;
     private final JsonAuthenticationFailureHandler failureHandler;
+    private final Validator validator;
 
     private final RequestMatcher LoginMatcher = PathPatternRequestMatcher
             .withDefaults()
@@ -69,7 +70,7 @@ public class JsonAuthenticationFilter extends OncePerRequestFilter {
 
         String username = authRequest.username();
         String password = authRequest.password();
-        Validator.validateCredentials(username, password);
+        validator.validateCredentials(username, password);
 
         UsernamePasswordAuthenticationToken authToken =
                 UsernamePasswordAuthenticationToken.unauthenticated(username, password);

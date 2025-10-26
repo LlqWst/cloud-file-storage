@@ -46,7 +46,7 @@ public class User {
 
     @Column(name = "account_expires_at", nullable = false)
     @Builder.Default
-    private LocalDateTime accountExpiresAt = LocalDateTime.now().plusMinutes(TIME_TO_EXPIRE);
+    private LocalDateTime accountExpiresAt = LocalDateTime.now().plusHours(TIME_TO_EXPIRE);
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @Builder.Default

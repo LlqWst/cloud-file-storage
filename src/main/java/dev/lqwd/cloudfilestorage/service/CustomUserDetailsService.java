@@ -1,5 +1,6 @@
 package dev.lqwd.cloudfilestorage.service;
 
+import dev.lqwd.cloudfilestorage.model.CustomUserDetails;
 import dev.lqwd.cloudfilestorage.entity.User;
 import dev.lqwd.cloudfilestorage.repository.UserRepository;
 import lombok.AllArgsConstructor;
@@ -27,14 +28,15 @@ public class CustomUserDetailsService implements UserDetailsService {
         return getUserDetails(user);
     }
 
-    private static UserDetails getUserDetails(User user) {
-        return org.springframework.security.core.userdetails.User.builder()
+    private static CustomUserDetails getUserDetails(User user) {
+        return CustomUserDetails.builder()
+                .id(user.getId())
                 .username(user.getUsername())
                 .password(user.getPassword())
-                .accountLocked(user.isLocked())
-                .disabled(user.isDisabled())
-                .accountExpired(isAccountExpired(user))
-                .credentialsExpired(isCredentialsExpired(user))
+                .isAccountNonLocked(!user.isLocked())
+                .isEnabled(!user.isDisabled())
+                .isAccountNonExpired(isAccountNonExpired(user))
+                .isCredentialsNonExpired(isCredentialsNonExpired(user))
                 .authorities(getAuthorities(user))
                 .build();
     }
@@ -45,12 +47,12 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .collect(Collectors.toList());
     }
 
-    private static boolean isAccountExpired(User user) {
-        return user.getAccountExpiresAt().isBefore(LocalDateTime.now());
+    private static boolean isAccountNonExpired(User user) {
+        return !user.getAccountExpiresAt().isBefore(LocalDateTime.now());
     }
 
-    private static boolean isCredentialsExpired(User user) {
-        return user.getCredentialsExpireAt().isBefore(LocalDateTime.now());
+    private static boolean isCredentialsNonExpired(User user) {
+        return !user.getCredentialsExpireAt().isBefore(LocalDateTime.now());
     }
 
 }

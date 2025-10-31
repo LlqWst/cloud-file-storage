@@ -1,6 +1,5 @@
-package dev.lqwd.cloudfilestorage.service;
+package dev.lqwd.cloudfilestorage.security;
 
-import dev.lqwd.cloudfilestorage.model.CustomUserDetails;
 import dev.lqwd.cloudfilestorage.entity.User;
 import dev.lqwd.cloudfilestorage.repository.UserRepository;
 import lombok.AllArgsConstructor;

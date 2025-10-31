@@ -1,6 +1,5 @@
 package dev.lqwd.cloudfilestorage.entity;
 
-import dev.lqwd.cloudfilestorage.model.Role;
 import jakarta.persistence.*;
 import lombok.*;
 

@@ -1,7 +1,7 @@
 package dev.lqwd.cloudfilestorage;
 
 
-import dev.lqwd.cloudfilestorage.model.Role;
+import dev.lqwd.cloudfilestorage.entity.Role;
 import dev.lqwd.cloudfilestorage.entity.User;
 import dev.lqwd.cloudfilestorage.entity.UserRole;
 import dev.lqwd.cloudfilestorage.repository.UserRepository;

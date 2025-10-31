@@ -2,7 +2,9 @@ package dev.lqwd.cloudfilestorage.exception_handler;
 
 import dev.lqwd.cloudfilestorage.dto.ErrorResponseDTO;
 import dev.lqwd.cloudfilestorage.exception.BadRequestException;
-import dev.lqwd.cloudfilestorage.exception.UserAlreadyExist;
+import dev.lqwd.cloudfilestorage.exception.AlreadyExistException;
+import dev.lqwd.cloudfilestorage.exception.InternalErrorException;
+import dev.lqwd.cloudfilestorage.exception.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
@@ -38,8 +40,8 @@ public class ApplicationExceptionHandler {
                 .body(new ErrorResponseDTO(message));
     }
 
-    @ExceptionHandler(UserAlreadyExist.class)
-    public ResponseEntity<ErrorResponseDTO> handleUserAlreadyExistsException(UserAlreadyExist e) {
+    @ExceptionHandler(AlreadyExistException.class)
+    public ResponseEntity<ErrorResponseDTO> handleUserAlreadyExistsException(AlreadyExistException e) {
 
         log.error("Exception occurred:  {}", e.getMessage(), e);
         return ResponseEntity
@@ -58,14 +60,24 @@ public class ApplicationExceptionHandler {
                 .body(new ErrorResponseDTO(e.getMessage()));
     }
 
-    @ExceptionHandler(Exception.class)
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<ErrorResponseDTO> handleNotFoundException(Exception e) {
+
+        log.warn("Exception occurred:  {}", e.getMessage(), e);
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(new ErrorResponseDTO(e.getMessage()));
+    }
+
+    @ExceptionHandler({Exception.class, InternalErrorException.class})
     public ResponseEntity<ErrorResponseDTO> handleUniversalException(Exception e) {
 
         log.error("Exception occurred:  {}", e.getMessage(), e);
         return ResponseEntity
                 .internalServerError()
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(new ErrorResponseDTO(e.getMessage()));
+                .body(new ErrorResponseDTO("Internal error exception"));
     }
 
 }

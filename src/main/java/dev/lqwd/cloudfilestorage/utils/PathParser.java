@@ -1,47 +1,48 @@
 package dev.lqwd.cloudfilestorage.utils;
 
 import dev.lqwd.cloudfilestorage.model.ProcessedPath;
+import dev.lqwd.cloudfilestorage.model.Type;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
+
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 
 @Component
+@AllArgsConstructor
 public class PathParser {
 
-    public static final int BEGIN_INDEX = 0;
     public static final String SLASH = "/";
-    public static final String DELETE = "";
-    private static final String DEFAULT_FOLDER = "Folder";
+    public static final String EMPTY = "";
+    private final PathNormalizer pathNormalizer;
 
     public ProcessedPath pars(String normalizedPath) {
+        Path path = Paths.get(normalizedPath);
+
         return ProcessedPath.builder()
-                .fullPath(getFullPath(normalizedPath))
-                .name(getDirName(normalizedPath))
-                .parent(getDirParent(normalizedPath))
+                .requestedPath(normalizedPath)
+                .name(getName(path))
+                .path(getParentPath(path))
+                .type(getType(normalizedPath))
                 .build();
     }
 
-    public String getFullPath(String normalizedPath) {
-        return normalizedPath;
+    private String getName(Path path) {
+        Path dirName = path.getFileName();
+        return pathNormalizer.normalize(dirName);
     }
 
-    public String getDirName(String normalizedPath) {
-        int lastSlash = normalizedPath.lastIndexOf(SLASH);
-        int dirCount = normalizedPath.split(SLASH).length;
-
-        if (dirCount == 1){
-            return normalizedPath.replace(SLASH, DELETE);
+    private String getParentPath(Path path) {
+        Path parentPath = path.getParent();
+        if (parentPath == null) {
+            return EMPTY;
         }
-        return lastSlash > BEGIN_INDEX ? normalizedPath.substring(lastSlash + 1) : DEFAULT_FOLDER;
+        return pathNormalizer.normalize(parentPath) + SLASH;
     }
 
-    public String getDirParent(String normalizedPath) {
-        int lastSlash = normalizedPath.lastIndexOf(SLASH);
-        int dirCount = normalizedPath.split(SLASH).length;
-
-        if (dirCount == 1){
-            return SLASH;
-        }
-        return lastSlash > BEGIN_INDEX ? normalizedPath.substring(lastSlash + 1) : normalizedPath;
+    private Type getType(String resourceName) {
+        return resourceName.endsWith(SLASH) ? Type.DIRECTORY : Type.FILE;
     }
 
 }

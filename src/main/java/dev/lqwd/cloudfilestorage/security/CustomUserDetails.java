@@ -1,4 +1,4 @@
-package dev.lqwd.cloudfilestorage.model;
+package dev.lqwd.cloudfilestorage.security;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

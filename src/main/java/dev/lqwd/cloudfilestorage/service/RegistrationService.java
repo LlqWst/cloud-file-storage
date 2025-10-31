@@ -1,10 +1,10 @@
 package dev.lqwd.cloudfilestorage.service;
 
 import dev.lqwd.cloudfilestorage.dto.RegistrationRequestDTO;
-import dev.lqwd.cloudfilestorage.model.Role;
+import dev.lqwd.cloudfilestorage.entity.Role;
 import dev.lqwd.cloudfilestorage.entity.User;
 import dev.lqwd.cloudfilestorage.entity.UserRole;
-import dev.lqwd.cloudfilestorage.exception.UserAlreadyExist;
+import dev.lqwd.cloudfilestorage.exception.AlreadyExistException;
 import dev.lqwd.cloudfilestorage.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -37,7 +37,7 @@ public class RegistrationService {
             return userRepository.save(user);
 
         } catch (DataIntegrityViolationException e) {
-            throw new UserAlreadyExist(ERROR_MESSAGE_USER_EXISTS, e);
+            throw new AlreadyExistException(ERROR_MESSAGE_USER_EXISTS, e);
         }
     }
 

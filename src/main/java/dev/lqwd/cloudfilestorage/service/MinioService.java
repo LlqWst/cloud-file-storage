@@ -1,91 +1,164 @@
 package dev.lqwd.cloudfilestorage.service;
 
-import dev.lqwd.cloudfilestorage.exception.InternalErrorException;
+import dev.lqwd.cloudfilestorage.exception.AlreadyExistException;
+import dev.lqwd.cloudfilestorage.exception.NotFoundException;
+import dev.lqwd.cloudfilestorage.model.ProcessedPath;
 import io.minio.*;
-import io.minio.errors.MinioException;
-import lombok.AllArgsConstructor;
+import io.minio.messages.Item;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.event.EventListener;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 
 
 @Service
 @Slf4j
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class MinioService {
 
-    public static final String BUCKET_NAME = "user-files";
-    public static final String USER_ROOT_DIRECTORY = "folder-%d-path/";
+    private static final String SLASH = "/";
+
+    @Value("${app.minio.bucket.name}")
+    private String bucketName;
+
+    @Value("${app.minio.root.template.name}")
+    private String userRootTemplate;
+
     private final MinioClient minioClient;
+    private final MinioOperationTemplate operationTemplate;
 
-    @EventListener(ApplicationReadyEvent.class)
-    public void onApplicationReady() {
-        createRootBucket();
-    }
-
-    private void createRootBucket() {
-        try {
-            boolean found =
-                    minioClient.bucketExists(BucketExistsArgs.builder()
-                            .bucket(BUCKET_NAME)
-                            .build());
-            if (!found) {
-                minioClient.makeBucket(MakeBucketArgs.builder()
-                        .bucket(BUCKET_NAME)
-                        .build());
-                log.info("Bucket '{}' created", BUCKET_NAME);
-            } else {
-                log.info("Bucket '{}' already exists", BUCKET_NAME);
-            }
-        } catch (MinioException e) {
-            log.error("HTTP trace: {}", e.httpTrace());
-            throw new InternalErrorException("Error during creation of Minio bucket: " + BUCKET_NAME, e);
-        } catch (Exception e) {
-            throw new InternalErrorException("Unexpected error during creation of Minio bucket: " + BUCKET_NAME, e);
+    public void createUserRootDir(Long id) {
+        String pathWithoutSlash = getUserRootDir(id);
+        if (!isResourceExist(pathWithoutSlash)) {
+            createDirectory(pathWithoutSlash);
         }
     }
 
-    public void createDirectory(String path) {
+    public void createNewDir(ProcessedPath path, Long id) {
+        String fullPath = getUserRootDir(id) + path.requestedPath();
+        if (isResourceExist(path, id)) {
+            throw new AlreadyExistException("Resource already exists: " + fullPath);
+        }
+        createDirectory(fullPath);
+    }
+
+    public Item getResource(ProcessedPath path, Long id) {
+        String userRootPath = getUserRootDir(id);
+        String fullPath = userRootPath + path.requestedPath();
+        String parentPath = userRootPath + path.path();
+        Optional<Item> item = findResource(fullPath, parentPath);
+        if (item.isPresent() && fullPath.equals(item.get().objectName())) {
+            return item.get();
+        }
+        throw new NotFoundException("Resource doesn't exists: " + path.requestedPath());
+    }
+
+    public boolean isResourceExist(ProcessedPath path, Long id) {
+        String userRootPath = getUserRootDir(id);
+        String fullPath = userRootPath + path.requestedPath();
+        String parentPath = userRootPath + path.path();
+        Optional<Item> item = findResource(fullPath, parentPath);
+        return item.isPresent();
+    }
+
+    private Optional<Item> findResource(String fullPath, String parentPath) {
+        String pathWithoutEndSlash = getPathWithoutEndSlash(fullPath);
+        Iterable<Result<Item>> results =
+                minioClient.listObjects(
+                        ListObjectsArgs.builder()
+                                .bucket(bucketName)
+                                .prefix(parentPath)
+                                .build());
+
+        if (!results.iterator().hasNext()) {
+            throw new NotFoundException("Parent path doesn't exist: " + parentPath);
+        }
+        return operationTemplate.execute(() -> {
+                    for (Result<Item> item : results) {
+                        String itemPath = item.get().objectName();
+                        if (pathWithoutEndSlash.equals(itemPath) ||
+                            (pathWithoutEndSlash + SLASH).equals(itemPath)) {
+                            return Optional.of(item.get());
+                        }
+                    }
+                    return Optional.empty();
+                },
+                "Minio error during getting of resource: " + fullPath,
+                "Unexpected error during getting of resource: " + fullPath);
+    }
+
+
+    private void createDirectory(String path) {
+        operationTemplate.execute(() ->
+                        minioClient.putObject(
+                                PutObjectArgs.builder()
+                                        .bucket(bucketName)
+                                        .object(path)
+                                        .stream(new ByteArrayInputStream(new byte[]{}), 0, -1)
+                                        .build()),
+                "Minio error during creation of directory",
+                "Unexpected error during creation of directory");
+    }
+
+    public void createFile(ProcessedPath path, Long id) {
+        String fullPath = getUserRootDir(id) + path.requestedPath();
+        if (isResourceExist(path, id)) {
+            throw new AlreadyExistException("Resource already exists: " + fullPath);
+        }
+
+        StringBuilder builder = new StringBuilder();
+        builder.append("some text for test");
         try {
+            ByteArrayInputStream bais = new ByteArrayInputStream(
+                    builder.toString().getBytes(StandardCharsets.UTF_8));
+
             minioClient.putObject(
                     PutObjectArgs.builder()
-                            .bucket(BUCKET_NAME)
-                            .object(path)
-                            .stream(new ByteArrayInputStream(new byte[]{}), 0, -1)
+                            .bucket(bucketName)
+                            .object(fullPath)
+                            .stream(bais, bais.available(), -1)
                             .build());
-            log.info("Directory created: {}", path);
-        } catch (MinioException e) {
-            log.error("HTTP trace: {}", e.httpTrace());
-            throw new InternalErrorException("Minio error during creation of directory", e);
+            bais.close();
+            log.info("file create for: {}", fullPath);
         } catch (Exception e) {
-            throw new InternalErrorException("Unexpected error during creation of directory", e);
+            throw new RuntimeException(e);
         }
     }
 
-    public void createDirectoryForNewUser(Long id) {
-        createDirectory(USER_ROOT_DIRECTORY.formatted(id));
+    private void removeResource(String resourceName) {
+        operationTemplate.execute(() ->
+                        minioClient.removeObject(
+                                RemoveObjectArgs.builder()
+                                        .bucket(bucketName)
+                                        .object(resourceName)
+                                        .build()),
+                "Minio error during deletion of resource: ",
+                "Unexpected error during deletion of resource: ");
     }
 
-    public void createNewDirectory(String path, Long id) {
-        createDirectory(USER_ROOT_DIRECTORY.formatted(id) + path);
+    private String getUserRootDir(Long id) {
+        return userRootTemplate.formatted(id);
     }
 
-    public void removeResource(String resourceName) {
-        try {
-            minioClient.removeObject(
-                    RemoveObjectArgs.builder()
-                            .bucket(BUCKET_NAME)
-                            .object(resourceName)
-                            .build());
-        } catch (MinioException e) {
-            log.error("HTTP trace: {}", e.httpTrace());
-            throw new InternalErrorException("Minio error during deletion of resource: " + resourceName, e);
-        } catch (Exception e) {
-            throw new InternalErrorException("Unexpected error during deletion of resource: " + resourceName, e);
+    private boolean isResourceExist(String path) {
+        Optional<Item> item = findResource(path, path);
+        return item.isPresent();
+    }
+
+    @NotNull
+    private String getPathWithoutEndSlash(String path) {
+        String pathWithoutSlash;
+        if (path.endsWith(SLASH)) {
+            pathWithoutSlash = path.substring(0, path.length() - 1);
+        } else {
+            pathWithoutSlash = path;
         }
+        return pathWithoutSlash;
     }
 
 }

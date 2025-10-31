@@ -3,7 +3,7 @@ package dev.lqwd.cloudfilestorage.security.json_auth;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.lqwd.cloudfilestorage.dto.AuthRequestDTO;
 import dev.lqwd.cloudfilestorage.exception.BadRequestException;
-import dev.lqwd.cloudfilestorage.utils.Validator;
+import dev.lqwd.cloudfilestorage.utils.CredentialsValidator;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -33,7 +33,7 @@ public class JsonAuthenticationFilter extends OncePerRequestFilter {
     private final AuthenticationManager authenticationManager;
     private final JsonAuthenticationSuccessHandler successHandler;
     private final JsonAuthenticationFailureHandler failureHandler;
-    private final Validator validator;
+    private final CredentialsValidator validator;
 
     private final RequestMatcher LoginMatcher = PathPatternRequestMatcher
             .withDefaults()

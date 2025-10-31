@@ -23,7 +23,7 @@ public class RegistrationController {
     public ResponseEntity<UserResponseDTO> createUser(@Valid @RequestBody RegistrationRequestDTO registrationRequest){
 
         User user = registrationService.registration(registrationRequest);
-        minioService.createDirectoryForNewUser(user.getId());
+        minioService.createUserRootDir(user.getId());
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)

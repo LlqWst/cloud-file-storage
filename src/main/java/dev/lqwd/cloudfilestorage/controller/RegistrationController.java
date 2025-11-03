@@ -3,7 +3,7 @@ package dev.lqwd.cloudfilestorage.controller;
 import dev.lqwd.cloudfilestorage.dto.RegistrationRequestDTO;
 import dev.lqwd.cloudfilestorage.dto.UserResponseDTO;
 import dev.lqwd.cloudfilestorage.entity.User;
-import dev.lqwd.cloudfilestorage.service.minio.MinioService;
+import dev.lqwd.cloudfilestorage.service.MinioService;
 import dev.lqwd.cloudfilestorage.service.RegistrationService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;

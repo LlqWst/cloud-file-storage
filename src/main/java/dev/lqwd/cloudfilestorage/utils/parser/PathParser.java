@@ -26,4 +26,3 @@ public class PathParser extends AbstractParser {
                 .build();
     }
 }
-

@@ -2,14 +2,12 @@ package dev.lqwd.cloudfilestorage.repository.minio;
 
 import dev.lqwd.cloudfilestorage.exception.InternalErrorException;
 import io.minio.errors.MinioException;
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 
 @Component
 @Slf4j
-@AllArgsConstructor
 public class MinioOperationTemplate {
 
     public <T> T execute(MinioOperation<T> operation,
@@ -37,7 +35,6 @@ public class MinioOperationTemplate {
             throw new InternalErrorException(generalErrorMessage, e);
         }
     }
-
 
     @FunctionalInterface
     public interface MinioOperation<T> {

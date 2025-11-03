@@ -2,7 +2,6 @@ package dev.lqwd.cloudfilestorage.repository.minio;
 
 import dev.lqwd.cloudfilestorage.exception.NotFoundException;
 import dev.lqwd.cloudfilestorage.utils.PathNormalizer;
-import dev.lqwd.cloudfilestorage.utils.path_processor.ProcessedPath;
 import io.minio.*;
 import io.minio.messages.Item;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +22,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class MinioDAO {
 
+    public static final String SLASH = "/";
     @Value("${app.minio.bucket.name}")
     private String bucketName;
 
@@ -31,21 +31,24 @@ public class MinioDAO {
     private final PathNormalizer pathNormalizer;
 
 
-    public boolean isExist(ProcessedPath path) {
-        return findResource(path.requestedPath(), path.parentPath()).isPresent();
+    public Optional<Item> findResource(String fullPath, String parentPath) {
+        Optional<Item> item = findResourceIgnoreEndSlash(fullPath, parentPath);
+        if (item.isPresent() && item.get().objectName().equals(fullPath)) {
+            return item;
+        }
+        return Optional.empty();
     }
 
-    public Optional<Item> findResource(String fullPath, String parentPath) {
+    private Optional<Item> findResourceIgnoreEndSlash(String fullPath, String parentPath) {
         String pathWithoutEndSlash = pathNormalizer.getPathWithoutEndSlash(fullPath);
+        String pathWithEndSlash = pathNormalizer.getPathWithoutEndSlash(fullPath) + SLASH;
         Iterable<Result<Item>> results = getItems(parentPath);
         return operationTemplate.execute(() -> {
                     for (Result<Item> item : results) {
                         String itemPath = item.get().objectName();
-                        if (itemPath.equals(fullPath)) {
+                        if (itemPath.equals(pathWithoutEndSlash) ||
+                            itemPath.equals(pathWithEndSlash)) {
                             return Optional.of(item.get());
-                        }
-                        if (itemPath.equals(pathWithoutEndSlash)) {
-                            return Optional.empty();
                         }
                     }
                     return Optional.empty();
@@ -59,7 +62,9 @@ public class MinioDAO {
         return operationTemplate.execute(() -> {
                     List<Item> items = new ArrayList<>();
                     for (Result<Item> item : results) {
-                        items.add(item.get());
+                        if (!item.get().objectName().equals(fullPath)) {
+                            items.add(item.get());
+                        }
                     }
                     return items;
                 },
@@ -99,7 +104,7 @@ public class MinioDAO {
         }
     }
 
-    private void removeResource(String resourceName) {
+    public void removeResource(String resourceName) {
         operationTemplate.execute(() ->
                         minioClient.removeObject(
                                 RemoveObjectArgs.builder()
@@ -110,9 +115,14 @@ public class MinioDAO {
                 "Unexpected error during deletion of resource: " + resourceName);
     }
 
-    private boolean isDirExist(String path) {
+    public boolean isExist(String fullPath, String parentPath) {
+        return findResourceIgnoreEndSlash(fullPath, parentPath)
+                .isPresent();
+    }
+
+    public boolean isDirExist(String path) {
         try {
-            return findResource(path, path).isPresent();
+            return isExist(path, path);
         } catch (NotFoundException _) {
             return false;
         }

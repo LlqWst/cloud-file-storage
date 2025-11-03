@@ -1,4 +1,4 @@
-package dev.lqwd.cloudfilestorage.service.minio;
+package dev.lqwd.cloudfilestorage.utils;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,12 +11,14 @@ public class UserDirectoryProvider {
     @Value("${app.minio.root.template.name}")
     private String userRootTemplate;
 
-    public String getUserDir(Long id) {
+    private final PathNormalizer normalizer;
+
+    public String provide(Long id) {
         return userRootTemplate.formatted(id);
     }
 
-    public String getPathWithUserDir(String path, Long id) {
-        return getUserDir(id) + path;
+    public String provide(String path, long id) {
+        return  normalizer.normalize(provide(id) + path);
     }
 
 }

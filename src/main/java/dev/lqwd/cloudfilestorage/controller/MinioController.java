@@ -4,10 +4,9 @@ package dev.lqwd.cloudfilestorage.controller;
 import dev.lqwd.cloudfilestorage.dto.resource.ResourceResponseDTO;
 import dev.lqwd.cloudfilestorage.mapper.ResourceResponseMapper;
 import dev.lqwd.cloudfilestorage.security.CustomUserDetails;
-import dev.lqwd.cloudfilestorage.service.minio.MinioService;
+import dev.lqwd.cloudfilestorage.service.MinioService;
 import dev.lqwd.cloudfilestorage.utils.path_processor.PathProcessor;
 import dev.lqwd.cloudfilestorage.utils.path_processor.ProcessedPath;
-import dev.lqwd.cloudfilestorage.utils.PathValidator;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -23,7 +22,6 @@ import java.util.List;
 public class MinioController {
 
     private final MinioService minioService;
-    private final PathValidator validator;
     private final PathProcessor pathProcessor;
     private final ResourceResponseMapper mapper;
 
@@ -31,8 +29,8 @@ public class MinioController {
     public ResponseEntity<ResourceResponseDTO> createDir(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                           @RequestParam(name = "path") String rawPath) {
 
-        ProcessedPath path = pathProcessor.processDir(rawPath, userDetails.getId());
-        minioService.createNewDir(path);
+        ProcessedPath path = pathProcessor.processDir(rawPath);
+        minioService.createNewDir(path, userDetails.getId());
 
         return ResponseEntity
                 .created(URI.create(rawPath))
@@ -43,10 +41,8 @@ public class MinioController {
     public ResponseEntity<List<ResourceResponseDTO>> getResources(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                                  @RequestParam(name = "path") String rawPath) {
 
-        //validator.validateDirPath(rawPath);
-        //List<ResourceResponseDTO> resources = minioService.getResources(rawPath, userDetails.getId());
-        ProcessedPath path = pathProcessor.processDir(rawPath, userDetails.getId());
-        List<ResourceResponseDTO> resources = minioService.getResources(path);
+        ProcessedPath path = pathProcessor.processDir(rawPath);
+        List<ResourceResponseDTO> resources = minioService.getResources(path, userDetails.getId());
 
         return ResponseEntity
                 .ok()
@@ -57,8 +53,8 @@ public class MinioController {
     public ResponseEntity<ResourceResponseDTO> createFile(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                            @RequestParam(name = "path") String rawPath) {
 
-        ProcessedPath path = pathProcessor.processFile(rawPath, userDetails.getId());
-        minioService.createFile(path);
+        ProcessedPath path = pathProcessor.processFile(rawPath);
+        minioService.createFile(path, userDetails.getId());
 
         return ResponseEntity
                 .created(URI.create(rawPath))
@@ -69,8 +65,8 @@ public class MinioController {
     public ResponseEntity<ResourceResponseDTO> getResource(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                            @RequestParam(name = "path") String rawPath) {
 
-        ProcessedPath path = pathProcessor.processResource(rawPath, userDetails.getId());
-        ResourceResponseDTO resource = minioService.getResource(path);
+        ProcessedPath path = pathProcessor.processResource(rawPath);
+        ResourceResponseDTO resource = minioService.getResource(path, userDetails.getId());
 
         return ResponseEntity
                 .ok()

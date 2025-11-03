@@ -1,4 +1,4 @@
-package dev.lqwd.cloudfilestorage.service;
+package dev.lqwd.cloudfilestorage.service.minio;
 
 import io.minio.*;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 public class MinioBucketService {
 
     @Value("${app.minio.bucket.name}")
-    public String bucketName;
+    private String bucketName;
 
     private final MinioClient minioClient;
     private final MinioOperationTemplate operationTemplate;

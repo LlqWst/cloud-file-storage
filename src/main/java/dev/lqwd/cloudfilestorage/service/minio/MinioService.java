@@ -1,19 +1,25 @@
-package dev.lqwd.cloudfilestorage.service;
+package dev.lqwd.cloudfilestorage.service.minio;
 
+import dev.lqwd.cloudfilestorage.dto.resource.ResourceResponseDTO;
 import dev.lqwd.cloudfilestorage.exception.AlreadyExistException;
 import dev.lqwd.cloudfilestorage.exception.NotFoundException;
-import dev.lqwd.cloudfilestorage.model.ProcessedPath;
+import dev.lqwd.cloudfilestorage.utils.PathNormalizer;
+import dev.lqwd.cloudfilestorage.utils.path_processor.ProcessedPath;
+import dev.lqwd.cloudfilestorage.utils.parser.ItemParser;
 import io.minio.*;
 import io.minio.messages.Item;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+
+import static java.util.function.Predicate.not;
 
 
 @Service
@@ -31,6 +37,8 @@ public class MinioService {
 
     private final MinioClient minioClient;
     private final MinioOperationTemplate operationTemplate;
+    private final ItemParser itemParser;
+    private final PathNormalizer pathNormalizer;
 
     public void createUserRootDir(Long id) {
         String pathWithoutSlash = getUserRootDir(id);
@@ -40,20 +48,19 @@ public class MinioService {
     }
 
     public void createNewDir(ProcessedPath path, Long id) {
-        String fullPath = getUserRootDir(id) + path.requestedPath();
+        String fullPath = getPathWithUserDir(path.requestedPath(), id);
         if (isResourceExist(path, id)) {
             throw new AlreadyExistException("Resource already exists: " + fullPath);
         }
         createDirectory(fullPath);
     }
 
-    public Item getResource(ProcessedPath path, Long id) {
-        String userRootPath = getUserRootDir(id);
-        String fullPath = userRootPath + path.requestedPath();
-        String parentPath = userRootPath + path.path();
+    public ResourceResponseDTO getResource(ProcessedPath path, Long id) {
+        String fullPath = getPathWithUserDir(path.requestedPath(), id);
+        String parentPath = getPathWithUserDir(path.parentPath(), id);
         Optional<Item> item = findResource(fullPath, parentPath);
         if (item.isPresent() && fullPath.equals(item.get().objectName())) {
-            return item.get();
+            return itemParser.pars(item.get());
         }
         throw new NotFoundException("Resource doesn't exists: " + path.requestedPath());
     }
@@ -61,13 +68,13 @@ public class MinioService {
     public boolean isResourceExist(ProcessedPath path, Long id) {
         String userRootPath = getUserRootDir(id);
         String fullPath = userRootPath + path.requestedPath();
-        String parentPath = userRootPath + path.path();
+        String parentPath = userRootPath + path.parentPath();
         Optional<Item> item = findResource(fullPath, parentPath);
         return item.isPresent();
     }
 
     private Optional<Item> findResource(String fullPath, String parentPath) {
-        String pathWithoutEndSlash = getPathWithoutEndSlash(fullPath);
+        String pathWithoutEndSlash = pathNormalizer.getPathWithoutEndSlash(fullPath);
         Iterable<Result<Item>> results =
                 minioClient.listObjects(
                         ListObjectsArgs.builder()
@@ -76,13 +83,12 @@ public class MinioService {
                                 .build());
 
         if (!results.iterator().hasNext()) {
-            throw new NotFoundException("Parent path doesn't exist: " + parentPath);
+            throw new NotFoundException("Parent parentPath doesn't exist: " + parentPath);
         }
         return operationTemplate.execute(() -> {
                     for (Result<Item> item : results) {
                         String itemPath = item.get().objectName();
-                        if (pathWithoutEndSlash.equals(itemPath) ||
-                            (pathWithoutEndSlash + SLASH).equals(itemPath)) {
+                        if (isRequestedResource(pathWithoutEndSlash, itemPath)) {
                             return Optional.of(item.get());
                         }
                     }
@@ -90,6 +96,37 @@ public class MinioService {
                 },
                 "Minio error during getting of resource: " + fullPath,
                 "Unexpected error during getting of resource: " + fullPath);
+    }
+
+    public List<ResourceResponseDTO> getResources(String requestedPath, long id) {
+        String fullPath = getPathWithUserDir(requestedPath, id);
+        String normalizedFullPath = pathNormalizer.normalize(fullPath);
+        return findDirectoryResources(normalizedFullPath).stream()
+                .filter(not(item -> item.objectName().equals(normalizedFullPath)))
+                .map(itemParser::pars)
+                .toList();
+    }
+
+    private List<Item> findDirectoryResources(String fullPath) {
+        Iterable<Result<Item>> results =
+                minioClient.listObjects(
+                        ListObjectsArgs.builder()
+                                .bucket(bucketName)
+                                .prefix(fullPath)
+                                .build());
+
+        if (!results.iterator().hasNext()) {
+            throw new NotFoundException("Directory doesn't exist: " + fullPath);
+        }
+        return operationTemplate.execute(() -> {
+                    List<Item> items = new ArrayList<>();
+                    for (Result<Item> item : results) {
+                        items.add(item.get());
+                    }
+                    return items;
+                },
+                "Minio error during getting of directory's resources: " + fullPath,
+                "Unexpected error during getting of directory's resources " + fullPath);
     }
 
 
@@ -106,11 +143,14 @@ public class MinioService {
     }
 
     public void createFile(ProcessedPath path, Long id) {
-        String fullPath = getUserRootDir(id) + path.requestedPath();
+        String fullPath = getPathWithUserDir(path.requestedPath(), id);
         if (isResourceExist(path, id)) {
             throw new AlreadyExistException("Resource already exists: " + fullPath);
         }
+        buildFile(fullPath);
+    }
 
+    private void buildFile(String fullPath){
         StringBuilder builder = new StringBuilder();
         builder.append("some text for test");
         try {
@@ -145,20 +185,22 @@ public class MinioService {
         return userRootTemplate.formatted(id);
     }
 
-    private boolean isResourceExist(String path) {
-        Optional<Item> item = findResource(path, path);
-        return item.isPresent();
+    public String getPathWithUserDir(String path, Long id) {
+        return getUserRootDir(id) + path;
     }
 
-    @NotNull
-    private String getPathWithoutEndSlash(String path) {
-        String pathWithoutSlash;
-        if (path.endsWith(SLASH)) {
-            pathWithoutSlash = path.substring(0, path.length() - 1);
-        } else {
-            pathWithoutSlash = path;
+    private static boolean isRequestedResource(String pathWithoutEndSlash, String itemPath) {
+        return pathWithoutEndSlash.equals(itemPath) ||
+               (pathWithoutEndSlash + SLASH).equals(itemPath);
+    }
+
+    private boolean isResourceExist(String path) {
+        try {
+            Optional<Item> item = findResource(path, path);
+            return item.isPresent();
+        } catch (NotFoundException _) {
+            return false;
         }
-        return pathWithoutSlash;
     }
 
 }

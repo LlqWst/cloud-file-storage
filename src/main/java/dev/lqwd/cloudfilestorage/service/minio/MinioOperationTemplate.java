@@ -1,4 +1,4 @@
-package dev.lqwd.cloudfilestorage.service;
+package dev.lqwd.cloudfilestorage.service.minio;
 
 import dev.lqwd.cloudfilestorage.exception.InternalErrorException;
 import io.minio.errors.MinioException;

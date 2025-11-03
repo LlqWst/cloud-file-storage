@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -50,7 +51,7 @@ public class ApplicationExceptionHandler {
                 .body(new ErrorResponseDTO(e.getMessage()));
     }
 
-    @ExceptionHandler(BadRequestException.class)
+    @ExceptionHandler({BadRequestException.class, MissingServletRequestParameterException.class})
     public ResponseEntity<ErrorResponseDTO> handleBadRequestException(Exception e) {
 
         log.warn("Exception occurred:  {}", e.getMessage(), e);

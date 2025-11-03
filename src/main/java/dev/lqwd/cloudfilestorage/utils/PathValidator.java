@@ -10,18 +10,20 @@ import org.springframework.stereotype.Component;
 public class PathValidator {
 
     public void validatePath(String path) {
-        if (path == null ||
-            path.trim().isBlank() ||
-            path.contains("*") ||
+        if (path == null || path.trim().isBlank()) {
+            throw new BadRequestException("Path is empty");
+        }
+
+        if (path.contains("*") ||
             path.contains(":") ||
             path.contains("<") ||
             path.contains(">") ||
             path.contains("\\") ||
             path.contains("|") ||
             path.contains("?") ||
-            path.startsWith("/")) {
-
-            throw new BadRequestException("Please enter a name that doesn't include any of these characters: .*:<>?/\\|");
+            (path.startsWith("/") && path.length() > 1)
+        ) {
+            throw new BadRequestException("Please enter a resourceName that doesn't include any of these characters: .*:<>?/\\|");
         }
     }
 

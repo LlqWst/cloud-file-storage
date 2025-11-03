@@ -1,19 +1,15 @@
-package dev.lqwd.cloudfilestorage.service.minio;
+package dev.lqwd.cloudfilestorage.repository.minio;
 
-import dev.lqwd.cloudfilestorage.dto.resource.ResourceResponseDTO;
-import dev.lqwd.cloudfilestorage.exception.AlreadyExistException;
 import dev.lqwd.cloudfilestorage.exception.NotFoundException;
-import dev.lqwd.cloudfilestorage.repository.minio.MinioOperationTemplate;
 import dev.lqwd.cloudfilestorage.utils.PathNormalizer;
 import dev.lqwd.cloudfilestorage.utils.path_processor.ProcessedPath;
-import dev.lqwd.cloudfilestorage.utils.parser.ItemParser;
 import io.minio.*;
 import io.minio.messages.Item;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
@@ -21,52 +17,25 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static java.util.function.Predicate.not;
 
-
-@Service
+@Component
 @Slf4j
 @RequiredArgsConstructor
-public class MinioService {
+public class MinioDAO {
 
     @Value("${app.minio.bucket.name}")
     private String bucketName;
 
-    @Value("${app.minio.root.template.name}")
-    private String userRootTemplate;
-
     private final MinioClient minioClient;
     private final MinioOperationTemplate operationTemplate;
-    private final ItemParser itemParser;
     private final PathNormalizer pathNormalizer;
 
-    public void createUserRootDir(long id) {
-        String pathWithoutSlash = getUserRootDir(id);
-        if (!isDirExist(pathWithoutSlash)) {
-            createDirectory(pathWithoutSlash);
-        }
-    }
-
-    public void createNewDir(ProcessedPath path) {
-        String fullPath = path.requestedPath();
-        if (isExist(path)) {
-            throw new AlreadyExistException("Resource already exists: " + fullPath);
-        }
-        createDirectory(fullPath);
-    }
-
-    public ResourceResponseDTO getResource(ProcessedPath path) {
-        String fullPath = path.requestedPath();
-        return findResource(fullPath, path.parentPath())
-                .map(itemParser::pars)
-                .orElseThrow(() -> new NotFoundException("Resource doesn't exist: " + fullPath));
-    }
 
     public boolean isExist(ProcessedPath path) {
         return findResource(path.requestedPath(), path.parentPath()).isPresent();
     }
 
-    private Optional<Item> findResource(String fullPath, String parentPath) {
+    public Optional<Item> findResource(String fullPath, String parentPath) {
         String pathWithoutEndSlash = pathNormalizer.getPathWithoutEndSlash(fullPath);
         Iterable<Result<Item>> results = getItems(parentPath);
         return operationTemplate.execute(() -> {
@@ -85,29 +54,7 @@ public class MinioService {
                 "Unexpected error during getting of resource: " + fullPath);
     }
 
-    @NotNull
-    private Iterable<Result<Item>> getItems(String parentPath) {
-        Iterable<Result<Item>> results =
-                minioClient.listObjects(
-                        ListObjectsArgs.builder()
-                                .bucket(bucketName)
-                                .prefix(parentPath)
-                                .build());
-        if (!results.iterator().hasNext()) {
-            throw new NotFoundException("Directory doesn't exist: " + parentPath);
-        }
-        return results;
-    }
-
-    public List<ResourceResponseDTO> getResources(ProcessedPath path) {
-        String fullPath = path.requestedPath();
-        return findDirectoryResources(fullPath).stream()
-                .filter(not(item -> item.objectName().equals(fullPath)))
-                .map(itemParser::pars)
-                .toList();
-    }
-
-    private List<Item> findDirectoryResources(String fullPath) {
+    public List<Item> findDirectoryResources(String fullPath) {
         Iterable<Result<Item>> results = getItems(fullPath);
         return operationTemplate.execute(() -> {
                     List<Item> items = new ArrayList<>();
@@ -120,7 +67,7 @@ public class MinioService {
                 "Unexpected error during getting of directory's resources " + fullPath);
     }
 
-    private void createDirectory(String path) {
+    public void createDirectory(String path) {
         operationTemplate.execute(() ->
                         minioClient.putObject(
                                 PutObjectArgs.builder()
@@ -132,15 +79,7 @@ public class MinioService {
                 "Unexpected error during creation of directory: " + path);
     }
 
-    public void createFile(ProcessedPath path) {
-        String fullPath = path.requestedPath();
-        if (isExist(path)) {
-            throw new AlreadyExistException("Resource already exists: " + fullPath);
-        }
-        buildFile(fullPath);
-    }
-
-    private void buildFile(String fullPath) {
+    public void buildFile(String fullPath) {
         StringBuilder builder = new StringBuilder();
         builder.append("some text for test");
         try {
@@ -171,16 +110,26 @@ public class MinioService {
                 "Unexpected error during deletion of resource: " + resourceName);
     }
 
-    private String getUserRootDir(Long id) {
-        return userRootTemplate.formatted(id);
-    }
-
     private boolean isDirExist(String path) {
         try {
             return findResource(path, path).isPresent();
         } catch (NotFoundException _) {
             return false;
         }
+    }
+
+    @NotNull
+    private Iterable<Result<Item>> getItems(String parentPath) {
+        Iterable<Result<Item>> results =
+                minioClient.listObjects(
+                        ListObjectsArgs.builder()
+                                .bucket(bucketName)
+                                .prefix(parentPath)
+                                .build());
+        if (!results.iterator().hasNext()) {
+            throw new NotFoundException("Directory doesn't exist: " + parentPath);
+        }
+        return results;
     }
 
 }

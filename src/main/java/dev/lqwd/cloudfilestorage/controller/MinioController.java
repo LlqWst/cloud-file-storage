@@ -31,8 +31,8 @@ public class MinioController {
     public ResponseEntity<ResourceResponseDTO> createDir(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                           @RequestParam(name = "path") String rawPath) {
 
-        ProcessedPath path = pathProcessor.processDir(rawPath);
-        minioService.createNewDir(path, userDetails.getId());
+        ProcessedPath path = pathProcessor.processDir(rawPath, userDetails.getId());
+        minioService.createNewDir(path);
 
         return ResponseEntity
                 .created(URI.create(rawPath))
@@ -43,8 +43,10 @@ public class MinioController {
     public ResponseEntity<List<ResourceResponseDTO>> getResources(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                                  @RequestParam(name = "path") String rawPath) {
 
-        validator.validateDirPath(rawPath);
-        List<ResourceResponseDTO> resources = minioService.getResources(rawPath, userDetails.getId());
+        //validator.validateDirPath(rawPath);
+        //List<ResourceResponseDTO> resources = minioService.getResources(rawPath, userDetails.getId());
+        ProcessedPath path = pathProcessor.processDir(rawPath, userDetails.getId());
+        List<ResourceResponseDTO> resources = minioService.getResources(path);
 
         return ResponseEntity
                 .ok()
@@ -55,8 +57,8 @@ public class MinioController {
     public ResponseEntity<ResourceResponseDTO> createFile(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                            @RequestParam(name = "path") String rawPath) {
 
-        ProcessedPath path = pathProcessor.processFile(rawPath);
-        minioService.createFile(path, userDetails.getId());
+        ProcessedPath path = pathProcessor.processFile(rawPath, userDetails.getId());
+        minioService.createFile(path);
 
         return ResponseEntity
                 .created(URI.create(rawPath))
@@ -67,8 +69,8 @@ public class MinioController {
     public ResponseEntity<ResourceResponseDTO> getResource(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                            @RequestParam(name = "path") String rawPath) {
 
-        ProcessedPath path = pathProcessor.processResource(rawPath);
-        ResourceResponseDTO resource = minioService.getResource(path, userDetails.getId());
+        ProcessedPath path = pathProcessor.processResource(rawPath, userDetails.getId());
+        ResourceResponseDTO resource = minioService.getResource(path);
 
         return ResponseEntity
                 .ok()

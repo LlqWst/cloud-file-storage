@@ -31,7 +31,7 @@ public class PathValidator {
         validatePath(path);
 
         if (!path.endsWith("/") || path.contains(".")) {
-            throw new BadRequestException("Resource is not a directory: directory should end with '/'");
+            throw new BadRequestException("Resource is not a directory: directory should end with '/' and shouldn't contain .");
         }
     }
 

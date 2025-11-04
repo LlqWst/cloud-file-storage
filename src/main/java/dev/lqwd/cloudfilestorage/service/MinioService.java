@@ -1,12 +1,13 @@
 package dev.lqwd.cloudfilestorage.service;
 
 import dev.lqwd.cloudfilestorage.dto.resource.ResourceResponseDTO;
-import dev.lqwd.cloudfilestorage.exception.AlreadyExistException;
+import dev.lqwd.cloudfilestorage.entity.Type;
 import dev.lqwd.cloudfilestorage.exception.NotFoundException;
 import dev.lqwd.cloudfilestorage.repository.minio.MinioDAO;
-import dev.lqwd.cloudfilestorage.utils.UserDirectoryProvider;
+import dev.lqwd.cloudfilestorage.utils.parser.minio.ItemParser;
 import dev.lqwd.cloudfilestorage.utils.path_processor.ProcessedPath;
-import dev.lqwd.cloudfilestorage.utils.parser.ItemParser;
+import dev.lqwd.cloudfilestorage.utils.parser.minio.StatObjectParser;
+import io.minio.StatObjectResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -19,48 +20,48 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MinioService {
 
-    private final UserDirectoryProvider userDirectoryProvider;
+    public static final String EMPTY = "";
+
+    private final StatObjectParser statObjectParser;
     private final ItemParser itemParser;
     private final MinioDAO minioDAO;
 
     public void createUserRootDir(long id) {
-        String userDir = userDirectoryProvider.provide(id);
-        if (!minioDAO.isDirExist(userDir)) {
-            minioDAO.createDirectory(userDir);
+        if (!minioDAO.isExist(EMPTY, id)) {
+            minioDAO.createDirectory(EMPTY, id);
         }
     }
 
     public void createNewDir(ProcessedPath path, long id) {
-        String fullPath = userDirectoryProvider.provide(path.requestedPath(), id);
-        String parentPath = userDirectoryProvider.provide(path.parentPath(), id);
-        if (minioDAO.isExist(fullPath, parentPath)) {
-            throw new AlreadyExistException("Resource already exists: " + fullPath);
+        String parentPath = path.parentPath();
+        if (!minioDAO.isExist(parentPath, id)) {
+            throw new NotFoundException("Parent path doesn't exist: " + parentPath);
         }
-        minioDAO.createDirectory(fullPath);
+        minioDAO.createDirectory(path.requestedPath(), id);
     }
 
     public ResourceResponseDTO getResource(ProcessedPath path, long id) {
-        String fullPath = userDirectoryProvider.provide(path.requestedPath(), id);
-        String parentPath = userDirectoryProvider.provide(path.parentPath(), id);
-        return minioDAO.findResource(fullPath, parentPath)
-                .map(itemParser::pars)
-                .orElseThrow(() -> new NotFoundException("Resource doesn't exist: " + fullPath));
+        StatObjectResponse statObject = minioDAO.findResource(path.requestedPath(), id);
+        return statObjectParser.pars(statObject);
     }
 
     public List<ResourceResponseDTO> getResources(ProcessedPath path, long id) {
-        String fullPath = userDirectoryProvider.provide(path.requestedPath(), id);
-        return minioDAO.findDirectoryResources(fullPath).stream()
+        return minioDAO.findDirectoryResourcesWithoutDir(path.requestedPath(), id).stream()
                 .map(itemParser::pars)
                 .toList();
     }
 
-    public void createFile(ProcessedPath path, long id) {
-        String fullPath = userDirectoryProvider.provide(path.requestedPath(), id);
-        String parentPath = userDirectoryProvider.provide(path.parentPath(), id);
-        if (minioDAO.isExist(fullPath, parentPath)) {
-            throw new AlreadyExistException("Resource already exists: " + fullPath);
+    public void removeResource(ProcessedPath path, long id) {
+        String requestedPath = path.requestedPath();
+        if(path.type().equals(Type.DIRECTORY)) {
+            minioDAO.removeDir(requestedPath, id);
+        } else {
+            minioDAO.removeFile(requestedPath, id);
         }
-        minioDAO.buildFile(fullPath);
+    }
+
+    public void createFile(ProcessedPath path, long id) {
+        minioDAO.buildFile(path.requestedPath(), id);
     }
 
 }

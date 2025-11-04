@@ -39,5 +39,9 @@ public class AbstractParser {
         return dirPath.equals(SLASH) ? EMPTY : dirPath;
     }
 
+    protected String removeUserDir(String fullPath){
+        return fullPath.substring(fullPath.indexOf(SLASH)  + 1);
+    }
+
 }
 

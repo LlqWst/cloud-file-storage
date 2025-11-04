@@ -21,7 +21,7 @@ public class PathValidator {
 
         for (char c : path.toCharArray()) {
             if (FORBIDDEN_CHARS.contains(c)) {
-                throw new BadRequestException("Please enter a resourceName that doesn't include any of these characters: " + FORBIDDEN_CHARS);
+                throw new BadRequestException("Please enter a resource name that doesn't include any of these characters: " + FORBIDDEN_CHARS);
             }
         }
 
@@ -34,7 +34,7 @@ public class PathValidator {
         validatePath(path);
 
         if (!path.endsWith(SLASH) || path.contains(".")) {
-            throw new BadRequestException("Resource is not a directory: directory should end with '/' and shouldn't contain .");
+            throw new BadRequestException("Resource is not a directory: directory should end with '/' and shouldn't contain '.'");
         }
     }
 

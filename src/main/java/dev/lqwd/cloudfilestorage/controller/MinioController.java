@@ -27,7 +27,7 @@ public class MinioController {
 
     @PostMapping("/directory")
     public ResponseEntity<ResourceResponseDTO> createDir(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                                          @RequestParam(name = "path") String rawPath) {
+                                                         @RequestParam(name = "path") String rawPath) {
 
         ProcessedPath path = pathProcessor.processDir(rawPath);
         minioService.createNewDir(path, userDetails.getId());
@@ -39,7 +39,7 @@ public class MinioController {
 
     @GetMapping("/directory")
     public ResponseEntity<List<ResourceResponseDTO>> getResources(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                                                 @RequestParam(name = "path") String rawPath) {
+                                                                  @RequestParam(name = "path") String rawPath) {
 
         ProcessedPath path = pathProcessor.processDir(rawPath);
         List<ResourceResponseDTO> resources = minioService.getResources(path, userDetails.getId());
@@ -51,7 +51,7 @@ public class MinioController {
 
     @PostMapping("/file")
     public ResponseEntity<ResourceResponseDTO> createFile(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                                           @RequestParam(name = "path") String rawPath) {
+                                                          @RequestParam(name = "path") String rawPath) {
 
         ProcessedPath path = pathProcessor.processFile(rawPath);
         minioService.createFile(path, userDetails.getId());
@@ -71,6 +71,18 @@ public class MinioController {
         return ResponseEntity
                 .ok()
                 .body(resource);
+    }
+
+    @DeleteMapping("/resource")
+    public ResponseEntity<Void> deleteResource(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                               @RequestParam(name = "path") String rawPath) {
+
+        ProcessedPath path = pathProcessor.processResource(rawPath);
+        minioService.removeResource(path, userDetails.getId());
+
+        return ResponseEntity
+                .noContent()
+                .build();
     }
 
 }

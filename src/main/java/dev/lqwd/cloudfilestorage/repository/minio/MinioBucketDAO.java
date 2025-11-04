@@ -33,8 +33,7 @@ public class MinioBucketDAO {
                                 BucketExistsArgs.builder()
                                         .bucket(bucketName)
                                         .build()),
-                "Minio error during checking for the existence of a bucket" + bucketName,
-                "Unexpected error during checking for the existence of a bucket" + bucketName);
+                "Error during checking for the existence of a bucket" + bucketName);
     }
 
     private void createRootBucket() {
@@ -45,8 +44,7 @@ public class MinioBucketDAO {
                                     .build());
                     log.info("Bucket '{}' created", bucketName);
                 },
-                "Minio error during creation of Minio bucket: " + bucketName,
-                "Unexpected error during creation of Minio bucket: " + bucketName);
+                "Error during creation of Minio bucket: " + bucketName);
     }
 
 }

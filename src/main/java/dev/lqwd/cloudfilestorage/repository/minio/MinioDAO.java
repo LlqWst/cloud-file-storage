@@ -1,7 +1,9 @@
 package dev.lqwd.cloudfilestorage.repository.minio;
 
+import dev.lqwd.cloudfilestorage.exception.AlreadyExistException;
 import dev.lqwd.cloudfilestorage.exception.NotFoundException;
 import dev.lqwd.cloudfilestorage.utils.PathNormalizer;
+import dev.lqwd.cloudfilestorage.utils.UserDirectoryProvider;
 import io.minio.*;
 import io.minio.messages.Item;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +16,6 @@ import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 
 @Component
@@ -23,68 +24,67 @@ import java.util.Optional;
 public class MinioDAO {
 
     public static final String SLASH = "/";
+
     @Value("${app.minio.bucket.name}")
     private String bucketName;
 
     private final MinioClient minioClient;
     private final MinioOperationTemplate operationTemplate;
     private final PathNormalizer pathNormalizer;
+    private final UserDirectoryProvider userDirectoryProvider;
 
 
-    public Optional<Item> findResource(String fullPath, String parentPath) {
-        Optional<Item> item = findResourceIgnoreEndSlash(fullPath, parentPath);
-        if (item.isPresent() && item.get().objectName().equals(fullPath)) {
-            return item;
+    private String getPathWithUserDir(String path, long id) {
+        return userDirectoryProvider.provide(path, id);
+    }
+
+    public boolean isExistIgnoreEndSlash(String path, long id) {
+        String pathWithoutEndSlash = pathNormalizer.getPathWithoutEndSlash(path);
+        String pathWithEndSlash = pathWithoutEndSlash + SLASH;
+        return isExist(pathWithoutEndSlash, id) || isExist(pathWithEndSlash, id);
+    }
+
+    public boolean isExist(String path, long id) {
+        try {
+            findResource(path, id);
+            return true;
+        } catch (NotFoundException _) {
+            return false;
         }
-        return Optional.empty();
     }
 
-    private Optional<Item> findResourceIgnoreEndSlash(String fullPath, String parentPath) {
-        String pathWithoutEndSlash = pathNormalizer.getPathWithoutEndSlash(fullPath);
-        String pathWithEndSlash = pathNormalizer.getPathWithoutEndSlash(fullPath) + SLASH;
-        Iterable<Result<Item>> results = getItems(parentPath);
-        return operationTemplate.execute(() -> {
-                    for (Result<Item> item : results) {
-                        String itemPath = item.get().objectName();
-                        if (itemPath.equals(pathWithoutEndSlash) ||
-                            itemPath.equals(pathWithEndSlash)) {
-                            return Optional.of(item.get());
-                        }
-                    }
-                    return Optional.empty();
-                },
-                "Minio error during getting of resource: " + fullPath,
-                "Unexpected error during getting of resource: " + fullPath);
+    public StatObjectResponse findResource(String path, long id) {
+        String pathWithUserDir = getPathWithUserDir(path, id);
+        return operationTemplate.execute(() ->
+                        minioClient.statObject(StatObjectArgs.builder()
+                                .bucket(bucketName)
+                                .object(pathWithUserDir)
+                                .build()),
+                "Error during getting of resource: " + path);
     }
 
-    public List<Item> findDirectoryResources(String fullPath) {
-        Iterable<Result<Item>> results = getItems(fullPath);
-        return operationTemplate.execute(() -> {
-                    List<Item> items = new ArrayList<>();
-                    for (Result<Item> item : results) {
-                        if (!item.get().objectName().equals(fullPath)) {
-                            items.add(item.get());
-                        }
-                    }
-                    return items;
-                },
-                "Minio error during getting of directory's resources: " + fullPath,
-                "Unexpected error during getting of directory's resources " + fullPath);
+    public List<Item> findDirectoryResourcesWithoutDir(String path, long id) {
+        validateOnAbsence(path, id);
+        String pathWithUserDir = getPathWithUserDir(path, id);
+        return findResources(path, pathWithUserDir, pathWithUserDir, false);
     }
 
-    public void createDirectory(String path) {
+    public void createDirectory(String path, long id) {
+        validateOnExistence(path, id);
+        String pathWithUserDir = getPathWithUserDir(path, id);
         operationTemplate.execute(() ->
                         minioClient.putObject(
                                 PutObjectArgs.builder()
                                         .bucket(bucketName)
-                                        .object(path)
+                                        .object(pathWithUserDir)
                                         .stream(new ByteArrayInputStream(new byte[]{}), 0, -1)
                                         .build()),
-                "Minio error during creation of directory: " + path,
-                "Unexpected error during creation of directory: " + path);
+                "Error during creation of directory: " + path);
     }
 
-    public void buildFile(String fullPath) {
+    public void buildFile(String path, long id) {
+        validateOnExistence(path, id);
+        String pathWithUserDir = getPathWithUserDir(path, id);
         StringBuilder builder = new StringBuilder();
         builder.append("some text for test");
         try {
@@ -94,52 +94,82 @@ public class MinioDAO {
             minioClient.putObject(
                     PutObjectArgs.builder()
                             .bucket(bucketName)
-                            .object(fullPath)
+                            .object(pathWithUserDir)
                             .stream(bais, bais.available(), -1)
                             .build());
             bais.close();
-            log.info("file create for: {}", fullPath);
+            log.info("file create for: {}", path);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    public void removeResource(String resourceName) {
-        operationTemplate.execute(() ->
-                        minioClient.removeObject(
-                                RemoveObjectArgs.builder()
-                                        .bucket(bucketName)
-                                        .object(resourceName)
-                                        .build()),
-                "Minio error during deletion of resource: " + resourceName,
-                "Unexpected error during deletion of resource: " + resourceName);
+    public void removeDir(String path, long id) {
+        List<Item> items = findDirectoryResourcesWithDir(path, id);
+        for (Item item : items) {
+            removeMinioObject(path, item.objectName());
+        }
     }
 
-    public boolean isExist(String fullPath, String parentPath) {
-        return findResourceIgnoreEndSlash(fullPath, parentPath)
-                .isPresent();
+    public void removeFile(String path, long id) {
+        validateOnAbsence(path, id);
+        String pathWithUserDir = getPathWithUserDir(path, id);
+        removeMinioObject(path, pathWithUserDir);
     }
 
-    public boolean isDirExist(String path) {
-        try {
-            return isExist(path, path);
-        } catch (NotFoundException _) {
-            return false;
+    private List<Item> findResources(String path, String pathWithUserDir,
+                                     String exceptionDir, boolean isRecursive) {
+
+        Iterable<Result<Item>> results = getResultItems(pathWithUserDir, isRecursive);
+        return operationTemplate.execute(() -> {
+                    List<Item> items = new ArrayList<>();
+                    for (Result<Item> item : results) {
+                        if (!item.get().objectName().equals(exceptionDir)) {
+                            items.add(item.get());
+                        }
+                    }
+                    return items;
+                },
+                "Error during getting of directory's resources. path: " + path);
+    }
+
+    private List<Item> findDirectoryResourcesWithDir(String path, long id) {
+        validateOnAbsence(path, id);
+        String userDir = userDirectoryProvider.provide(id);
+        String pathWithUserDir = getPathWithUserDir(path, id);
+        return findResources(path, pathWithUserDir, userDir, true);
+    }
+
+    private void validateOnExistence(String path, long id) {
+        if (isExistIgnoreEndSlash(path, id)) {
+            throw new AlreadyExistException("Resource already exist: " + path);
+        }
+    }
+
+    private void validateOnAbsence(String path, long id) {
+        if (!isExistIgnoreEndSlash(path, id)) {
+            throw new NotFoundException("Resource doesn't exist: " + path);
         }
     }
 
     @NotNull
-    private Iterable<Result<Item>> getItems(String parentPath) {
-        Iterable<Result<Item>> results =
-                minioClient.listObjects(
-                        ListObjectsArgs.builder()
-                                .bucket(bucketName)
-                                .prefix(parentPath)
-                                .build());
-        if (!results.iterator().hasNext()) {
-            throw new NotFoundException("Directory doesn't exist: " + parentPath);
-        }
-        return results;
+    private Iterable<Result<Item>> getResultItems(String pathWithUserDir, boolean isRecursive) {
+        return minioClient.listObjects(
+                ListObjectsArgs.builder()
+                        .bucket(bucketName)
+                        .prefix(pathWithUserDir)
+                        .recursive(isRecursive)
+                        .build());
+    }
+
+    private void removeMinioObject(String path, String pathWithUserDir) {
+        operationTemplate.execute(() ->
+                        minioClient.removeObject(
+                                RemoveObjectArgs.builder()
+                                        .bucket(bucketName)
+                                        .object(pathWithUserDir)
+                                        .build()),
+                "Error during deletion of resource: " + path);
     }
 
 }

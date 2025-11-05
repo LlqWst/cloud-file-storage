@@ -6,6 +6,7 @@ import dev.lqwd.cloudfilestorage.dto.resource.ResourceResponseDTO;
 import dev.lqwd.cloudfilestorage.mapper.ResourceResponseMapper;
 import dev.lqwd.cloudfilestorage.security.CustomUserDetails;
 import dev.lqwd.cloudfilestorage.service.MinioService;
+import dev.lqwd.cloudfilestorage.utils.PathValidator;
 import dev.lqwd.cloudfilestorage.utils.path_processor.PathProcessor;
 import dev.lqwd.cloudfilestorage.utils.path_processor.ProcessedPath;
 import lombok.AllArgsConstructor;
@@ -25,6 +26,7 @@ public class MinioController {
     private final MinioService minioService;
     private final PathProcessor pathProcessor;
     private final ResourceResponseMapper mapper;
+    private final PathValidator validator;
 
     @PostMapping("/directory")
     public ResponseEntity<ResourceResponseDTO> createDir(@AuthenticationPrincipal CustomUserDetails userDetails,
@@ -98,6 +100,18 @@ public class MinioController {
         return ResponseEntity
                 .ok()
                 .body(mapper.toDirResponseDTO(pathTo));
+    }
+
+    @GetMapping("/resource/search")
+    public ResponseEntity<List<ResourceResponseDTO>> search(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                             @RequestParam(name = "query") String query) {
+
+        validator.validatePath(query);
+        List<ResourceResponseDTO> resources = minioService.searchResource(query, userDetails.getId());
+
+        return ResponseEntity
+                .ok()
+                .body(resources);
     }
 
 }

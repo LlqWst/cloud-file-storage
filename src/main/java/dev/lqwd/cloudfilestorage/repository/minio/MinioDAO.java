@@ -23,7 +23,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MinioDAO {
 
-    public static final String SLASH = "/";
+    private static final String SLASH = "/";
 
     @Value("${app.minio.bucket.name}")
     private String bucketName;
@@ -166,7 +166,7 @@ public class MinioDAO {
     }
 
     private List<Item> findDirectoryResourcesWithDir(String path, long id) {
-        String userDir = userDirectoryProvider.provide(id);
+        String userDir = getUserDir(id);
         String pathWithUserDir = getPathWithUserDir(path, id);
         return findResources(path, pathWithUserDir, userDir, true);
     }
@@ -201,6 +201,14 @@ public class MinioDAO {
                                         .object(pathWithUserDir)
                                         .build()),
                 "Error during deletion of resource: " + path);
+    }
+
+    public List<Item> findAllResources(long id) {
+        return findDirectoryResourcesWithDir(SLASH, id);
+    }
+
+    private String getUserDir(long id) {
+        return userDirectoryProvider.provide(id);
     }
 
 }

@@ -99,6 +99,16 @@ public class MinioService {
         minioDAO.buildFile(getRequestedPath(path), id);
     }
 
+    public List<ResourceResponseDTO> searchResource(String query, long id) {
+        String lowerCaseQuery = query.toLowerCase();
+        return minioDAO.findAllResources(id).stream()
+                .map(itemParser::pars)
+                .filter(dto -> dto.name()
+                        .toLowerCase()
+                        .contains(lowerCaseQuery))
+                .toList();
+    }
+
     private static String getRequestedPath(ProcessedPath path) {
         return path.requestedPath();
     }

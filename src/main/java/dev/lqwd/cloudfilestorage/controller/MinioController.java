@@ -1,6 +1,7 @@
 package dev.lqwd.cloudfilestorage.controller;
 
 
+import dev.lqwd.cloudfilestorage.dto.resource.DirectoryResourceDTO;
 import dev.lqwd.cloudfilestorage.dto.resource.ResourceResponseDTO;
 import dev.lqwd.cloudfilestorage.mapper.ResourceResponseMapper;
 import dev.lqwd.cloudfilestorage.security.CustomUserDetails;
@@ -83,6 +84,20 @@ public class MinioController {
         return ResponseEntity
                 .noContent()
                 .build();
+    }
+
+    @GetMapping("/resource/move")
+    public ResponseEntity<DirectoryResourceDTO> moveResource(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                             @RequestParam(name = "from") String from,
+                                                             @RequestParam(name = "to") String to) {
+
+        ProcessedPath pathFrom = pathProcessor.processResource(from);
+        ProcessedPath pathTo = pathProcessor.processResource(to);
+        minioService.moveResource(pathFrom, pathTo, userDetails.getId());
+
+        return ResponseEntity
+                .ok()
+                .body(mapper.toDirResponseDTO(pathTo));
     }
 
 }

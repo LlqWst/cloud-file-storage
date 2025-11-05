@@ -64,13 +64,11 @@ public class MinioDAO {
     }
 
     public List<Item> findDirectoryResourcesWithoutDir(String path, long id) {
-        validateOnAbsence(path, id);
         String pathWithUserDir = getPathWithUserDir(path, id);
         return findResources(path, pathWithUserDir, pathWithUserDir, false);
     }
 
     public void createDirectory(String path, long id) {
-        validateOnExistence(path, id);
         String pathWithUserDir = getPathWithUserDir(path, id);
         operationTemplate.execute(() ->
                         minioClient.putObject(
@@ -83,7 +81,6 @@ public class MinioDAO {
     }
 
     public void buildFile(String path, long id) {
-        validateOnExistence(path, id);
         String pathWithUserDir = getPathWithUserDir(path, id);
         StringBuilder builder = new StringBuilder();
         builder.append("some text for test");
@@ -107,14 +104,49 @@ public class MinioDAO {
     public void removeDir(String path, long id) {
         List<Item> items = findDirectoryResourcesWithDir(path, id);
         for (Item item : items) {
-            removeMinioObject(path, item.objectName());
+            removeResource(path, item.objectName());
         }
     }
 
     public void removeFile(String path, long id) {
-        validateOnAbsence(path, id);
         String pathWithUserDir = getPathWithUserDir(path, id);
-        removeMinioObject(path, pathWithUserDir);
+        removeResource(path, pathWithUserDir);
+    }
+
+    public void moveDir(String from, String to, long id) {
+        List<Item> items = findDirectoryResourcesWithDir(from, id);
+        for (Item item : items) {
+            String source = item.objectName();
+            String target = item.objectName().replaceFirst(from, to);
+
+            copyResource(from, to, source, target);
+            removeResource(from, source);
+        }
+    }
+
+    public void moveFile(String from, String to, long id) {
+        String fromWithUserDir = getPathWithUserDir(from, id);
+        String toWithUserDir = getPathWithUserDir(to, id);
+        copyResource(from, to, fromWithUserDir, toWithUserDir);
+        removeResource(from, fromWithUserDir);
+    }
+
+    private void copyResource(String from, String to,
+                              String source, String target) {
+
+        operationTemplate.execute(() -> {
+                    minioClient.copyObject(
+                            CopyObjectArgs.builder()
+                                    .bucket(bucketName)
+                                    .object(target)
+                                    .source(
+                                            CopySource.builder()
+                                                    .bucket(bucketName)
+                                                    .object(source)
+                                                    .build())
+                                    .build());
+                },
+                "Error during moving resource from: %s - to: %s".formatted(from, to));
     }
 
     private List<Item> findResources(String path, String pathWithUserDir,
@@ -134,19 +166,18 @@ public class MinioDAO {
     }
 
     private List<Item> findDirectoryResourcesWithDir(String path, long id) {
-        validateOnAbsence(path, id);
         String userDir = userDirectoryProvider.provide(id);
         String pathWithUserDir = getPathWithUserDir(path, id);
         return findResources(path, pathWithUserDir, userDir, true);
     }
 
-    private void validateOnExistence(String path, long id) {
+    public void validateOnExistence(String path, long id) {
         if (isExistIgnoreEndSlash(path, id)) {
             throw new AlreadyExistException("Resource already exist: " + path);
         }
     }
 
-    private void validateOnAbsence(String path, long id) {
+    public void validateOnAbsence(String path, long id) {
         if (!isExistIgnoreEndSlash(path, id)) {
             throw new NotFoundException("Resource doesn't exist: " + path);
         }
@@ -162,7 +193,7 @@ public class MinioDAO {
                         .build());
     }
 
-    private void removeMinioObject(String path, String pathWithUserDir) {
+    private void removeResource(String path, String pathWithUserDir) {
         operationTemplate.execute(() ->
                         minioClient.removeObject(
                                 RemoveObjectArgs.builder()

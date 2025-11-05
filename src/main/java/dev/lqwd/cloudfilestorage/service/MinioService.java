@@ -2,6 +2,7 @@ package dev.lqwd.cloudfilestorage.service;
 
 import dev.lqwd.cloudfilestorage.dto.resource.ResourceResponseDTO;
 import dev.lqwd.cloudfilestorage.entity.Type;
+import dev.lqwd.cloudfilestorage.exception.BadRequestException;
 import dev.lqwd.cloudfilestorage.exception.NotFoundException;
 import dev.lqwd.cloudfilestorage.repository.minio.MinioDAO;
 import dev.lqwd.cloudfilestorage.utils.parser.minio.ItemParser;
@@ -34,25 +35,28 @@ public class MinioService {
 
     public void createNewDir(ProcessedPath path, long id) {
         String parentPath = path.parentPath();
-        if (!minioDAO.isExist(parentPath, id)) {
-            throw new NotFoundException("Parent path doesn't exist: " + parentPath);
-        }
-        minioDAO.createDirectory(path.requestedPath(), id);
+        String requestedPath = getRequestedPath(path);
+        validatePArentPath(id, parentPath);
+        minioDAO.validateOnExistence(requestedPath, id);
+        minioDAO.createDirectory(requestedPath, id);
     }
 
     public ResourceResponseDTO getResource(ProcessedPath path, long id) {
-        StatObjectResponse statObject = minioDAO.findResource(path.requestedPath(), id);
+        StatObjectResponse statObject = minioDAO.findResource(getRequestedPath(path), id);
         return statObjectParser.pars(statObject);
     }
 
     public List<ResourceResponseDTO> getResources(ProcessedPath path, long id) {
-        return minioDAO.findDirectoryResourcesWithoutDir(path.requestedPath(), id).stream()
+        String requestedPath = getRequestedPath(path);
+        minioDAO.validateOnAbsence(requestedPath, id);
+        return minioDAO.findDirectoryResourcesWithoutDir(requestedPath, id).stream()
                 .map(itemParser::pars)
                 .toList();
     }
 
     public void removeResource(ProcessedPath path, long id) {
-        String requestedPath = path.requestedPath();
+        String requestedPath = getRequestedPath(path);
+        minioDAO.validateOnAbsence(requestedPath, id);
         if(path.type().equals(Type.DIRECTORY)) {
             minioDAO.removeDir(requestedPath, id);
         } else {
@@ -60,8 +64,43 @@ public class MinioService {
         }
     }
 
+    public void moveResource(ProcessedPath pathFrom, ProcessedPath pathTo, long id) {
+        if (!pathFrom.type().equals(pathTo.type())){
+            throw new BadRequestException("The resource types must match");
+        }
+        String from = getRequestedPath(pathFrom);
+        String to = getRequestedPath(pathTo);
+
+        if (from.equals("/") || from.isBlank()){
+            throw new BadRequestException("You can't cut the root directory");
+        }
+
+        String parentPathTo = pathTo.parentPath();
+        validatePArentPath(id, parentPathTo);
+
+        minioDAO.validateOnAbsence(from, id);
+        minioDAO.validateOnExistence(to, id);
+
+        if(pathFrom.type().equals(Type.DIRECTORY)) {
+            minioDAO.moveDir(from, to, id);
+        } else {
+            minioDAO.moveFile(from, to, id);
+        }
+    }
+
+    private void validatePArentPath(long id, String parentPathTo) {
+        if (!minioDAO.isExist(parentPathTo, id)) {
+            throw new NotFoundException("Parent path doesn't exist: " + parentPathTo);
+        }
+    }
+
     public void createFile(ProcessedPath path, long id) {
-        minioDAO.buildFile(path.requestedPath(), id);
+        minioDAO.validateOnExistence(getRequestedPath(path), id);
+        minioDAO.buildFile(getRequestedPath(path), id);
+    }
+
+    private static String getRequestedPath(ProcessedPath path) {
+        return path.requestedPath();
     }
 
 }

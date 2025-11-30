@@ -1,12 +1,14 @@
 package dev.lqwd.cloudfilestorage.utils;
 
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
 import java.nio.file.Path;
 
 
+@Slf4j
 @Component
 @NoArgsConstructor
 public class PathNormalizer {
@@ -16,6 +18,10 @@ public class PathNormalizer {
     private static final int END_SLASH = 1;
 
     public String normalize(String path) {
+        if (path == null || path.isBlank()){
+            return SLASH;
+        }
+
         return path.trim()
                 .replace("\\", SLASH)
                 .replaceAll("/{2,}", SLASH);

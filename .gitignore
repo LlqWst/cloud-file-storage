@@ -40,3 +40,4 @@ out/
 /gradle/
 /.env
 /src/main/java/dev/lqwd/cloudfilestorage/controller/ForTesting.java
+/1compose.yaml

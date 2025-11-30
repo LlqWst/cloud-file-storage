@@ -14,7 +14,7 @@ public class UserDirectoryProvider {
 
     private final PathNormalizer normalizer;
 
-    public String provide(Long id) {
+    public String provide(long id) {
         return userRootTemplate.formatted(id);
     }
 

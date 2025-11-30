@@ -10,10 +10,13 @@ import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 
 import java.util.stream.Collectors;
@@ -51,7 +54,8 @@ public class ApplicationExceptionHandler {
                 .body(new ErrorResponseDTO(e.getMessage()));
     }
 
-    @ExceptionHandler({BadRequestException.class, MissingServletRequestParameterException.class})
+    @ExceptionHandler({BadRequestException.class, MissingServletRequestParameterException.class,
+            HttpRequestMethodNotSupportedException.class})
     public ResponseEntity<ErrorResponseDTO> handleBadRequestException(Exception e) {
 
         log.warn("Exception occurred:  {}", e.getMessage(), e);
@@ -61,7 +65,7 @@ public class ApplicationExceptionHandler {
                 .body(new ErrorResponseDTO(e.getMessage()));
     }
 
-    @ExceptionHandler(NotFoundException.class)
+    @ExceptionHandler({NotFoundException.class, NoResourceFoundException.class})
     public ResponseEntity<ErrorResponseDTO> handleNotFoundException(Exception e) {
 
         log.warn("Exception occurred:  {}", e.getMessage(), e);
@@ -80,6 +84,7 @@ public class ApplicationExceptionHandler {
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(new ErrorResponseDTO("Internal error exception"));
     }
+
 
 }
 

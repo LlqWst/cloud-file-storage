@@ -17,7 +17,7 @@ public interface MinioParser {
                     .type(type)
                     .build();
             case DIRECTORY -> DirectoryResourceDTO.builder()
-                    .name(name)
+                    .name(name + "/")
                     .path(normalizedPath)
                     .type(type)
                     .build();

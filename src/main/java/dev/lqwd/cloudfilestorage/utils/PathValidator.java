@@ -33,8 +33,8 @@ public class PathValidator {
     public void validateDirPath(String path) {
         validatePath(path);
 
-        if (!path.endsWith(SLASH) || path.contains(".")) {
-            throw new BadRequestException("Resource is not a directory: directory should end with '/' and shouldn't contain '.'");
+        if (!path.endsWith(SLASH)) {
+            throw new BadRequestException("Resource is not a directory: directory should end with '/'");
         }
     }
 

@@ -24,7 +24,6 @@ public class MinioOperationTemplate {
             log.error("HTTP trace: {}", e.httpTrace(), e);
             throw new InternalErrorException("Minio error. " + errorMessage, e);
         } catch (Exception e) {
-            log.error("{} : {}", errorMessage, e.getMessage(), e);
             throw new InternalErrorException("Unexpected error. " + errorMessage, e);
         }
     }
@@ -40,7 +39,6 @@ public class MinioOperationTemplate {
             log.error("HTTP trace: {}", e.httpTrace(), e);
             throw new InternalErrorException("Minio error. " + errorMessage, e);
         } catch (Exception e) {
-            log.error("{} : {}", errorMessage, e.getMessage(), e);
             throw new InternalErrorException("Unexpected error. " + errorMessage, e);
         }
     }

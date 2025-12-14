@@ -1,7 +1,7 @@
 package dev.lqwd.cloudfilestorage.utils.parser;
 
-import dev.lqwd.cloudfilestorage.utils.PathNormalizer;
 import dev.lqwd.cloudfilestorage.utils.path_processor.ProcessedPath;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.nio.file.Path;
@@ -9,20 +9,19 @@ import java.nio.file.Paths;
 
 
 @Component
-public class PathParser extends AbstractParser {
+@RequiredArgsConstructor
+public class PathParser  {
 
-    public PathParser(PathNormalizer pathNormalizer) {
-        super(pathNormalizer);
-    }
+    private final PathParsHelper pathHelper;
 
     public ProcessedPath pars(String normalizedPath) {
         Path path = Paths.get(normalizedPath);
 
         return ProcessedPath.builder()
                 .requestedPath(normalizedPath)
-                .resourceName(getName(path))
-                .parentPath(getParentPath(path))
-                .type(getType(normalizedPath))
+                .resourceName(pathHelper.getName(path))
+                .parentPath(pathHelper.getParentPath(path))
+                .type(pathHelper.getType(normalizedPath))
                 .build();
     }
 }

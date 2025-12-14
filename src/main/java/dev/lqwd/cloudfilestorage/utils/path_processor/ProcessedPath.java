@@ -8,5 +8,5 @@ public record ProcessedPath(
         String requestedPath,
         String parentPath,
         String resourceName,
-        Type type) {
-}
+        Type type
+) {}

@@ -1,8 +1,7 @@
 package dev.lqwd.cloudfilestorage.dto;
 
 
-public record AuthRequestDTO(
+public record AuthRequestDto(
         String username,
         String password
-) {
-}
+) {}

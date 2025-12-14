@@ -18,7 +18,7 @@ public @interface StrongPassword {
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};
 
-    int min() default 6;
-    int max() default 64;
+    int min() default 5;
+    int max() default 20;
 
 }

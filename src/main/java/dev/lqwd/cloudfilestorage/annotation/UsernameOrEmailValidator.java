@@ -9,8 +9,9 @@ import java.util.regex.Pattern;
 public class UsernameOrEmailValidator implements ConstraintValidator<UsernameOrEmail, String> {
 
     private static final int MAX_EMAIL_LENGTH = 254;
-    private static final Pattern LOGIN_PATTERN = Pattern.compile("^[a-zA-Z0-9 ~!#$%^&*()_=+/'\".-]{6,20}$");
+    private static final Pattern LOGIN_PATTERN = Pattern.compile("^[a-zA-Z0-9 ~!#$%^&*()_=+/'\".-]{5,20}$");
 
+    private static final EmailValidator EMAIL_VALIDATOR = EmailValidator.getInstance();
 
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
@@ -18,6 +19,6 @@ public class UsernameOrEmailValidator implements ConstraintValidator<UsernameOrE
             return false;
         }
 
-        return LOGIN_PATTERN.matcher(value).matches() || EmailValidator.getInstance().isValid(value);
+        return LOGIN_PATTERN.matcher(value).matches() || EMAIL_VALIDATOR.isValid(value);
     }
 }

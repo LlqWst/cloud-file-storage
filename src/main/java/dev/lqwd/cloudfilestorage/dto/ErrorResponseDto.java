@@ -1,7 +1,6 @@
 package dev.lqwd.cloudfilestorage.dto;
 
 
-public record ErrorResponseDTO (
+public record ErrorResponseDto(
         String message
-) {
-}
+) {}

@@ -1,9 +1,8 @@
 package dev.lqwd.cloudfilestorage.mapper;
 
-import dev.lqwd.cloudfilestorage.dto.resource.DirectoryResourceDTO;
-import dev.lqwd.cloudfilestorage.dto.resource.FileResourceDTO;
-import dev.lqwd.cloudfilestorage.dto.resource.ResourceResponseDTO;
-import dev.lqwd.cloudfilestorage.entity.Type;
+import dev.lqwd.cloudfilestorage.dto.resource.DirectoryResourceDto;
+import dev.lqwd.cloudfilestorage.dto.resource.FileResourceDto;
+import dev.lqwd.cloudfilestorage.dto.resource.ResourceResponseDto;
 import dev.lqwd.cloudfilestorage.exception.InternalErrorException;
 import dev.lqwd.cloudfilestorage.utils.path_processor.ProcessedPath;
 import org.mapstruct.Mapper;
@@ -16,21 +15,15 @@ public interface ResourceResponseMapper {
     @Mapping(source = "parentPath", target = "path")
     @Mapping(source = "resourceName", target = "name")
     @Mapping(source = "type", target = "type")
-    DirectoryResourceDTO toDirResponseDTO(ProcessedPath path);
-
-//    @Mapping(source = "parentPath", target = "path")
-//    @Mapping(source = "resourceName", target = "name")
-//    @Mapping(source = "type", target = "type")
-//    @Mapping(defaultValue = "0", target = "size")
-//    FileResourceDTO toFileResponseDTO(ProcessedPath path);
+    DirectoryResourceDto toDirResponseDTO(ProcessedPath path);
 
     @Mapping(source = "path.parentPath", target = "path")
     @Mapping(source = "path.resourceName", target = "name")
     @Mapping(source = "path.type", target = "type")
     @Mapping(source = "size", target = "size")
-    FileResourceDTO toFileResponseDTO(ProcessedPath path, long size);
+    FileResourceDto toFileResponseDTO(ProcessedPath path, long size);
 
-    default ResourceResponseDTO toResponseDTO(ProcessedPath path, long size){
+    default ResourceResponseDto toResponseDTO(ProcessedPath path, long size){
 
         switch(path.type()){
          case DIRECTORY -> {

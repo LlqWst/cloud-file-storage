@@ -1,16 +1,13 @@
 package dev.lqwd.cloudfilestorage.exception_handler;
 
-import dev.lqwd.cloudfilestorage.dto.ErrorResponseDTO;
+import dev.lqwd.cloudfilestorage.dto.ErrorResponseDto;
 import dev.lqwd.cloudfilestorage.exception.BadRequestException;
 import dev.lqwd.cloudfilestorage.exception.AlreadyExistException;
 import dev.lqwd.cloudfilestorage.exception.InternalErrorException;
 import dev.lqwd.cloudfilestorage.exception.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
@@ -24,67 +21,50 @@ import java.util.stream.Collectors;
 
 @RestControllerAdvice
 @Slf4j
-public class ApplicationExceptionHandler {
-
+public class ApplicationExceptionHandler extends BaseHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponseDTO> handleValidationExceptions(
+    public ResponseEntity<ErrorResponseDto> handleValidationExceptions(
             MethodArgumentNotValidException e) {
 
         log.error("Exception occurred:  {}", e.getMessage(), e);
-
-        String message = e.getBindingResult().getFieldErrors()
+        String message = e.getBindingResult()
+                .getFieldErrors()
                 .stream()
                 .map(DefaultMessageSourceResolvable::getDefaultMessage)
                 .collect(Collectors.joining("; "));
 
-        return ResponseEntity
-                .badRequest()
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(new ErrorResponseDTO(message));
+        return buildBadRequestResponse(message);
     }
 
     @ExceptionHandler(AlreadyExistException.class)
-    public ResponseEntity<ErrorResponseDTO> handleUserAlreadyExistsException(AlreadyExistException e) {
+    public ResponseEntity<ErrorResponseDto> handleUserAlreadyExistsException(AlreadyExistException e) {
 
         log.error("Exception occurred:  {}", e.getMessage(), e);
-        return ResponseEntity
-                .status(HttpStatus.CONFLICT)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(new ErrorResponseDTO(e.getMessage()));
+        return buildConflictResponse(e.getMessage());
     }
 
     @ExceptionHandler({BadRequestException.class, MissingServletRequestParameterException.class,
             HttpRequestMethodNotSupportedException.class})
-    public ResponseEntity<ErrorResponseDTO> handleBadRequestException(Exception e) {
+    public ResponseEntity<ErrorResponseDto> handleBadRequestException(Exception e) {
 
         log.warn("Exception occurred:  {}", e.getMessage(), e);
-        return ResponseEntity
-                .badRequest()
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(new ErrorResponseDTO(e.getMessage()));
+        return buildBadRequestResponse(e.getMessage());
     }
 
     @ExceptionHandler({NotFoundException.class, NoResourceFoundException.class})
-    public ResponseEntity<ErrorResponseDTO> handleNotFoundException(Exception e) {
+    public ResponseEntity<ErrorResponseDto> handleNotFoundException(Exception e) {
 
         log.warn("Exception occurred:  {}", e.getMessage(), e);
-        return ResponseEntity
-                .status(HttpStatus.NOT_FOUND)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(new ErrorResponseDTO(e.getMessage()));
+        return buildNotFoundResponse(e.getMessage());
     }
 
     @ExceptionHandler({Exception.class, InternalErrorException.class})
-    public ResponseEntity<ErrorResponseDTO> handleUniversalException(Exception e) {
+    public ResponseEntity<ErrorResponseDto> handleUniversalException(Exception e) {
 
         log.error("Exception occurred:  {}", e.getMessage(), e);
-        return ResponseEntity
-                .internalServerError()
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(new ErrorResponseDTO("Internal error exception"));
+        return buildInternalServerErrorResponse("Internal error exception");
     }
-
 
 }
 

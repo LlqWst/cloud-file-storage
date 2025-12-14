@@ -9,7 +9,7 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface UsernameOrEmail {
 
-    String message() default "Please provide username 6-20 characters long (char '@' not supported for username), or correct email";
+    String message() default "Please provide username 5-20 characters long (char '@' not supported for username), or correct email";
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};
 

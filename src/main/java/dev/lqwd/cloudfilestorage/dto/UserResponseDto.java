@@ -1,6 +1,5 @@
 package dev.lqwd.cloudfilestorage.dto;
 
-public record UserResponseDTO (
+public record UserResponseDto(
         String username
-) {
-}
+) {}

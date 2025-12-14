@@ -1,7 +1,7 @@
 package dev.lqwd.cloudfilestorage.security.json_auth;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import dev.lqwd.cloudfilestorage.dto.AuthRequestDTO;
+import dev.lqwd.cloudfilestorage.dto.AuthRequestDto;
 import dev.lqwd.cloudfilestorage.exception.BadRequestException;
 import dev.lqwd.cloudfilestorage.utils.CredentialsValidator;
 import jakarta.servlet.FilterChain;
@@ -66,7 +66,7 @@ public class JsonAuthenticationFilter extends OncePerRequestFilter {
     private Authentication attemptAuthentication(HttpServletRequest request)
             throws AuthenticationException, BadRequestException {
 
-        AuthRequestDTO authRequest = getAuthRequest(request);
+        AuthRequestDto authRequest = getAuthRequest(request);
 
         String username = authRequest.username();
         String password = authRequest.password();
@@ -77,9 +77,9 @@ public class JsonAuthenticationFilter extends OncePerRequestFilter {
         return authenticationManager.authenticate(authToken);
     }
 
-    private AuthRequestDTO getAuthRequest(HttpServletRequest request) {
+    private AuthRequestDto getAuthRequest(HttpServletRequest request) {
         try {
-            return objectMapper.readValue(request.getInputStream(), AuthRequestDTO.class);
+            return objectMapper.readValue(request.getInputStream(), AuthRequestDto.class);
         } catch (IOException e) {
             throw new BadRequestException(FAILED_TO_PARSE_REQUEST_MESSAGE, e);
         }

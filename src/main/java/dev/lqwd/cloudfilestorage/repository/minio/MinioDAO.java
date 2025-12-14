@@ -87,28 +87,6 @@ public class MinioDAO {
                 "Error during creation of directory: " + path);
     }
 
-    public void buildFile(String path, long id) {
-        String pathWithUserDir = getPathWithUserDir(path, id);
-        StringBuilder builder = new StringBuilder();
-        builder.append("some text for test");
-        try {
-            ByteArrayInputStream bais = new ByteArrayInputStream(
-                    builder.toString().getBytes(StandardCharsets.UTF_8));
-
-            minioClient.putObject(
-                    PutObjectArgs.builder()
-                            .bucket(bucketName)
-                            .object(pathWithUserDir)
-                            .stream(bais, bais.available(), -1)
-                            .build());
-            bais.close();
-            log.info("file create for: {}", path);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-
     public void uploadResource(String path, long id, MultipartFile file) {
         String pathWithUserDir = getPathWithUserDir(path, id);
         try {
@@ -127,10 +105,6 @@ public class MinioDAO {
     public void removeDir(String dirPath, long id) {
         findAllResourcesPath(dirPath, id)
                 .forEach(innerResource -> removeResource(dirPath, innerResource));
-//        List<Item> items = findDirectoryResourcesWithDirRecursive(dirPath, id);
-//        for (Item item : items) {
-//            removeResource(dirPath, item.objectName());
-//        }
     }
 
     public void removeFile(String path, long id) {
@@ -145,14 +119,6 @@ public class MinioDAO {
                     copyResource(from, to, source, target);
                     removeResource(from, source);
                 });
-//        List<Item> items = findDirectoryResourcesWithDirRecursive(from, id);
-//        for (Item item : items) {
-//            String source = item.objectName();
-//            String target = item.objectName().replaceFirst(from, to);
-//
-//            copyResource(from, to, source, target);
-//            removeResource(from, source);
-//        }
     }
 
     public void moveFile(String from, String to, long id) {
@@ -170,24 +136,23 @@ public class MinioDAO {
                             CopyObjectArgs.builder()
                                     .bucket(bucketName)
                                     .object(target)
-                                    .source(
-                                            CopySource.builder()
-                                                    .bucket(bucketName)
-                                                    .object(source)
-                                                    .build())
+                                    .source(CopySource.builder()
+                                            .bucket(bucketName)
+                                            .object(source)
+                                            .build())
                                     .build());
                 },
                 "Error during moving resource from: %s - to: %s".formatted(from, to));
     }
 
     private List<Item> findResources(String path, String pathWithUserDir,
-                                     String exceptionDir, boolean isRecursive) {
+                                     String folderPathForExclusion, boolean isRecursive) {
 
         Iterable<Result<Item>> results = getResultItems(pathWithUserDir, isRecursive);
         return operationTemplate.execute(() -> {
                     List<Item> items = new ArrayList<>();
                     for (Result<Item> item : results) {
-                        if (!item.get().objectName().equals(exceptionDir)) {
+                        if (!item.get().objectName().equals(folderPathForExclusion)) {
                             items.add(item.get());
                         }
                     }
@@ -202,7 +167,7 @@ public class MinioDAO {
         return findResources(path, pathWithUserDir, userDir, true);
     }
 
-    private List<String> findAllResourcesPath(String path, long id){
+    private List<String> findAllResourcesPath(String path, long id) {
         return findDirectoryResourcesWithDirRecursive(path, id)
                 .stream()
                 .map(Item::objectName)

@@ -2,7 +2,7 @@ package dev.lqwd.cloudfilestorage.security.json_auth;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import dev.lqwd.cloudfilestorage.dto.ErrorResponseDTO;
+import dev.lqwd.cloudfilestorage.dto.ErrorResponseDto;
 import dev.lqwd.cloudfilestorage.exception.BadRequestException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -40,7 +40,7 @@ public class JsonAuthenticationFailureHandler {
         response.setStatus(httpStatus);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
-        ErrorResponseDTO errorResponseDTO = new ErrorResponseDTO(ex.getMessage());
+        ErrorResponseDto errorResponseDTO = new ErrorResponseDto(ex.getMessage());
         objectMapper.writeValue(response.getWriter(), errorResponseDTO);
     }
 

@@ -3,27 +3,30 @@ package dev.lqwd.cloudfilestorage.utils.parser;
 import dev.lqwd.cloudfilestorage.entity.Type;
 import dev.lqwd.cloudfilestorage.utils.PathNormalizer;
 import lombok.AllArgsConstructor;
+import org.springframework.stereotype.Component;
 
 import java.nio.file.Path;
 import java.util.Optional;
 
+@Component
 @AllArgsConstructor
-public class AbstractParser {
+public class PathParsHelper {
 
-    protected static final String SLASH = "/";
-    protected static final String EMPTY = "";
+    private static final String SLASH = "/";
+    private static final String EMPTY = "";
     private final PathNormalizer pathNormalizer;
 
-    protected String getName(Path path) {
+    public String getName(Path path) {
         Optional<Path> name = Optional.ofNullable(
                 path.getFileName());
+
         if (name.isPresent()) {
             return pathNormalizer.normalize(name.get());
         }
         return EMPTY;
     }
 
-    protected String getParentPath(Path path) {
+    public String getParentPath(Path path) {
         Path parentPath = path.getParent();
         if (parentPath == null) {
             return EMPTY;
@@ -31,16 +34,16 @@ public class AbstractParser {
         return pathNormalizer.normalize(parentPath) + SLASH;
     }
 
-    protected Type getType(String resourcePath) {
+    public Type getType(String resourcePath) {
         return resourcePath.endsWith(SLASH) ? Type.DIRECTORY : Type.FILE;
     }
 
-    protected String normalizeRootPath(String dirPath) {
+    public String normalizeRootPath(String dirPath) {
         return dirPath.equals(SLASH) ? EMPTY : dirPath;
     }
 
-    protected String removeUserDir(String fullPath){
-        return fullPath.substring(fullPath.indexOf(SLASH)  + 1);
+    public String removeUserDir(String fullPath){
+        return fullPath.substring(fullPath.indexOf(SLASH) + 1);
     }
 
 }

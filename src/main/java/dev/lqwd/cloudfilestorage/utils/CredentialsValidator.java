@@ -9,9 +9,9 @@ import org.springframework.stereotype.Component;
 @NoArgsConstructor
 public class CredentialsValidator {
 
-    public static final int MIN_LENGTH = 6;
+    public static final int MIN_LENGTH = 5;
     public static final int MAX_LENGTH_USERNAME = 20;
-    public static final int MAX_LENGTH_PASSWORD = 64;
+    public static final int MAX_LENGTH_PASSWORD = 20;
 
     public void validateCredentials(String username, String password) {
         if (isBlank(username) || isIncorrectUsernameLength(username)

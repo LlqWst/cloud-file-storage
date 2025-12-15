@@ -51,6 +51,7 @@ public class MinioDAO {
             findResource(path, id);
             return true;
         } catch (NotFoundException _) {
+            log.info("Resource doesn't exist");
             return false;
         }
     }

@@ -23,7 +23,6 @@ public class RegistrationController extends BaseController {
                                                       HttpServletRequest request){
 
         User user = authService.registrationAndLogin(registrationRequest, request.getSession());
-
         return buildCreatedResponse(new UserResponseDto(user.getUsername()), "id/" + user.getId());
     }
 }

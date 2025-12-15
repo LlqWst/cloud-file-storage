@@ -38,6 +38,7 @@ public class JsonAuthenticationFailureHandler {
         }
 
         response.setStatus(httpStatus);
+        response.setCharacterEncoding("UTF-8");
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
         ErrorResponseDto errorResponseDTO = new ErrorResponseDto(ex.getMessage());

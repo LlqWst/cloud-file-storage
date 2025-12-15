@@ -4,8 +4,7 @@ package dev.lqwd.cloudfilestorage.controller;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-
-import java.net.URI;
+import org.springframework.web.util.UriComponentsBuilder;
 
 
 public abstract class BaseController {
@@ -18,7 +17,10 @@ public abstract class BaseController {
 
     protected <T> ResponseEntity<T> buildCreatedResponse(T body, String uri) {
         return ResponseEntity
-                .created(URI.create(uri))
+                .created(UriComponentsBuilder
+                        .fromPath(uri)
+                        .build()
+                        .toUri())
                 .body(body);
     }
 

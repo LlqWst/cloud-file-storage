@@ -181,13 +181,14 @@ public class MinioService {
 
     public List<ResourceResponseDto> upload(String rawPath, long id, MultipartFile[] files) {
         String requestedFolderPath = pathProcessor.processDir(rawPath).requestedPath();
+        requestedFolderPath = requestedFolderPath.equals(SLASH) ? EMPTY : requestedFolderPath;
         minioDAO.validateOnAbsence(requestedFolderPath, id);
         for (MultipartFile file : files) {
-            minioDAO.validateOnExistence(file.getOriginalFilename(), id);
+            minioDAO.validateOnExistence(requestedFolderPath + file.getOriginalFilename(), id);
         }
         List<ResourceResponseDto> resources = new ArrayList<>();
         for (MultipartFile file : files) {
-            String filePath = file.getOriginalFilename();
+            String filePath = requestedFolderPath + file.getOriginalFilename();
             ProcessedPath processed = pathProcessor.processFile(filePath);
             createRecursiveParentFolders(processed.parentPath(), id);
             minioDAO.uploadResource(requestedFolderPath, id, file);

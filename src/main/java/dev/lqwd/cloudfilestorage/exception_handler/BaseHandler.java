@@ -2,7 +2,6 @@ package dev.lqwd.cloudfilestorage.exception_handler;
 
 
 import dev.lqwd.cloudfilestorage.dto.ErrorResponseDto;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -39,7 +38,6 @@ public abstract class BaseHandler {
                 .body(getBody(message));
     }
 
-    @NotNull
     private static ErrorResponseDto getBody(String message) {
         return new ErrorResponseDto(message);
     }

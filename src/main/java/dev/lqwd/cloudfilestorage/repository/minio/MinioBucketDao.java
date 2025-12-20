@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 @RequiredArgsConstructor
-public class MinioBucketDAO {
+public class MinioBucketDao {
 
     @Value("${app.minio.bucket.name}")
     private String bucketName;
@@ -24,6 +24,9 @@ public class MinioBucketDAO {
     public void onApplicationReady() {
         if (!isBucketExists()) {
             createRootBucket();
+            log.info("Bucket '{}' created", bucketName);
+        } else {
+            log.debug("Bucket '{}' already exists", bucketName);
         }
     }
 
@@ -37,13 +40,11 @@ public class MinioBucketDAO {
     }
 
     private void createRootBucket() {
-        operationTemplate.execute(() -> {
+        operationTemplate.execute(() ->
                     minioClient.makeBucket(
                             MakeBucketArgs.builder()
                                     .bucket(bucketName)
-                                    .build());
-                    log.info("Bucket '{}' created", bucketName);
-                },
+                                    .build()),
                 "Error during creation of Minio bucket: " + bucketName);
     }
 

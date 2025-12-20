@@ -30,7 +30,7 @@ public abstract class BaseController {
                 .build();
     }
 
-    protected <T> ResponseEntity<T> buildDownloadResponse(T body, String fileName){
+    protected <T> ResponseEntity<T> buildOkDownloadResponse(T body, String fileName){
         return ResponseEntity
                 .ok()
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)

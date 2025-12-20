@@ -35,14 +35,13 @@ public class PathParsHelper {
     }
 
     public Type getType(String resourcePath) {
-        return resourcePath.endsWith(SLASH) ? Type.DIRECTORY : Type.FILE;
+        if (resourcePath.endsWith(SLASH) || resourcePath.isEmpty()) {
+            return Type.DIRECTORY;
+        }
+        return Type.FILE;
     }
 
-    public String normalizeRootPath(String dirPath) {
-        return dirPath.equals(SLASH) ? EMPTY : dirPath;
-    }
-
-    public String removeUserDir(String fullPath){
+    public String removeUserDir(String fullPath) {
         return fullPath.substring(fullPath.indexOf(SLASH) + 1);
     }
 

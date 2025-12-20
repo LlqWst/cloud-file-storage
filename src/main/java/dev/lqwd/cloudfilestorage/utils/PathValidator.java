@@ -15,8 +15,8 @@ public class PathValidator {
     private static final String SLASH = "/";
 
     public void validatePath(String path) {
-        if (path == null || path.trim().isBlank()) {
-            throw new BadRequestException("Path is empty");
+        if (path == null) {
+            throw new BadRequestException("Path cannot be null");
         }
 
         for (char c : path.toCharArray()) {
@@ -33,7 +33,7 @@ public class PathValidator {
     public void validateDirPath(String path) {
         validatePath(path);
 
-        if (!path.endsWith(SLASH)) {
+        if (!path.endsWith(SLASH) && !path.isEmpty()) {
             throw new BadRequestException("Resource is not a directory: directory should end with '/'");
         }
     }
@@ -41,8 +41,8 @@ public class PathValidator {
     public void validateFilePath(String path) {
         validatePath(path);
 
-        if (path.endsWith(SLASH)) {
-            throw new BadRequestException("Resource is not a file: file should not end with '/'");
+        if (path.endsWith(SLASH) || path.isEmpty()) {
+            throw new BadRequestException("Resource is not a file: file should not end with '/' and can't be empty");
         }
     }
 }

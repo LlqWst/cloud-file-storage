@@ -4,7 +4,7 @@ import dev.lqwd.cloudfilestorage.entity.Type;
 import lombok.Builder;
 
 @Builder
-public record FileResourceDto(
+public record FileResponseDto(
         String path,
         String name,
         Long size,

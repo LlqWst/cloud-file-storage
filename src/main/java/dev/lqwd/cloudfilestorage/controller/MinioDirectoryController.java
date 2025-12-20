@@ -1,7 +1,7 @@
 package dev.lqwd.cloudfilestorage.controller;
 
 
-import dev.lqwd.cloudfilestorage.dto.resource.DirectoryResourceDto;
+import dev.lqwd.cloudfilestorage.dto.resource.DirectoryResponseDto;
 import dev.lqwd.cloudfilestorage.dto.resource.ResourceResponseDto;
 import dev.lqwd.cloudfilestorage.security.CustomUserDetails;
 import dev.lqwd.cloudfilestorage.service.MinioService;
@@ -24,16 +24,15 @@ public class MinioDirectoryController extends BaseController {
     public ResponseEntity<ResourceResponseDto> createDir(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                          @RequestParam(name = "path") String rawPath) {
 
-        DirectoryResourceDto directoryResourceDTO = minioService.createDir(rawPath, userDetails.getId());
-        return buildCreatedResponse(directoryResourceDTO, rawPath);
+        DirectoryResponseDto directoryResponseDto = minioService.createDir(rawPath, userDetails.getId());
+        return buildCreatedResponse(directoryResponseDto, rawPath);
     }
 
     @GetMapping
     public ResponseEntity<List<ResourceResponseDto>> getResources(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                                   @RequestParam(name = "path") String rawPath) {
 
-        List<ResourceResponseDto> resources = minioService.getResources(rawPath, userDetails.getId());
-        return buildOkResponse(resources);
+        return buildOkResponse(minioService.getResources(rawPath, userDetails.getId()));
     }
 
 }

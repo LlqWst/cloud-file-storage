@@ -4,12 +4,12 @@ import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 import java.lang.annotation.*;
 
-@Constraint(validatedBy = UsernameOrEmailValidator.class)
+@Constraint(validatedBy = UsernameValidator.class)
 @Target({ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface UsernameOrEmail {
+public @interface Username {
 
-    String message() default "Please provide username 5-20 characters long (char '@' not supported for username), or correct email";
+    String message() default "Please provide username 5-20 characters long";
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};
 

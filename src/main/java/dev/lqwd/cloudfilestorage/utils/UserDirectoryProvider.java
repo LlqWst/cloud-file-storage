@@ -12,14 +12,13 @@ public class UserDirectoryProvider {
     @Value("${app.minio.root.template.name}")
     private String userRootTemplate;
 
-    private final PathNormalizer normalizer;
 
     public String provide(long id) {
         return userRootTemplate.formatted(id);
     }
 
     public String provide(String path, long id) {
-        return  normalizer.normalize(provide(id) + path);
+        return  provide(id) + path;
     }
 
 }

@@ -24,7 +24,8 @@ public class ItemParser implements MinioParser {
                 item.size(),
                 pathHelper.getType(item.objectName()),
                 pathHelper.getName(path),
-                pathHelper.normalizeRootPath(requestedPath));
+                //pathHelper.normalizeRootPath(requestedPath));
+                requestedPath);
     }
 
 }

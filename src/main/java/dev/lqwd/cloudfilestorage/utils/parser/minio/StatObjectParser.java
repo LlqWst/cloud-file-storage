@@ -24,7 +24,7 @@ public class StatObjectParser implements MinioParser {
         return getResourceResponseDTO(statObject.size(),
                 pathHelper.getType(objectPath),
                 pathHelper.getName(path),
-                pathHelper.normalizeRootPath(requestedPath));
+                requestedPath);
     }
 
 }

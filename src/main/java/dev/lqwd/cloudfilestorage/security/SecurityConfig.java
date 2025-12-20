@@ -84,7 +84,9 @@ public class SecurityConfig {
                         .requireExplicitSave(false)
                 )
                 .exceptionHandling(conf ->
-                        conf.authenticationEntryPoint((req, res, authException) ->
+                        conf.authenticationEntryPoint((req,
+                                                       res,
+                                                       authException) ->
                             res.sendError(HttpStatus.UNAUTHORIZED.value())
                         )
                 )

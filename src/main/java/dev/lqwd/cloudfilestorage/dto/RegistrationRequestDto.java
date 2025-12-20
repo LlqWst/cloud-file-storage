@@ -1,15 +1,14 @@
 package dev.lqwd.cloudfilestorage.dto;
 
 
-import dev.lqwd.cloudfilestorage.annotation.UsernameOrEmail;
+import dev.lqwd.cloudfilestorage.annotation.Username;
 import dev.lqwd.cloudfilestorage.annotation.StrongPassword;
 
 public record RegistrationRequestDto(
 
-        @UsernameOrEmail
+        @Username
         String username,
 
         @StrongPassword
         String password
-) {
-}
+) {}

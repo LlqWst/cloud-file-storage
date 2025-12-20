@@ -26,8 +26,7 @@ public class MinioResourceController extends BaseController {
     public ResponseEntity<ResourceResponseDto> getResource(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                            @RequestParam(name = "path") String rawPath) {
 
-        ResourceResponseDto resource = minioService.getResource(rawPath, userDetails.getId());
-        return buildOkResponse(resource);
+        return buildOkResponse(minioService.getResource(rawPath, userDetails.getId()));
     }
 
     @PostMapping
@@ -52,16 +51,14 @@ public class MinioResourceController extends BaseController {
                                                             @RequestParam(name = "from") String from,
                                                             @RequestParam(name = "to") String to) {
 
-        ResourceResponseDto resourceResponseDTO = minioService.moveResource(from, to, userDetails.getId());
-        return buildOkResponse(resourceResponseDTO);
+        return buildOkResponse(minioService.moveResource(from, to, userDetails.getId()));
     }
 
     @GetMapping("/search")
     public ResponseEntity<List<ResourceResponseDto>> searchResource(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                                     @RequestParam(name = "query") String query) {
 
-        List<ResourceResponseDto> resources = minioService.searchResource(query, userDetails.getId());
-        return buildOkResponse(resources);
+        return buildOkResponse(minioService.searchResource(query, userDetails.getId()));
     }
 
     @GetMapping("/download")
@@ -69,7 +66,7 @@ public class MinioResourceController extends BaseController {
                                                                   @RequestParam(name = "path") String rawPath) {
 
         DownloadedResponseDto download = minioService.download(rawPath, userDetails.getId());
-        return buildDownloadResponse(download.content(), download.name());
+        return buildOkDownloadResponse(download.content(), download.name());
     }
 
 }

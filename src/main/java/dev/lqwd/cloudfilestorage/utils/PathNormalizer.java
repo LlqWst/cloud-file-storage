@@ -14,12 +14,13 @@ import java.nio.file.Path;
 public class PathNormalizer {
 
     private static final String SLASH = "/";
+    private static final String EMPTY = "";
     private static final int BEGINNING = 0;
     private static final int END_SLASH = 1;
 
     public String normalize(String path) {
         if (path == null || path.isBlank()){
-            return SLASH;
+            return EMPTY;
         }
 
         return path.trim()

@@ -1,6 +1,6 @@
 package dev.lqwd.cloudfilestorage.service;
 
-import dev.lqwd.cloudfilestorage.dto.resource.DirectoryResourceDto;
+import dev.lqwd.cloudfilestorage.dto.resource.DirectoryResponseDto;
 import dev.lqwd.cloudfilestorage.dto.resource.DownloadedResponseDto;
 import dev.lqwd.cloudfilestorage.dto.resource.ResourceResponseDto;
 import dev.lqwd.cloudfilestorage.entity.Type;
@@ -8,7 +8,7 @@ import dev.lqwd.cloudfilestorage.exception.BadRequestException;
 import dev.lqwd.cloudfilestorage.exception.InternalErrorException;
 import dev.lqwd.cloudfilestorage.exception.NotFoundException;
 import dev.lqwd.cloudfilestorage.mapper.ResourceResponseMapper;
-import dev.lqwd.cloudfilestorage.repository.minio.MinioDAO;
+import dev.lqwd.cloudfilestorage.repository.minio.MinioServiceRep;
 import dev.lqwd.cloudfilestorage.utils.PathValidator;
 import dev.lqwd.cloudfilestorage.utils.parser.minio.ItemParser;
 import dev.lqwd.cloudfilestorage.utils.path_processor.PathProcessor;
@@ -18,7 +18,6 @@ import io.minio.StatObjectResponse;
 import io.minio.messages.Item;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
@@ -40,38 +39,38 @@ public class MinioService {
 
     private final StatObjectParser statObjectParser;
     private final ItemParser itemParser;
-    private final MinioDAO minioDAO;
+    private final MinioServiceRep minioDao;
     private final PathProcessor pathProcessor;
     private final ResourceResponseMapper mapper;
     private final PathValidator validator;
 
     public void createUserRootDir(long id) {
-        if (!minioDAO.isExist(EMPTY, id)) {
-            minioDAO.createDirectory(EMPTY, id);
+        if (!minioDao.isExist(EMPTY, id)) {
+            minioDao.createDirectory(EMPTY, id);
         }
     }
 
-    public DirectoryResourceDto createDir(String rawPath, long id) {
+    public DirectoryResponseDto createDir(String rawPath, long id) {
         ProcessedPath path = pathProcessor.processDir(rawPath);
         String parentPath = path.parentPath();
         String requestedPath = getRequestedPath(path);
         validateParentPath(id, parentPath);
-        minioDAO.validateOnExistence(requestedPath, id);
-        minioDAO.createDirectory(requestedPath, id);
+        minioDao.validateOnExistence(requestedPath, id);
+        minioDao.createDirectory(requestedPath, id);
         return mapper.toDirResponseDTO(path);
     }
 
     public ResourceResponseDto getResource(String rawPath, long id) {
         ProcessedPath path = pathProcessor.processResource(rawPath);
-        StatObjectResponse statObject = minioDAO.findResource(getRequestedPath(path), id);
+        StatObjectResponse statObject = minioDao.findResource(getRequestedPath(path), id);
         return statObjectParser.pars(statObject);
     }
 
     public List<ResourceResponseDto> getResources(String rawPath, long id) {
         ProcessedPath path = pathProcessor.processDir(rawPath);
         String requestedPath = getRequestedPath(path);
-        minioDAO.validateOnAbsence(requestedPath, id);
-        return minioDAO.findDirectoryResourcesWithoutDir(requestedPath, id)
+        minioDao.validateOnAbsence(requestedPath, id);
+        return minioDao.findDirResourcesWithoutDir(requestedPath, id)
                 .stream()
                 .map(itemParser::pars)
                 .toList();
@@ -80,11 +79,11 @@ public class MinioService {
     public void removeResource(String rawPath, long id) {
         ProcessedPath path = pathProcessor.processResource(rawPath);
         String requestedPath = getRequestedPath(path);
-        minioDAO.validateOnAbsence(requestedPath, id);
+        minioDao.validateOnAbsence(requestedPath, id);
         if (isDirectory(path)) {
-            minioDAO.removeDir(requestedPath, id);
+            minioDao.removeDir(requestedPath, id);
         } else {
-            minioDAO.removeFile(requestedPath, id);
+            minioDao.removeFile(requestedPath, id);
         }
     }
 
@@ -98,26 +97,26 @@ public class MinioService {
         String requestedPathTo = getRequestedPath(pathTo);
 
         if (requestedPathFrom.equals(SLASH) || requestedPathFrom.isBlank()) {
-            throw new BadRequestException("You can't cut the root directory");
+            throw new BadRequestException("You can't move the root directory");
         }
 
         String parentPathTo = pathTo.parentPath();
         validateParentPath(id, parentPathTo);
 
-        minioDAO.validateOnAbsence(requestedPathFrom, id);
-        minioDAO.validateOnExistence(requestedPathTo, id);
+        minioDao.validateOnAbsence(requestedPathFrom, id);
+        minioDao.validateOnExistence(requestedPathTo, id);
 
         if (isDirectory(pathFrom)) {
-            minioDAO.moveDir(requestedPathFrom, requestedPathTo, id);
+            minioDao.moveDir(requestedPathFrom, requestedPathTo, id);
             return mapper.toDirResponseDTO(pathTo);
         } else {
-            minioDAO.moveFile(requestedPathFrom, requestedPathTo, id);
-            return mapper.toFileResponseDTO(pathTo, minioDAO.findResource(requestedPathTo, id).size());
+            minioDao.moveFile(requestedPathFrom, requestedPathTo, id);
+            return mapper.toFileResponseDTO(pathTo, minioDao.findResource(requestedPathTo, id).size());
         }
     }
 
     private void validateParentPath(long id, String parentPathTo) {
-        if (!minioDAO.isExist(parentPathTo, id)) {
+        if (!minioDao.isExist(parentPathTo, id)) {
             throw new NotFoundException("Parent path doesn't exist: " + parentPathTo);
         }
     }
@@ -125,7 +124,7 @@ public class MinioService {
     public List<ResourceResponseDto> searchResource(String query, long id) {
         validator.validatePath(query);
         String lowerCaseQuery = query.toLowerCase();
-        return minioDAO.findAllResources(id)
+        return minioDao.findAllResources(id)
                 .stream()
                 .map(itemParser::pars)
                 .filter(resource -> resource
@@ -142,13 +141,13 @@ public class MinioService {
     public DownloadedResponseDto download(String rawPath, long id) {
         ProcessedPath path = pathProcessor.processResource(rawPath);
         String requestedPath = path.requestedPath();
-        minioDAO.validateOnAbsence(requestedPath, id);
+        minioDao.validateOnAbsence(requestedPath, id);
 
         if (isDirectory(path)) {
             return DownloadedResponseDto.builder()
                     .content(outputStream -> {
                                 try (ZipOutputStream zipOut = new ZipOutputStream(outputStream)) {
-                                    List<Item> resources = minioDAO.findDirectoryResourcesWithoutDirRecursive(requestedPath, id);
+                                    List<Item> resources = minioDao.findDirResourcesWithoutDirRecursive(requestedPath, id);
                                     for (Item resource : resources) {
                                         String resourcePath = resource.objectName();
                                         String folderStartPath = path.resourceName() + "/";
@@ -158,7 +157,7 @@ public class MinioService {
                                                 .replaceFirst(folderStartPath, EMPTY);
                                         ZipEntry zipEntry = new ZipEntry(entryName);
                                         zipOut.putNextEntry(zipEntry);
-                                        try (InputStream fileStream = minioDAO.downloadFile(resourcePath)) {
+                                        try (InputStream fileStream = minioDao.downloadFile(resourcePath)) {
                                             fileStream.transferTo(zipOut);
                                         }
                                         zipOut.closeEntry();
@@ -181,17 +180,17 @@ public class MinioService {
 
     public List<ResourceResponseDto> upload(String rawPath, long id, MultipartFile[] files) {
         String requestedFolderPath = pathProcessor.processDir(rawPath).requestedPath();
-        requestedFolderPath = requestedFolderPath.equals(SLASH) ? EMPTY : requestedFolderPath;
-        minioDAO.validateOnAbsence(requestedFolderPath, id);
+
+        minioDao.validateOnAbsence(requestedFolderPath, id);
         for (MultipartFile file : files) {
-            minioDAO.validateOnExistence(requestedFolderPath + file.getOriginalFilename(), id);
+            minioDao.validateOnExistence(requestedFolderPath + file.getOriginalFilename(), id);
         }
         List<ResourceResponseDto> resources = new ArrayList<>();
         for (MultipartFile file : files) {
             String filePath = requestedFolderPath + file.getOriginalFilename();
             ProcessedPath processed = pathProcessor.processFile(filePath);
             createRecursiveParentFolders(processed.parentPath(), id);
-            minioDAO.uploadResource(requestedFolderPath, id, file);
+            minioDao.uploadResource(requestedFolderPath, id, file);
             ResourceResponseDto responseDTO = mapper.toResponseDTO(processed, file.getSize());
             resources.add(responseDTO);
         }
@@ -199,8 +198,8 @@ public class MinioService {
     }
 
     private void createRecursiveParentFolders(String path, long id){
-        if (!minioDAO.isExist(path, id)) {
-            minioDAO.createDirectory(path, id);
+        if (!minioDao.isExist(path, id)) {
+            minioDao.createDirectory(path, id);
             String parentPath = pathProcessor.processDir(path).parentPath();
             createRecursiveParentFolders(parentPath, id);
         }
@@ -210,10 +209,9 @@ public class MinioService {
         return path.type().equals(Type.DIRECTORY);
     }
 
-    @NotNull
     private StreamingResponseBody getFileBytes(long id, String requestedPath) {
         return outputStream -> {
-            try (InputStream fileStream = minioDAO.downloadFile(requestedPath, id)) {
+            try (InputStream fileStream = minioDao.downloadFile(requestedPath, id)) {
                 fileStream.transferTo(outputStream);
             } catch (Exception e) {
                 throw new InternalErrorException("Error during file streaming for path: " + requestedPath, e);

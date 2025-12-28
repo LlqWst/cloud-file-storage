@@ -6,6 +6,7 @@ import dev.lqwd.cloudfilestorage.entity.User;
 import dev.lqwd.cloudfilestorage.entity.UserRole;
 import dev.lqwd.cloudfilestorage.exception.AlreadyExistException;
 import dev.lqwd.cloudfilestorage.repository.UserRepository;
+import dev.lqwd.cloudfilestorage.service.storage.CreationService;
 import jakarta.servlet.http.HttpSession;
 import lombok.AllArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -25,13 +26,13 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final MinioService minioService;
+    private final CreationService creationService;
     private final AuthenticationManager authenticationManager;
 
 
     public User registrationAndLogin(RegistrationRequestDto registrationRequest, HttpSession session) {
         User user = registration(registrationRequest);
-        minioService.createUserRootDir(user.getId());
+        creationService.createUserRootDir(user.getId());
         login(session, registrationRequest);
         return user;
     }

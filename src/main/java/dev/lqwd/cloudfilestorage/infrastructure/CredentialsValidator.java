@@ -1,4 +1,4 @@
-package dev.lqwd.cloudfilestorage.utils;
+package dev.lqwd.cloudfilestorage.infrastructure;
 
 import dev.lqwd.cloudfilestorage.exception.BadRequestException;
 import lombok.NoArgsConstructor;

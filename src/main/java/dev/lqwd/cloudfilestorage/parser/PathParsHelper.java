@@ -1,7 +1,7 @@
-package dev.lqwd.cloudfilestorage.utils.parser;
+package dev.lqwd.cloudfilestorage.parser;
 
 import dev.lqwd.cloudfilestorage.entity.Type;
-import dev.lqwd.cloudfilestorage.utils.PathNormalizer;
+import dev.lqwd.cloudfilestorage.infrastructure.PathNormalizer;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 

@@ -4,7 +4,7 @@ import dev.lqwd.cloudfilestorage.dto.resource.DirectoryResponseDto;
 import dev.lqwd.cloudfilestorage.dto.resource.FileResponseDto;
 import dev.lqwd.cloudfilestorage.dto.resource.ResourceResponseDto;
 import dev.lqwd.cloudfilestorage.exception.InternalErrorException;
-import dev.lqwd.cloudfilestorage.utils.path_processor.ProcessedPath;
+import dev.lqwd.cloudfilestorage.path_processor.ProcessedPath;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

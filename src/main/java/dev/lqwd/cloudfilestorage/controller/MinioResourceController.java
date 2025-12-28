@@ -4,7 +4,10 @@ package dev.lqwd.cloudfilestorage.controller;
 import dev.lqwd.cloudfilestorage.dto.resource.DownloadedResponseDto;
 import dev.lqwd.cloudfilestorage.dto.resource.ResourceResponseDto;
 import dev.lqwd.cloudfilestorage.security.CustomUserDetails;
-import dev.lqwd.cloudfilestorage.service.MinioService;
+import dev.lqwd.cloudfilestorage.service.storage.DownloadService;
+import dev.lqwd.cloudfilestorage.service.storage.FindService;
+import dev.lqwd.cloudfilestorage.service.storage.UploadService;
+import dev.lqwd.cloudfilestorage.service.storage.ModificationService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -20,13 +23,16 @@ import java.util.List;
 @AllArgsConstructor
 public class MinioResourceController extends BaseController {
 
-    private final MinioService minioService;
+    private final UploadService uploadService;
+    private final FindService findService;
+    private final DownloadService downloadService;
+    private final ModificationService modificationService;
 
     @GetMapping
     public ResponseEntity<ResourceResponseDto> getResource(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                            @RequestParam(name = "path") String rawPath) {
 
-        return buildOkResponse(minioService.getResource(rawPath, userDetails.getId()));
+        return buildOkResponse(findService.getResource(rawPath, userDetails.getId()));
     }
 
     @PostMapping
@@ -34,7 +40,7 @@ public class MinioResourceController extends BaseController {
                                                                     @RequestParam("object") MultipartFile[] resources,
                                                                     @RequestParam("path") String rawPath) {
 
-        List<ResourceResponseDto> savedResources = minioService.upload(rawPath, userDetails.getId(), resources);
+        List<ResourceResponseDto> savedResources = uploadService.upload(rawPath, userDetails.getId(), resources);
         return buildCreatedResponse(savedResources, rawPath);
     }
 
@@ -42,7 +48,7 @@ public class MinioResourceController extends BaseController {
     public ResponseEntity<Void> deleteResource(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                @RequestParam(name = "path") String rawPath) {
 
-        minioService.removeResource(rawPath, userDetails.getId());
+        modificationService.removeResource(rawPath, userDetails.getId());
         return buildNoContentResponse();
     }
 
@@ -51,21 +57,21 @@ public class MinioResourceController extends BaseController {
                                                             @RequestParam(name = "from") String from,
                                                             @RequestParam(name = "to") String to) {
 
-        return buildOkResponse(minioService.moveResource(from, to, userDetails.getId()));
+        return buildOkResponse(modificationService.moveResource(from, to, userDetails.getId()));
     }
 
     @GetMapping("/search")
     public ResponseEntity<List<ResourceResponseDto>> searchResource(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                                     @RequestParam(name = "query") String query) {
 
-        return buildOkResponse(minioService.searchResource(query, userDetails.getId()));
+        return buildOkResponse(findService.searchResource(query, userDetails.getId()));
     }
 
     @GetMapping("/download")
     public ResponseEntity<StreamingResponseBody> downloadResource(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                                   @RequestParam(name = "path") String rawPath) {
 
-        DownloadedResponseDto download = minioService.download(rawPath, userDetails.getId());
+        DownloadedResponseDto download = downloadService.download(rawPath, userDetails.getId());
         return buildOkDownloadResponse(download.content(), download.name());
     }
 

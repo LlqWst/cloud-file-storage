@@ -1,6 +1,6 @@
-package dev.lqwd.cloudfilestorage.utils.parser;
+package dev.lqwd.cloudfilestorage.parser;
 
-import dev.lqwd.cloudfilestorage.utils.path_processor.ProcessedPath;
+import dev.lqwd.cloudfilestorage.path_processor.ProcessedPath;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

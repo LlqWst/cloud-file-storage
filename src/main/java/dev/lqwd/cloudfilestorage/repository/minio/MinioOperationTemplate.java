@@ -1,6 +1,7 @@
 package dev.lqwd.cloudfilestorage.repository.minio;
 
 import dev.lqwd.cloudfilestorage.exception.InternalErrorException;
+import dev.lqwd.cloudfilestorage.exception.MinioErrorException;
 import io.minio.errors.ErrorResponseException;
 import io.minio.errors.MinioException;
 import lombok.extern.slf4j.Slf4j;
@@ -43,7 +44,7 @@ public class MinioOperationTemplate {
     private RuntimeException identifyException(Exception e, String errorMessage) {
         if (e instanceof MinioException minioEx) {
             log.error("Minio HTTP trace: {}", minioEx.httpTrace(), minioEx);
-            return new InternalErrorException("Minio error. " + errorMessage, minioEx);
+            return new MinioErrorException("Minio error. " + errorMessage, minioEx);
         }
         return new InternalErrorException("Unexpected error. " + errorMessage, e);
     }

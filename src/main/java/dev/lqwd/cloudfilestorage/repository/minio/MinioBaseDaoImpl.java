@@ -1,8 +1,7 @@
 package dev.lqwd.cloudfilestorage.repository.minio;
 
-import dev.lqwd.cloudfilestorage.exception.InternalErrorException;
+import dev.lqwd.cloudfilestorage.repository.BaseFileStorageDao;
 import io.minio.*;
-import io.minio.messages.Item;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,32 +9,20 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.StreamSupport;
+import java.io.InputStream;
+import java.util.Map;
 
 
 @Component
 @Slf4j
 @RequiredArgsConstructor
-public class MinioDao {
+public class MinioBaseDaoImpl implements BaseFileStorageDao {
 
     @Value("${app.minio.bucket.name}")
     private String bucketName;
 
     private final MinioClient minioClient;
     private final MinioOperationTemplate operationTemplate;
-
-
-    public Optional<StatObjectResponse> findResource(String pathWithUserDir) {
-        return operationTemplate.findResource(() ->
-                        minioClient.statObject(
-                                StatObjectArgs.builder()
-                                        .bucket(bucketName)
-                                        .object(pathWithUserDir)
-                                        .build()),
-                "Error during getting of resource: " + pathWithUserDir);
-    }
 
     public void createDirectory(String pathWithUserDir) {
         operationTemplate.execute(() ->
@@ -44,6 +31,7 @@ public class MinioDao {
                                         .bucket(bucketName)
                                         .object(pathWithUserDir)
                                         .stream(new ByteArrayInputStream(new byte[]{}), 0, -1)
+                                        .headers(Map.of("x-amz-if-none-match", "*"))
                                         .build()),
                 "Error during creation of directory: " + pathWithUserDir);
     }
@@ -55,12 +43,12 @@ public class MinioDao {
                                         .bucket(bucketName)
                                         .object(pathWithUserDir + file.getOriginalFilename())
                                         .stream(file.getInputStream(), file.getSize(), -1)
+                                        .headers(Map.of("x-amz-if-none-match", "*"))
                                         .build()),
                 "Error during uploading resource to path: " + pathWithUserDir);
     }
 
     public void copyResource(String source, String target) {
-
         operationTemplate.execute(() ->
                         minioClient.copyObject(
                                 CopyObjectArgs.builder()
@@ -70,18 +58,9 @@ public class MinioDao {
                                                 .bucket(bucketName)
                                                 .object(source)
                                                 .build())
+                                        .headers(Map.of("x-amz-if-none-match", "*"))
                                         .build()),
                 "Error during moving resource from: %s - to: %s".formatted(source, target));
-    }
-
-    public List<Item> findResources(String pathWithUserDir, boolean isRecursive) {
-        return operationTemplate.execute(() ->
-                        StreamSupport.stream(
-                                        getResultItems(pathWithUserDir, isRecursive)
-                                                .spliterator(), false)
-                                .map(this::safeGetItem)
-                                .toList(),
-                "Error during getting of directory's resources. path: " + pathWithUserDir);
     }
 
     public void removeResource(String pathWithUserDir) {
@@ -94,7 +73,7 @@ public class MinioDao {
                 "Error during deletion of resource: " + pathWithUserDir);
     }
 
-    public GetObjectResponse downloadByPath(String pathWithUserDir) {
+    public InputStream downloadByPath(String pathWithUserDir) {
         return operationTemplate.execute(() ->
                         minioClient.getObject(
                                 GetObjectArgs.builder()
@@ -102,23 +81,6 @@ public class MinioDao {
                                         .object(pathWithUserDir)
                                         .build()),
                 "Error during download file: " + pathWithUserDir);
-    }
-
-    private Iterable<Result<Item>> getResultItems(String pathWithUserDir, boolean isRecursive) {
-        return minioClient.listObjects(
-                ListObjectsArgs.builder()
-                        .bucket(bucketName)
-                        .prefix(pathWithUserDir)
-                        .recursive(isRecursive)
-                        .build());
-    }
-
-    private Item safeGetItem(Result<Item> result) {
-        try {
-            return result.get();
-        } catch (Exception e) {
-            throw new InternalErrorException("Failed to get item from MinIO result " + result, e);
-        }
     }
 
 }

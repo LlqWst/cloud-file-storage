@@ -1,4 +1,4 @@
-package dev.lqwd.cloudfilestorage.utils;
+package dev.lqwd.cloudfilestorage.infrastructure;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;

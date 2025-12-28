@@ -4,7 +4,8 @@ package dev.lqwd.cloudfilestorage.controller;
 import dev.lqwd.cloudfilestorage.dto.resource.DirectoryResponseDto;
 import dev.lqwd.cloudfilestorage.dto.resource.ResourceResponseDto;
 import dev.lqwd.cloudfilestorage.security.CustomUserDetails;
-import dev.lqwd.cloudfilestorage.service.MinioService;
+import dev.lqwd.cloudfilestorage.service.storage.CreationService;
+import dev.lqwd.cloudfilestorage.service.storage.FindService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -18,13 +19,14 @@ import java.util.List;
 @AllArgsConstructor
 public class MinioDirectoryController extends BaseController {
 
-    private final MinioService minioService;
+    private final FindService findService;
+    private final CreationService creationService;
 
     @PostMapping
     public ResponseEntity<ResourceResponseDto> createDir(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                          @RequestParam(name = "path") String rawPath) {
 
-        DirectoryResponseDto directoryResponseDto = minioService.createDir(rawPath, userDetails.getId());
+        DirectoryResponseDto directoryResponseDto = creationService.createDir(rawPath, userDetails.getId());
         return buildCreatedResponse(directoryResponseDto, rawPath);
     }
 
@@ -32,7 +34,7 @@ public class MinioDirectoryController extends BaseController {
     public ResponseEntity<List<ResourceResponseDto>> getResources(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                                   @RequestParam(name = "path") String rawPath) {
 
-        return buildOkResponse(minioService.getResources(rawPath, userDetails.getId()));
+        return buildOkResponse(findService.getResources(rawPath, userDetails.getId()));
     }
 
 }

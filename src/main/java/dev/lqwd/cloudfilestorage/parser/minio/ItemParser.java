@@ -1,7 +1,8 @@
-package dev.lqwd.cloudfilestorage.utils.parser.minio;
+package dev.lqwd.cloudfilestorage.parser.minio;
 
 import dev.lqwd.cloudfilestorage.dto.resource.ResourceResponseDto;
-import dev.lqwd.cloudfilestorage.utils.parser.PathParsHelper;
+import dev.lqwd.cloudfilestorage.parser.ResourceTypeParser;
+import dev.lqwd.cloudfilestorage.parser.PathParsHelper;
 import io.minio.messages.Item;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -12,7 +13,7 @@ import java.nio.file.Paths;
 
 @Component
 @RequiredArgsConstructor
-public class ItemParser implements MinioParser {
+public class ItemParser implements ResourceTypeParser {
 
     private final PathParsHelper pathHelper;
 
@@ -24,7 +25,6 @@ public class ItemParser implements MinioParser {
                 item.size(),
                 pathHelper.getType(item.objectName()),
                 pathHelper.getName(path),
-                //pathHelper.normalizeRootPath(requestedPath));
                 requestedPath);
     }
 

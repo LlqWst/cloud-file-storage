@@ -17,7 +17,6 @@ public class ModificationsMinioService implements ModificationsStorageService {
     private final MinioBaseStorage minioBaseStorage;
     private final FindMinioService findMinioService;
 
-
     public void removeDir(String dirPath, long id) {
         findMinioService.findAllResourcesPath(dirPath, id)
                 .forEach(minioBaseStorage::removeResource);
@@ -32,16 +31,19 @@ public class ModificationsMinioService implements ModificationsStorageService {
         findMinioService.findAllResourcesPath(from, id)
                 .forEach(source -> {
                     String target = source.replaceFirst(from, to);
-                    minioBaseStorage.copyResource(source, target);
-                    minioBaseStorage.removeResource(source);
+                    moveResource(source, target);
                 });
     }
 
     public void moveFile(String from, String to, long id) {
         String fromWithUserDir = getPathWithUserDir(from, id);
         String toWithUserDir = getPathWithUserDir(to, id);
-        minioBaseStorage.copyResource(fromWithUserDir, toWithUserDir);
-        minioBaseStorage.removeResource(fromWithUserDir);
+        moveResource(fromWithUserDir, toWithUserDir);
+    }
+
+    private void moveResource(String source, String target) {
+        minioBaseStorage.copyResource(source, target);
+        minioBaseStorage.removeResource(source);
     }
 
     private String getPathWithUserDir(String path, long id) {

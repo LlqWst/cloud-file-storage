@@ -7,7 +7,6 @@ import dev.lqwd.cloudfilestorage.entity.UserRole;
 import dev.lqwd.cloudfilestorage.exception.AlreadyExistException;
 import dev.lqwd.cloudfilestorage.repository.UserRepository;
 import dev.lqwd.cloudfilestorage.service.storage.operations.CreationService;
-import jakarta.servlet.http.HttpSession;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -31,16 +30,15 @@ public class AuthService {
     private final CreationService creationService;
     private final AuthenticationManager authenticationManager;
 
-
-    public User registrationAndLogin(RegistrationRequestDto registrationRequest, HttpSession session) {
+    public User registrationAndLogin(RegistrationRequestDto registrationRequest) {
         User user = registration(registrationRequest);
         creationService.createUserRootDir(user.getId());
-        login(session, registrationRequest);
+        login(registrationRequest);
         return user;
     }
 
     private User registration(RegistrationRequestDto registrationRequest) {
-        log.info("registration processing");
+        log.info("registration processing for user: {}", registrationRequest.username());
         try {
             User user = User.builder()
                     .username(registrationRequest.username())
@@ -60,17 +58,15 @@ public class AuthService {
         }
     }
 
-    private void login(HttpSession session, RegistrationRequestDto registrationRequest){
-        log.info("login process starts");
+    private void login(RegistrationRequestDto registrationRequest) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         registrationRequest.username(),
                         registrationRequest.password()
                 )
         );
-
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
+        log.info("user '{}' successfully login", registrationRequest.username());
     }
 
 }

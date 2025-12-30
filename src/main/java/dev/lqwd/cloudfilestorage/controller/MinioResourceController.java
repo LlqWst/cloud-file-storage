@@ -28,7 +28,6 @@ public class MinioResourceController extends BaseController {
     private final DownloadService downloadService;
     private final ModificationService modificationService;
 
-
     @GetMapping
     public ResponseEntity<ResourceResponseDto> getResource(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                            @RequestParam(name = "path") String rawPath) {

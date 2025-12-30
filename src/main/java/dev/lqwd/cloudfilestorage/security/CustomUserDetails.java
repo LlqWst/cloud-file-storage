@@ -1,30 +1,40 @@
 package dev.lqwd.cloudfilestorage.security;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.Getter;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 
-
-@Builder
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
+@JsonIgnoreProperties(ignoreUnknown = true)
+@NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Data
 public class CustomUserDetails implements UserDetails {
 
     @Getter
-    private final Long id;
+    private Long id;
 
-    private final String username;
-    private final String password;
-    private final Collection<? extends GrantedAuthority> authorities;
-    private final boolean isEnabled;
-    private final boolean isAccountNonLocked;
-    private final boolean isAccountNonExpired;
-    private final boolean isCredentialsNonExpired;
+    private String username;
+    private String password;
+    private Collection<? extends GrantedAuthority> authorities;
+
+    @JsonProperty("enabled")
+    private boolean isEnabled;
+
+    @JsonProperty("accountNonLocked")
+    private boolean isAccountNonLocked;
+
+    @JsonProperty("accountNonExpired")
+    private boolean isAccountNonExpired;
+
+    @JsonProperty("credentialsNonExpired")
+    private boolean isCredentialsNonExpired;
 
 
     @Override
@@ -54,7 +64,7 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return isCredentialsNonExpired;
+        return isAccountNonLocked;
     }
 
     @Override

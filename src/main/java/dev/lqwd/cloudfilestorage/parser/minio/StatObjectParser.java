@@ -17,7 +17,6 @@ public class StatObjectParser implements ResourceTypeParser {
 
     private final PathParsHelper pathHelper;
 
-
     public ResourceResponseDto pars(StatObjectResponse statObject) {
         String objectPath = statObject.object();
         Path path = Paths.get(objectPath);

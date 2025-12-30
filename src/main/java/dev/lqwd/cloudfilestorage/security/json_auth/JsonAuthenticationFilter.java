@@ -40,7 +40,6 @@ public class JsonAuthenticationFilter extends OncePerRequestFilter {
             .withDefaults()
             .matcher(SIGN_IN_URL);
 
-
     @Override
     protected boolean shouldNotFilter(@NotNull HttpServletRequest request) {
         return !LoginMatcher.matches(request);

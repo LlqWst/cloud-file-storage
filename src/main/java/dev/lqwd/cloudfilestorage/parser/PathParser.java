@@ -14,7 +14,6 @@ public class PathParser  {
 
     private final PathParsHelper pathHelper;
 
-
     public ProcessedPath pars(String normalizedPath) {
         Path path = Paths.get(normalizedPath);
 

@@ -12,7 +12,6 @@ public class UserDirectoryProvider {
     @Value("${app.minio.root.template.name}")
     private String userRootTemplate;
 
-
     public String provide(long id) {
         return userRootTemplate.formatted(id);
     }

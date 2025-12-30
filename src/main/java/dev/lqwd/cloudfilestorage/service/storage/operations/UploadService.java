@@ -26,7 +26,6 @@ public class UploadService {
     private final ResourceResponseMapper mapper;
     private final CreationService creationService;
 
-
     public List<ResourceResponseDto> upload(String rawPath, long id, MultipartFile[] files) {
         String requestedFolderPath = pathProcessor.processDir(rawPath).requestedPath();
         validationStorageService.validateOnAbsence(requestedFolderPath, id);

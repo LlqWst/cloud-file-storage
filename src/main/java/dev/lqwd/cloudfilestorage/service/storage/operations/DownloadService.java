@@ -9,7 +9,7 @@ import dev.lqwd.cloudfilestorage.path_processor.PathProcessor;
 import dev.lqwd.cloudfilestorage.path_processor.ProcessedPath;
 import dev.lqwd.cloudfilestorage.service.storage.provider.minio.ValidationMinioService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import java.io.IOException;
@@ -18,8 +18,7 @@ import java.io.OutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-
-@Component
+@Service
 @RequiredArgsConstructor
 public class DownloadService {
 

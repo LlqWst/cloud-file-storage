@@ -17,6 +17,7 @@ public interface ResourceTypeParser {
                     .size(size)
                     .type(type)
                     .build();
+
             case DIRECTORY -> DirectoryResponseDto.builder()
                     .name(name)
                     .path(normalizedPath)

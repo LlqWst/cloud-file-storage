@@ -27,7 +27,6 @@ public class ModificationService {
     private final PathProcessor pathProcessor;
     private final ResourceResponseMapper mapper;
 
-
     public void removeResource(String rawPath, long id) {
         ProcessedPath path = pathProcessor.processResource(rawPath);
         String requestedPath = getRequestedPath(path);

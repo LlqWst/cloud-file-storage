@@ -21,7 +21,6 @@ public class MinioDirectoryController extends BaseController {
     private final FindService findService;
     private final CreationService creationService;
 
-
     @PostMapping
     public ResponseEntity<ResourceResponseDto> createDir(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                          @RequestParam(name = "path") String rawPath) {

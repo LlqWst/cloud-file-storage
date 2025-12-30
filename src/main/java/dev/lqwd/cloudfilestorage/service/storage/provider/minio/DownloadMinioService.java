@@ -16,7 +16,6 @@ public class DownloadMinioService implements DownloadStorageService {
     private final UserDirectoryProvider userDirectoryProvider;
     private final MinioBaseStorage minioBaseStorage;
 
-
     public InputStream downloadFile(String path, long id) {
         return minioBaseStorage.downloadByPath(userDirectoryProvider.provide(path, id));
     }

@@ -15,7 +15,6 @@ public class UploadMinioService implements UploadStorageService {
     private final UserDirectoryProvider userDirectoryProvider;
     private final MinioBaseStorage minioBaseStorage;
 
-
     public void uploadResource(String path, long id, MultipartFile file) {
         minioBaseStorage.uploadResource(userDirectoryProvider.provide(path, id), file);
     }

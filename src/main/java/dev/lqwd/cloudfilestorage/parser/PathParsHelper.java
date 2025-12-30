@@ -17,7 +17,6 @@ public class PathParsHelper {
     private static final String EMPTY = "";
     private final PathNormalizer pathNormalizer;
 
-
     public String getName(Path path) {
         Optional<Path> name = Optional.ofNullable(
                 path.getFileName());

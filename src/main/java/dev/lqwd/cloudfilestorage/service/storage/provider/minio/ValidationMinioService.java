@@ -22,11 +22,9 @@ public class ValidationMinioService implements ValidationStorageService {
     private final UserDirectoryProvider userDirectoryProvider;
     private final MinioFindStorage minioFindStorage;
 
-
     public boolean isExistIgnoreEndSlash(String path, long id) {
         String pathWithoutEndSlash = pathNormalizer.getPathWithoutEndSlash(path);
         String pathWithEndSlash = pathWithoutEndSlash + SLASH;
-
         return isExist(pathWithoutEndSlash, id) || isExist(pathWithEndSlash, id);
     }
 

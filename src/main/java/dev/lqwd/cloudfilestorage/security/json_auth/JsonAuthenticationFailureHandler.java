@@ -23,7 +23,6 @@ public class JsonAuthenticationFailureHandler {
 
     private final ObjectMapper objectMapper;
 
-
     public void onException(HttpServletRequest request,
                             HttpServletResponse response,
                             Exception ex) throws IOException {

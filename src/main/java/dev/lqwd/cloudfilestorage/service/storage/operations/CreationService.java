@@ -7,10 +7,10 @@ import dev.lqwd.cloudfilestorage.path_processor.PathProcessor;
 import dev.lqwd.cloudfilestorage.path_processor.ProcessedPath;
 import dev.lqwd.cloudfilestorage.service.storage.provider.minio.ValidationMinioService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 
-@Component
+@Service
 @RequiredArgsConstructor
 public class CreationService {
 
@@ -20,7 +20,6 @@ public class CreationService {
     private final ValidationMinioService validationStorageService;
     private final PathProcessor pathProcessor;
     private final ResourceResponseMapper mapper;
-
 
     public void createUserRootDir(long id) {
         if (!validationStorageService.isExist(EMPTY, id)) {

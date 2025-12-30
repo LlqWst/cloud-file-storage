@@ -22,14 +22,13 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 public class FindMinioService implements FindStorageService {
 
-    private static final String ROOT = "";
+    private static final String USER_ROOT = "";
 
     private final UserDirectoryProvider userDirectoryProvider;
     private final MinioFindAllStorage minioFindAllStorage;
     private final MinioFindStorage minioFindStorage;
     private final StatObjectParser statObjectParser;
     private final ItemParser itemParser;
-
 
     public ResourceResponseDto findResource(String path, long id) {
         return minioFindStorage.findResource(getPathWithUserDir(path, id))
@@ -58,7 +57,7 @@ public class FindMinioService implements FindStorageService {
     }
 
     public Stream<ResourceResponseDto> findAllResources(long id) {
-        return findDirResourcesWithDirRecursive(ROOT, id)
+        return findDirResourcesWithDirRecursive(USER_ROOT, id)
                 .map(itemParser::pars);
     }
 

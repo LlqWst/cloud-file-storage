@@ -22,7 +22,6 @@ public class JsonAuthenticationSuccessHandler implements AuthenticationSuccessHa
 
     private final ObjectMapper objectMapper;
 
-
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request,
                                         HttpServletResponse response,

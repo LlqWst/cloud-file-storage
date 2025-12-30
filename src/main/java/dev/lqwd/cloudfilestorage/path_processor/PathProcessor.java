@@ -15,7 +15,6 @@ public class PathProcessor {
     private final PathParser parser;
     private final PathValidator validator;
 
-
     public ProcessedPath processResource(String rawPath) {
         String normalized = normalizer.normalize(rawPath);
         validator.validatePath(normalized);

@@ -1,11 +1,11 @@
-package dev.lqwd.cloudfilestorage.service.storage;
+package dev.lqwd.cloudfilestorage.service.storage.operations;
 
 import dev.lqwd.cloudfilestorage.dto.resource.DirectoryResponseDto;
 import dev.lqwd.cloudfilestorage.mapper.ResourceResponseMapper;
-import dev.lqwd.cloudfilestorage.service.proxy.CreationProxyService;
+import dev.lqwd.cloudfilestorage.service.storage.provider.minio.CreationMinioService;
 import dev.lqwd.cloudfilestorage.path_processor.PathProcessor;
 import dev.lqwd.cloudfilestorage.path_processor.ProcessedPath;
-import dev.lqwd.cloudfilestorage.service.proxy.StorageValidationProxyService;
+import dev.lqwd.cloudfilestorage.service.storage.provider.minio.ValidationMinioService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -16,21 +16,21 @@ public class CreationService {
 
     private static final String EMPTY = "";
 
-    private final CreationProxyService creationProxyService;
-    private final StorageValidationProxyService validationProxyService;
+    private final CreationMinioService creationStorageService;
+    private final ValidationMinioService validationStorageService;
     private final PathProcessor pathProcessor;
     private final ResourceResponseMapper mapper;
 
 
     public void createUserRootDir(long id) {
-        if (!validationProxyService.isExist(EMPTY, id)) {
-            creationProxyService.createDirectory(EMPTY, id);
+        if (!validationStorageService.isExist(EMPTY, id)) {
+            creationStorageService.createDirectory(EMPTY, id);
         }
     }
 
     public void createRecursiveParentFolders(String path, long id) {
-        if (!validationProxyService.isExist(path, id)) {
-            creationProxyService.createDirectory(path, id);
+        if (!validationStorageService.isExist(path, id)) {
+            creationStorageService.createDirectory(path, id);
             String parentPath = pathProcessor.processDir(path).parentPath();
             createRecursiveParentFolders(parentPath, id);
         }
@@ -38,16 +38,12 @@ public class CreationService {
 
     public DirectoryResponseDto createDir(String rawPath, long id) {
         ProcessedPath path = pathProcessor.processDir(rawPath);
-        String parentPath = path.parentPath();
-        String requestedPath = getRequestedPath(path);
-        validationProxyService.validateParentPath(id, parentPath);
-        validationProxyService.validateOnExistence(requestedPath, id);
-        creationProxyService.createDirectory(requestedPath, id);
-        return mapper.toDirResponseDTO(path);
-    }
+        String requestedPath = path.requestedPath();
+        validationStorageService.validateParentPath(id, path.parentPath());
+        validationStorageService.validateOnExistence(requestedPath, id);
 
-    private static String getRequestedPath(ProcessedPath path) {
-        return path.requestedPath();
+        creationStorageService.createDirectory(requestedPath, id);
+        return mapper.toDirResponseDTO(path);
     }
 
 }

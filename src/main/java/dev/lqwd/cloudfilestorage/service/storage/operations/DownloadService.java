@@ -1,14 +1,13 @@
-package dev.lqwd.cloudfilestorage.service.storage;
+package dev.lqwd.cloudfilestorage.service.storage.operations;
 
 import dev.lqwd.cloudfilestorage.dto.resource.DownloadedResponseDto;
 import dev.lqwd.cloudfilestorage.entity.Type;
 import dev.lqwd.cloudfilestorage.exception.InternalErrorException;
-import dev.lqwd.cloudfilestorage.service.proxy.DownloadProxyService;
-import dev.lqwd.cloudfilestorage.service.proxy.FindProxyService;
+import dev.lqwd.cloudfilestorage.service.storage.provider.minio.DownloadMinioService;
+import dev.lqwd.cloudfilestorage.service.storage.provider.minio.FindMinioService;
 import dev.lqwd.cloudfilestorage.path_processor.PathProcessor;
 import dev.lqwd.cloudfilestorage.path_processor.ProcessedPath;
-import dev.lqwd.cloudfilestorage.service.proxy.StorageValidationProxyService;
-import io.minio.messages.Item;
+import dev.lqwd.cloudfilestorage.service.storage.provider.minio.ValidationMinioService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
@@ -28,15 +27,15 @@ public class DownloadService {
     private static final String SLASH = "/";
 
     private final PathProcessor pathProcessor;
-    private final DownloadProxyService downloadProxyService;
-    private final StorageValidationProxyService validationProxyService;
-    private final FindProxyService findProxyService;
+    private final DownloadMinioService downloadStorageService;
+    private final ValidationMinioService validationStorageService;
+    private final FindMinioService findMinioService;
 
 
     public DownloadedResponseDto download(String rawPath, long id) {
         ProcessedPath path = pathProcessor.processResource(rawPath);
         String requestedPath = path.requestedPath();
-        validationProxyService.validateOnAbsence(requestedPath, id);
+        validationStorageService.validateOnAbsence(requestedPath, id);
 
         if (isDirectory(path)) {
             return DownloadedResponseDto.builder()
@@ -52,7 +51,7 @@ public class DownloadService {
 
     private StreamingResponseBody getFileBytes(long id, String requestedPath) {
         return outputStream -> {
-            try (InputStream fileStream = downloadProxyService.downloadFile(requestedPath, id)) {
+            try (InputStream fileStream = downloadStorageService.downloadFile(requestedPath, id)) {
                 fileStream.transferTo(outputStream);
             } catch (Exception e) {
                 throw new InternalErrorException("Error during file streaming for path: " + requestedPath, e);
@@ -66,35 +65,33 @@ public class DownloadService {
 
     private void toZip(long id, OutputStream outputStream, String requestedPath, ProcessedPath path) {
         try (ZipOutputStream zipOut = new ZipOutputStream(outputStream)) {
-            findProxyService.findDirResourcesWithoutDirRecursive(requestedPath, id)
-                    .forEach(resource -> processResource(zipOut, resource, path.resourceName()));
+            findMinioService.findDirResourcesNameWithoutDirRecursive(requestedPath, id)
+                    .forEach(resourceName -> processResource(zipOut, resourceName, path.resourceName()));
         } catch (Exception e) {
             throw new InternalErrorException("Error during directory streaming for path " + requestedPath, e);
         }
     }
 
-    private void processResource(ZipOutputStream zipOut, Item resource, String baseFolder) {
-        String entryName = getRelativePath(resource.objectName(), baseFolder);
-
+    private void processResource(ZipOutputStream zipOut, String resourceName, String baseFolder) {
+        String entryName = getRelativePath(resourceName, baseFolder);
         try {
             zipOut.putNextEntry(new ZipEntry(entryName));
-            copyToZip(zipOut, resource.objectName());
+            copyToZip(zipOut, resourceName);
             zipOut.closeEntry();
             zipOut.flush();
         } catch (IOException e) {
-            throw new InternalErrorException("Error processing: " + resource.objectName(), e);
+            throw new InternalErrorException("Error processing: " + resourceName, e);
         }
     }
 
     private void copyToZip(ZipOutputStream zipOut, String resourcePath) throws IOException {
-        try (InputStream fileStream = downloadProxyService.downloadFile(resourcePath)) {
+        try (InputStream fileStream = downloadStorageService.downloadFile(resourcePath)) {
             fileStream.transferTo(zipOut);
         }
     }
 
     private String getRelativePath(String fullPath, String baseFolder) {
         String folderWithSlash = baseFolder + SLASH;
-
         return fullPath.substring(fullPath.indexOf(folderWithSlash) + folderWithSlash.length());
     }
 

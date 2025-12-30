@@ -18,9 +18,10 @@ public class RegistrationController extends BaseController {
 
     private final AuthService authService;
 
+
     @PostMapping("/sign-up")
     public ResponseEntity<UserResponseDto> createUser(@Valid @RequestBody RegistrationRequestDto registrationRequest,
-                                                      HttpServletRequest request){
+                                                      HttpServletRequest request) {
 
         User user = authService.registrationAndLogin(registrationRequest, request.getSession());
         return buildCreatedResponse(new UserResponseDto(user.getUsername()), "id/" + user.getId());

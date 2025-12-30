@@ -1,10 +1,10 @@
-package dev.lqwd.cloudfilestorage.repository.minio;
+package dev.lqwd.cloudfilestorage.repository.storage.minio;
 
-import dev.lqwd.cloudfilestorage.repository.BaseFileStorageDao;
+import dev.lqwd.cloudfilestorage.config.MinioConfiguration;
+import dev.lqwd.cloudfilestorage.repository.storage.BaseFileStorage;
 import io.minio.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -16,19 +16,18 @@ import java.util.Map;
 @Component
 @Slf4j
 @RequiredArgsConstructor
-public class MinioBaseDaoImpl implements BaseFileStorageDao {
+public class MinioBaseStorage implements BaseFileStorage {
 
-    @Value("${app.minio.bucket.name}")
-    private String bucketName;
-
+    private final MinioConfiguration minioConfig;
     private final MinioClient minioClient;
     private final MinioOperationTemplate operationTemplate;
+
 
     public void createDirectory(String pathWithUserDir) {
         operationTemplate.execute(() ->
                         minioClient.putObject(
                                 PutObjectArgs.builder()
-                                        .bucket(bucketName)
+                                        .bucket(minioConfig.getBucketName())
                                         .object(pathWithUserDir)
                                         .stream(new ByteArrayInputStream(new byte[]{}), 0, -1)
                                         .headers(Map.of("x-amz-if-none-match", "*"))
@@ -40,7 +39,7 @@ public class MinioBaseDaoImpl implements BaseFileStorageDao {
         operationTemplate.execute(() ->
                         minioClient.putObject(
                                 PutObjectArgs.builder()
-                                        .bucket(bucketName)
+                                        .bucket(minioConfig.getBucketName())
                                         .object(pathWithUserDir + file.getOriginalFilename())
                                         .stream(file.getInputStream(), file.getSize(), -1)
                                         .headers(Map.of("x-amz-if-none-match", "*"))
@@ -52,10 +51,10 @@ public class MinioBaseDaoImpl implements BaseFileStorageDao {
         operationTemplate.execute(() ->
                         minioClient.copyObject(
                                 CopyObjectArgs.builder()
-                                        .bucket(bucketName)
+                                        .bucket(minioConfig.getBucketName())
                                         .object(target)
                                         .source(CopySource.builder()
-                                                .bucket(bucketName)
+                                                .bucket(minioConfig.getBucketName())
                                                 .object(source)
                                                 .build())
                                         .headers(Map.of("x-amz-if-none-match", "*"))
@@ -67,7 +66,7 @@ public class MinioBaseDaoImpl implements BaseFileStorageDao {
         operationTemplate.execute(() ->
                         minioClient.removeObject(
                                 RemoveObjectArgs.builder()
-                                        .bucket(bucketName)
+                                        .bucket(minioConfig.getBucketName())
                                         .object(pathWithUserDir)
                                         .build()),
                 "Error during deletion of resource: " + pathWithUserDir);
@@ -77,7 +76,7 @@ public class MinioBaseDaoImpl implements BaseFileStorageDao {
         return operationTemplate.execute(() ->
                         minioClient.getObject(
                                 GetObjectArgs.builder()
-                                        .bucket(bucketName)
+                                        .bucket(minioConfig.getBucketName())
                                         .object(pathWithUserDir)
                                         .build()),
                 "Error during download file: " + pathWithUserDir);

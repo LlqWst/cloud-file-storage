@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
+
 @Component
 @Slf4j
 @AllArgsConstructor
@@ -22,11 +23,12 @@ public class JsonAuthenticationFailureHandler {
 
     private final ObjectMapper objectMapper;
 
+
     public void onException(HttpServletRequest request,
                             HttpServletResponse response,
                             Exception ex) throws IOException {
 
-        log.warn("Exception occurred:  {}", ex.getMessage(), ex);
+        log.warn("Exception occurred while authenticate:  {}", ex.getMessage(), ex);
 
         int httpStatus;
         if (ex instanceof AuthenticationException) {

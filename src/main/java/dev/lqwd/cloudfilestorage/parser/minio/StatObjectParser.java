@@ -17,12 +17,13 @@ public class StatObjectParser implements ResourceTypeParser {
 
     private final PathParsHelper pathHelper;
 
+
     public ResourceResponseDto pars(StatObjectResponse statObject) {
         String objectPath = statObject.object();
         Path path = Paths.get(objectPath);
         String requestedPath = pathHelper.removeUserDir(pathHelper.getParentPath(path));
 
-        return getResourceResponseDTO(statObject.size(),
+        return getResourceResponseDto(statObject.size(),
                 pathHelper.getType(objectPath),
                 pathHelper.getName(path),
                 requestedPath);

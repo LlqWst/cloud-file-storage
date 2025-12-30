@@ -1,29 +1,25 @@
-package dev.lqwd.cloudfilestorage.repository.minio;
+package dev.lqwd.cloudfilestorage.repository.storage.minio;
 
-import dev.lqwd.cloudfilestorage.exception.InternalErrorException;
-import dev.lqwd.cloudfilestorage.repository.FindAllResourcesStorageDao;
+import dev.lqwd.cloudfilestorage.config.MinioConfiguration;
+import dev.lqwd.cloudfilestorage.exception.StorageException;
+import dev.lqwd.cloudfilestorage.repository.storage.FindAllResourcesStorage;
 import io.minio.*;
 import io.minio.messages.Item;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
 
 import java.util.List;
 import java.util.stream.StreamSupport;
 
 
 @Component
-@Slf4j
 @RequiredArgsConstructor
-public class MinioFindAllImpl implements FindAllResourcesStorageDao<Item> {
-
-    @Value("${app.minio.bucket.name}")
-    private String bucketName;
+public class MinioFindAllStorage implements FindAllResourcesStorage<Item> {
 
     private final MinioClient minioClient;
     private final MinioOperationTemplate operationTemplate;
+    private final MinioConfiguration minioConfig;
+
 
     public List<Item> findResources(String pathWithUserDir, boolean isRecursive) {
         return operationTemplate.execute(() ->
@@ -38,7 +34,7 @@ public class MinioFindAllImpl implements FindAllResourcesStorageDao<Item> {
     private Iterable<Result<Item>> getResultItems(String pathWithUserDir, boolean isRecursive) {
         return minioClient.listObjects(
                 ListObjectsArgs.builder()
-                        .bucket(bucketName)
+                        .bucket(minioConfig.getBucketName())
                         .prefix(pathWithUserDir)
                         .recursive(isRecursive)
                         .build());
@@ -48,7 +44,7 @@ public class MinioFindAllImpl implements FindAllResourcesStorageDao<Item> {
         try {
             return result.get();
         } catch (Exception e) {
-            throw new InternalErrorException("Failed to get item from MinIO result " + result, e);
+            throw new StorageException("Failed to get item from MinIO result " + result, e);
         }
     }
 

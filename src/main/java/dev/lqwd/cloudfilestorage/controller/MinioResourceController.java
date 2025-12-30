@@ -4,10 +4,10 @@ package dev.lqwd.cloudfilestorage.controller;
 import dev.lqwd.cloudfilestorage.dto.resource.DownloadedResponseDto;
 import dev.lqwd.cloudfilestorage.dto.resource.ResourceResponseDto;
 import dev.lqwd.cloudfilestorage.security.CustomUserDetails;
-import dev.lqwd.cloudfilestorage.service.storage.DownloadService;
-import dev.lqwd.cloudfilestorage.service.storage.FindService;
-import dev.lqwd.cloudfilestorage.service.storage.UploadService;
-import dev.lqwd.cloudfilestorage.service.storage.ModificationService;
+import dev.lqwd.cloudfilestorage.service.storage.operations.DownloadService;
+import dev.lqwd.cloudfilestorage.service.storage.operations.FindService;
+import dev.lqwd.cloudfilestorage.service.storage.operations.UploadService;
+import dev.lqwd.cloudfilestorage.service.storage.operations.ModificationService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -27,6 +27,7 @@ public class MinioResourceController extends BaseController {
     private final FindService findService;
     private final DownloadService downloadService;
     private final ModificationService modificationService;
+
 
     @GetMapping
     public ResponseEntity<ResourceResponseDto> getResource(@AuthenticationPrincipal CustomUserDetails userDetails,

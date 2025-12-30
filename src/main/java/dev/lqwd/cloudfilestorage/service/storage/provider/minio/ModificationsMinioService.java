@@ -1,7 +1,8 @@
-package dev.lqwd.cloudfilestorage.service.proxy;
+package dev.lqwd.cloudfilestorage.service.storage.provider.minio;
 
 import dev.lqwd.cloudfilestorage.infrastructure.UserDirectoryProvider;
-import dev.lqwd.cloudfilestorage.repository.minio.MinioBaseDaoImpl;
+import dev.lqwd.cloudfilestorage.repository.storage.minio.MinioBaseStorage;
+import dev.lqwd.cloudfilestorage.service.storage.provider.ModificationsStorageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -10,37 +11,37 @@ import org.springframework.stereotype.Service;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class ModificationsProxyService {
+public class ModificationsMinioService implements ModificationsStorageService {
 
     private final UserDirectoryProvider userDirectoryProvider;
-    private final MinioBaseDaoImpl minioBaseDao;
-    private final FindProxyService findProxyService;
+    private final MinioBaseStorage minioBaseStorage;
+    private final FindMinioService findMinioService;
 
 
     public void removeDir(String dirPath, long id) {
-        findProxyService.findAllResourcesPath(dirPath, id)
-                .forEach(minioBaseDao::removeResource);
+        findMinioService.findAllResourcesPath(dirPath, id)
+                .forEach(minioBaseStorage::removeResource);
     }
 
     public void removeFile(String path, long id) {
         String pathWithUserDir = getPathWithUserDir(path, id);
-        minioBaseDao.removeResource(pathWithUserDir);
+        minioBaseStorage.removeResource(pathWithUserDir);
     }
 
     public void moveDir(String from, String to, long id) {
-        findProxyService.findAllResourcesPath(from, id)
+        findMinioService.findAllResourcesPath(from, id)
                 .forEach(source -> {
                     String target = source.replaceFirst(from, to);
-                    minioBaseDao.copyResource(source, target);
-                    minioBaseDao.removeResource(source);
+                    minioBaseStorage.copyResource(source, target);
+                    minioBaseStorage.removeResource(source);
                 });
     }
 
     public void moveFile(String from, String to, long id) {
         String fromWithUserDir = getPathWithUserDir(from, id);
         String toWithUserDir = getPathWithUserDir(to, id);
-        minioBaseDao.copyResource(fromWithUserDir, toWithUserDir);
-        minioBaseDao.removeResource(fromWithUserDir);
+        minioBaseStorage.copyResource(fromWithUserDir, toWithUserDir);
+        minioBaseStorage.removeResource(fromWithUserDir);
     }
 
     private String getPathWithUserDir(String path, long id) {

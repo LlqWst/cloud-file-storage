@@ -8,6 +8,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+
 
 @Component
 @AllArgsConstructor
@@ -34,23 +36,23 @@ public class JsonAuthenticationFilter extends OncePerRequestFilter {
     private final JsonAuthenticationSuccessHandler successHandler;
     private final JsonAuthenticationFailureHandler failureHandler;
     private final CredentialsValidator validator;
-
     private final RequestMatcher LoginMatcher = PathPatternRequestMatcher
             .withDefaults()
             .matcher(SIGN_IN_URL);
 
+
     @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) {
+    protected boolean shouldNotFilter(@NotNull HttpServletRequest request) {
         return !LoginMatcher.matches(request);
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain) throws  IOException {
+    protected void doFilterInternal(@NotNull HttpServletRequest request,
+                                    @NotNull HttpServletResponse response,
+                                    @NotNull FilterChain filterChain) throws IOException {
 
         try {
-            if(!POST.equalsIgnoreCase(request.getMethod())){
+            if (!POST.equalsIgnoreCase(request.getMethod())) {
                 throw new BadRequestException(METHOD_IS_NOT_ALLOWED_MESSAGE);
             }
             Authentication authentication = attemptAuthentication(request);
@@ -67,7 +69,6 @@ public class JsonAuthenticationFilter extends OncePerRequestFilter {
             throws AuthenticationException, BadRequestException {
 
         AuthRequestDto authRequest = getAuthRequest(request);
-
         String username = authRequest.username();
         String password = authRequest.password();
         validator.validateCredentials(username, password);

@@ -45,4 +45,5 @@ public class PathValidator {
             throw new BadRequestException("Resource is not a file: file should not end with '/' and can't be empty");
         }
     }
+
 }

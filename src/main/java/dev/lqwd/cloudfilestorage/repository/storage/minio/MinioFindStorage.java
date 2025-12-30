@@ -1,24 +1,19 @@
-package dev.lqwd.cloudfilestorage.repository.minio;
+package dev.lqwd.cloudfilestorage.repository.storage.minio;
 
-
-import dev.lqwd.cloudfilestorage.repository.FindResourceStorageDao;
+import dev.lqwd.cloudfilestorage.config.MinioConfiguration;
+import dev.lqwd.cloudfilestorage.repository.storage.FindResourceStorage;
 import io.minio.*;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
 
 import java.util.Optional;
 
+
 @Component
-@Slf4j
 @RequiredArgsConstructor
-public class MinioFindImpl implements FindResourceStorageDao<StatObjectResponse> {
+public class MinioFindStorage implements FindResourceStorage<StatObjectResponse> {
 
-    @Value("${app.minio.bucket.name}")
-    private String bucketName;
-
+    private final MinioConfiguration minioConfig;
     private final MinioClient minioClient;
     private final MinioOperationTemplate operationTemplate;
 
@@ -27,10 +22,10 @@ public class MinioFindImpl implements FindResourceStorageDao<StatObjectResponse>
         return operationTemplate.findResource(() ->
                         minioClient.statObject(
                                 StatObjectArgs.builder()
-                                        .bucket(bucketName)
+                                        .bucket(minioConfig.getBucketName())
                                         .object(pathWithUserDir)
                                         .build()),
-                "Error during getting of resource: " + pathWithUserDir);
+                "Error during finding resource: " + pathWithUserDir);
     }
 
 }

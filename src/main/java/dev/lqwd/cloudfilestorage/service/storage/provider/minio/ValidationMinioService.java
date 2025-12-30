@@ -1,10 +1,11 @@
-package dev.lqwd.cloudfilestorage.service.proxy;
+package dev.lqwd.cloudfilestorage.service.storage.provider.minio;
 
 import dev.lqwd.cloudfilestorage.exception.AlreadyExistException;
 import dev.lqwd.cloudfilestorage.exception.NotFoundException;
-import dev.lqwd.cloudfilestorage.repository.minio.MinioFindImpl;
+import dev.lqwd.cloudfilestorage.repository.storage.minio.MinioFindStorage;
 import dev.lqwd.cloudfilestorage.infrastructure.PathNormalizer;
 import dev.lqwd.cloudfilestorage.infrastructure.UserDirectoryProvider;
+import dev.lqwd.cloudfilestorage.service.storage.provider.ValidationStorageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -13,13 +14,13 @@ import org.springframework.stereotype.Service;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class StorageValidationProxyService {
+public class ValidationMinioService implements ValidationStorageService {
 
     private static final String SLASH = "/";
 
     private final PathNormalizer pathNormalizer;
     private final UserDirectoryProvider userDirectoryProvider;
-    private final MinioFindImpl minioFindDao;
+    private final MinioFindStorage minioFindStorage;
 
 
     public boolean isExistIgnoreEndSlash(String path, long id) {
@@ -30,7 +31,8 @@ public class StorageValidationProxyService {
     }
 
     public boolean isExist(String path, long id) {
-        return minioFindDao.findResource(userDirectoryProvider.provide(path, id))
+        log.debug("checking for the existence of a resource");
+        return minioFindStorage.findResource(userDirectoryProvider.provide(path, id))
                 .isPresent();
     }
 

@@ -6,9 +6,10 @@ import dev.lqwd.cloudfilestorage.entity.User;
 import dev.lqwd.cloudfilestorage.entity.UserRole;
 import dev.lqwd.cloudfilestorage.exception.AlreadyExistException;
 import dev.lqwd.cloudfilestorage.repository.UserRepository;
-import dev.lqwd.cloudfilestorage.service.storage.CreationService;
+import dev.lqwd.cloudfilestorage.service.storage.operations.CreationService;
 import jakarta.servlet.http.HttpSession;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 
 @Service
+@Slf4j
 @AllArgsConstructor
 public class AuthService {
 
@@ -38,6 +40,7 @@ public class AuthService {
     }
 
     private User registration(RegistrationRequestDto registrationRequest) {
+        log.info("registration processing");
         try {
             User user = User.builder()
                     .username(registrationRequest.username())
@@ -58,6 +61,7 @@ public class AuthService {
     }
 
     private void login(HttpSession session, RegistrationRequestDto registrationRequest){
+        log.info("login process starts");
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         registrationRequest.username(),

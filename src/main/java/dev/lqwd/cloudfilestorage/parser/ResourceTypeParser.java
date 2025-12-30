@@ -8,7 +8,7 @@ import dev.lqwd.cloudfilestorage.entity.Type;
 
 public interface ResourceTypeParser {
 
-    default ResourceResponseDto getResourceResponseDTO(long size, Type type, String name, String normalizedPath) {
+    default ResourceResponseDto getResourceResponseDto(long size, Type type, String name, String normalizedPath) {
 
         return switch (type) {
             case FILE -> FileResponseDto.builder()

@@ -26,6 +26,7 @@ public class CustomUserDetails implements UserDetails {
     private final boolean isAccountNonExpired;
     private final boolean isCredentialsNonExpired;
 
+
     @Override
     public String getUsername() {
         return this.username;

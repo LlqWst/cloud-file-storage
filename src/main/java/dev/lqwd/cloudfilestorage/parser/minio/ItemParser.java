@@ -17,11 +17,12 @@ public class ItemParser implements ResourceTypeParser {
 
     private final PathParsHelper pathHelper;
 
+
     public ResourceResponseDto pars(Item item)  {
         Path path = Paths.get(item.objectName());
         String requestedPath = pathHelper.removeUserDir(pathHelper.getParentPath(path));
 
-        return getResourceResponseDTO(
+        return getResourceResponseDto(
                 item.size(),
                 pathHelper.getType(item.objectName()),
                 pathHelper.getName(path),

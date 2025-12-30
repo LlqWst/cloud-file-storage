@@ -1,10 +1,11 @@
-package dev.lqwd.cloudfilestorage.repository;
+package dev.lqwd.cloudfilestorage.repository.storage;
 
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
 
-public interface BaseFileStorageDao {
+
+public interface BaseFileStorage {
 
     InputStream downloadByPath(String pathWithUserDir);
     void createDirectory(String pathWithUserDir);

@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Configuration;
 @Slf4j
 public class MinioConfiguration {
 
-    @Value("${app.minio.bucket.name}")
+    @Value("${app.bucket.name}")
     private String bucketName;
 
 

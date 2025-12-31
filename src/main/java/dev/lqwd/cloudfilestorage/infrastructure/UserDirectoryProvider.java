@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class UserDirectoryProvider {
 
-    @Value("${app.minio.root.template.name}")
+    @Value("${app.root.template.name}")
     private String userRootTemplate;
 
     public String provide(long id) {

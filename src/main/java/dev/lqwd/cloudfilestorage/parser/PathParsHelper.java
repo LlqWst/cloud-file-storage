@@ -15,6 +15,7 @@ public class PathParsHelper {
 
     private static final String SLASH = "/";
     private static final String EMPTY = "";
+
     private final PathNormalizer pathNormalizer;
 
     public String getName(Path path) {

@@ -43,6 +43,20 @@ public class SecurityConfig {
     public static final int MAX_SESSIONS = 1;
     public static final String UNAUTHORIZED_MESSAGE = "{\"message\":\"Unauthorized user\"}";
 
+    private static final String[] SWAGGER_WHITELIST = {
+            "/swagger-ui/**",
+            "/swagger-ui.html",
+            "/v3/api-docs/**",
+            "/api-docs/**",
+            "/swagger-resources/**",
+            "/swagger-resources",
+            "/webjars/**",
+            "/swagger-ui/index.html"
+    };
+    private static final String[] WHITELIST = {
+            "/api/auth/**"
+    };
+
     private final RequestMatcher LogoutMatcher = PathPatternRequestMatcher
             .withDefaults()
             .matcher(SIGN_OUT_URL);
@@ -89,8 +103,8 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .requestCache(RequestCacheConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/").permitAll()
+                        .requestMatchers(WHITELIST).permitAll()
+                        .requestMatchers(SWAGGER_WHITELIST).permitAll()
                         .anyRequest().authenticated()
                 )
                 .securityContext(securityContext -> securityContext
@@ -112,7 +126,7 @@ public class SecurityConfig {
                                 POST.equalsIgnoreCase(req.getMethod())
                         )
                         .logoutSuccessHandler(customLogoutSuccessHandler)
-                        .deleteCookies("JSESSIONID")
+                        .deleteCookies("SESSION")
                         .invalidateHttpSession(true)
                 )
                 .addFilterBefore(tomcatErrorFilter, WebAsyncManagerIntegrationFilter.class)

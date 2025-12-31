@@ -43,7 +43,7 @@ public class ApplicationExceptionHandler extends BaseHandler {
     public ResponseEntity<ErrorResponseDto> handleValidationExceptions(
             MethodArgumentNotValidException e) {
 
-        log.error("Exception occurred:  {}", e.getMessage(), e);
+        log.warn("Exception occurred:  {}", e.getMessage(), e);
         String message = e.getBindingResult()
                 .getFieldErrors()
                 .stream()

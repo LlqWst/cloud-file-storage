@@ -28,7 +28,7 @@ public class DownloadService {
     private final PathProcessor pathProcessor;
     private final DownloadMinioService downloadStorageService;
     private final ValidationMinioService validationStorageService;
-    private final FindMinioService findMinioService;
+    private final FindMinioService findStorageService;
 
 
     public DownloadedResponseDto download(String rawPath, long id) {
@@ -64,7 +64,7 @@ public class DownloadService {
 
     private void toZip(long id, OutputStream outputStream, String requestedPath, ProcessedPath path) {
         try (ZipOutputStream zipOut = new ZipOutputStream(outputStream)) {
-            findMinioService.findDirResourcesNameWithoutDirRecursive(requestedPath, id)
+            findStorageService.findDirResourcesNameWithoutDirRecursive(requestedPath, id)
                     .forEach(resourceName -> processResource(zipOut, resourceName, path.resourceName()));
         } catch (Exception e) {
             throw new InternalErrorException("Error during directory streaming for path " + requestedPath, e);
@@ -72,7 +72,7 @@ public class DownloadService {
     }
 
     private void processResource(ZipOutputStream zipOut, String resourceName, String baseFolder) {
-        String entryName = getRelativePath(resourceName, baseFolder);
+        String entryName = getPathAfterBaseFolder(resourceName, baseFolder);
         try {
             zipOut.putNextEntry(new ZipEntry(entryName));
             copyToZip(zipOut, resourceName);
@@ -89,7 +89,7 @@ public class DownloadService {
         }
     }
 
-    private String getRelativePath(String fullPath, String baseFolder) {
+    private String getPathAfterBaseFolder(String fullPath, String baseFolder) {
         String folderWithSlash = baseFolder + SLASH;
         return fullPath.substring(fullPath.indexOf(folderWithSlash) + folderWithSlash.length());
     }

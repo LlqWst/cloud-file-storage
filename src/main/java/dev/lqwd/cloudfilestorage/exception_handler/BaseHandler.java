@@ -51,7 +51,7 @@ public abstract class BaseHandler {
         return new ErrorResponseDto(message);
     }
 
-    protected  <T extends Throwable> boolean isInstanceOf(Exception e, Class<T> clazz) {
+    protected <T extends Throwable> boolean isInstanceOf(Exception e, Class<T> clazz) {
         Throwable cause = e;
         while (cause != null) {
             if (clazz.isInstance(cause)) {

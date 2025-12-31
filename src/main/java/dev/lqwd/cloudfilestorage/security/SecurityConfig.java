@@ -2,10 +2,13 @@ package dev.lqwd.cloudfilestorage.security;
 
 
 import dev.lqwd.cloudfilestorage.security.json_auth.JsonAuthenticationFilter;
+import dev.lqwd.cloudfilestorage.security.user_details.CustomUserDetailsService;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -19,12 +22,14 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.context.SecurityContextRepository;
+import org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter;
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.io.IOException;
 import java.util.List;
 
 
@@ -35,6 +40,8 @@ public class SecurityConfig {
 
     public static final String POST = "POST";
     public static final String SIGN_OUT_URL = "/api/auth/sign-out";
+    public static final int MAX_SESSIONS = 1;
+    public static final String UNAUTHORIZED_MESSAGE = "{\"message\":\"Unauthorized user\"}";
 
     private final RequestMatcher LogoutMatcher = PathPatternRequestMatcher
             .withDefaults()
@@ -68,12 +75,13 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http,
-            JsonAuthenticationFilter jsonAuthenticationFilter) throws Exception {
+            JsonAuthenticationFilter jsonAuthenticationFilter,
+            TomcatErrorFilter tomcatErrorFilter) throws Exception {
 
         return http
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-                        .maximumSessions(1)
+                        .maximumSessions(MAX_SESSIONS)
                         .maxSessionsPreventsLogin(false)
                 )
                 .cors(cors -> cors
@@ -81,7 +89,6 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .requestCache(RequestCacheConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/error/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/").permitAll()
                         .anyRequest().authenticated()
@@ -94,7 +101,7 @@ public class SecurityConfig {
                         conf.authenticationEntryPoint((req,
                                                        res,
                                                        authException) ->
-                                res.sendError(HttpStatus.UNAUTHORIZED.value())
+                                UnauthorizedResponse(res)
                         )
                 )
                 .formLogin(AbstractHttpConfigurer::disable)
@@ -108,8 +115,15 @@ public class SecurityConfig {
                         .deleteCookies("JSESSIONID")
                         .invalidateHttpSession(true)
                 )
+                .addFilterBefore(tomcatErrorFilter, WebAsyncManagerIntegrationFilter.class)
                 .addFilterBefore(jsonAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
+    }
+
+    private static void UnauthorizedResponse(HttpServletResponse res) throws IOException {
+        res.setStatus(HttpStatus.UNAUTHORIZED.value());
+        res.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        res.getWriter().write(UNAUTHORIZED_MESSAGE);
     }
 
     @Bean

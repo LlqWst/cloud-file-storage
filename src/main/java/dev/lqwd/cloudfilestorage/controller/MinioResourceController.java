@@ -3,7 +3,7 @@ package dev.lqwd.cloudfilestorage.controller;
 
 import dev.lqwd.cloudfilestorage.dto.resource.DownloadedResponseDto;
 import dev.lqwd.cloudfilestorage.dto.resource.ResourceResponseDto;
-import dev.lqwd.cloudfilestorage.security.CustomUserDetails;
+import dev.lqwd.cloudfilestorage.security.user_details.CustomUserDetails;
 import dev.lqwd.cloudfilestorage.service.storage.operations.DownloadService;
 import dev.lqwd.cloudfilestorage.service.storage.operations.FindService;
 import dev.lqwd.cloudfilestorage.service.storage.operations.UploadService;

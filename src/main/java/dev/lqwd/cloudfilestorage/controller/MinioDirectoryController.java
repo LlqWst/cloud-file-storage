@@ -2,7 +2,7 @@ package dev.lqwd.cloudfilestorage.controller;
 
 import dev.lqwd.cloudfilestorage.dto.resource.DirectoryResponseDto;
 import dev.lqwd.cloudfilestorage.dto.resource.ResourceResponseDto;
-import dev.lqwd.cloudfilestorage.security.CustomUserDetails;
+import dev.lqwd.cloudfilestorage.security.user_details.CustomUserDetails;
 import dev.lqwd.cloudfilestorage.service.storage.operations.CreationService;
 import dev.lqwd.cloudfilestorage.service.storage.operations.FindService;
 import lombok.AllArgsConstructor;

@@ -1,4 +1,4 @@
-package dev.lqwd.cloudfilestorage.security;
+package dev.lqwd.cloudfilestorage.security.user_details;
 
 import dev.lqwd.cloudfilestorage.entity.User;
 import dev.lqwd.cloudfilestorage.repository.UserRepository;

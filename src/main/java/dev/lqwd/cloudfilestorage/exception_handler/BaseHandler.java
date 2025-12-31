@@ -1,13 +1,22 @@
 package dev.lqwd.cloudfilestorage.exception_handler;
 
-
 import dev.lqwd.cloudfilestorage.dto.ErrorResponseDto;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
 
 public abstract class BaseHandler {
+
+    @Value("${spring.servlet.multipart.max-file-size}")
+    protected String maxFileSize;
+
+    @Value("${spring.servlet.multipart.max-request-size}")
+    protected String maxRequestSize;
+
+    @Value("${server.tomcat.max-part-count}")
+    protected int maxFilesCount;
 
     protected ResponseEntity<ErrorResponseDto> buildBadRequestResponse(String message) {
         return ResponseEntity
@@ -40,6 +49,17 @@ public abstract class BaseHandler {
 
     private static ErrorResponseDto getBody(String message) {
         return new ErrorResponseDto(message);
+    }
+
+    protected  <T extends Throwable> boolean isInstanceOf(Exception e, Class<T> clazz) {
+        Throwable cause = e;
+        while (cause != null) {
+            if (clazz.isInstance(cause)) {
+                return true;
+            }
+            cause = cause.getCause();
+        }
+        return false;
     }
 
 }

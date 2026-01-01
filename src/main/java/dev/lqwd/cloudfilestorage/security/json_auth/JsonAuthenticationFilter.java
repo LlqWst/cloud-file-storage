@@ -3,7 +3,7 @@ package dev.lqwd.cloudfilestorage.security.json_auth;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.lqwd.cloudfilestorage.dto.AuthRequestDto;
 import dev.lqwd.cloudfilestorage.exception.BadRequestException;
-import dev.lqwd.cloudfilestorage.infrastructure.CredentialsValidator;
+import dev.lqwd.cloudfilestorage.infrastructure.validator.CredentialsValidator;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

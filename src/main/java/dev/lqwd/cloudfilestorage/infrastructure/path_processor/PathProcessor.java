@@ -1,8 +1,8 @@
-package dev.lqwd.cloudfilestorage.path_processor;
+package dev.lqwd.cloudfilestorage.infrastructure.path_processor;
 
 import dev.lqwd.cloudfilestorage.infrastructure.PathNormalizer;
-import dev.lqwd.cloudfilestorage.infrastructure.PathValidator;
-import dev.lqwd.cloudfilestorage.parser.PathParser;
+import dev.lqwd.cloudfilestorage.infrastructure.validator.PathValidator;
+import dev.lqwd.cloudfilestorage.infrastructure.parser.PathParser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

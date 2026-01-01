@@ -42,7 +42,6 @@ public class SecurityConfig {
     public static final String SIGN_OUT_URL = "/api/auth/sign-out";
     public static final int MAX_SESSIONS = 1;
     public static final String UNAUTHORIZED_MESSAGE = "{\"message\":\"Unauthorized user\"}";
-
     private static final String[] SWAGGER_WHITELIST = {
             "/swagger-ui/**",
             "/swagger-ui.html",
@@ -50,19 +49,17 @@ public class SecurityConfig {
             "/api-docs/**",
             "/swagger-resources/**",
             "/swagger-resources",
-            "/webjars/**",
-            "/swagger-ui/index.html"
+            "/webjars/**"
     };
     private static final String[] PUBLIC_ENDPOINTS = {
             "/api/auth/**"
     };
 
+    private final CustomUserDetailsService customUserDetailsService;
+    private final CustomLogoutSuccessHandler customLogoutSuccessHandler;
     private final RequestMatcher LogoutMatcher = PathPatternRequestMatcher
             .withDefaults()
             .matcher(SIGN_OUT_URL);
-
-    private final CustomUserDetailsService customUserDetailsService;
-    private final CustomLogoutSuccessHandler customLogoutSuccessHandler;
 
 
     @Bean
@@ -77,12 +74,10 @@ public class SecurityConfig {
 
     @Bean
     public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
-
         AuthenticationManagerBuilder builder = http.getSharedObject(AuthenticationManagerBuilder.class);
         builder
                 .userDetailsService(customUserDetailsService)
                 .passwordEncoder(passwordEncoder());
-
         return builder.build();
     }
 

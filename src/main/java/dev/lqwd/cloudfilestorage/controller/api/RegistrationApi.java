@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+
 @RequestMapping("/api/auth")
 @Tag(
         name = "Registration controller",

@@ -1,4 +1,4 @@
-package dev.lqwd.cloudfilestorage.parser;
+package dev.lqwd.cloudfilestorage.infrastructure.parser;
 
 import dev.lqwd.cloudfilestorage.dto.resource.DirectoryResponseDto;
 import dev.lqwd.cloudfilestorage.dto.resource.FileResponseDto;

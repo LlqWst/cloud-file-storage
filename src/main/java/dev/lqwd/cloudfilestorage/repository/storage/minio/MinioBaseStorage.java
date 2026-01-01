@@ -18,6 +18,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class MinioBaseStorage implements BaseFileStorage {
 
+    public static final String EXCEPTION_IF_NOT_EXISTS = "x-amz-if-none-match";
     private final MinioConfiguration minioConfig;
     private final MinioClient minioClient;
     private final MinioOperationTemplate operationTemplate;
@@ -30,7 +31,7 @@ public class MinioBaseStorage implements BaseFileStorage {
                                         .bucket(minioConfig.getBucketName())
                                         .object(pathWithUserDir)
                                         .stream(new ByteArrayInputStream(new byte[]{}), 0, -1)
-                                        .headers(Map.of("x-amz-if-none-match", "*"))
+                                        .headers(Map.of(EXCEPTION_IF_NOT_EXISTS, "*"))
                                         .build()),
                 "Error during creation of directory: " + pathWithUserDir);
     }
@@ -42,7 +43,7 @@ public class MinioBaseStorage implements BaseFileStorage {
                                         .bucket(minioConfig.getBucketName())
                                         .object(pathWithUserDir + file.getOriginalFilename())
                                         .stream(file.getInputStream(), file.getSize(), -1)
-                                        .headers(Map.of("x-amz-if-none-match", "*"))
+                                        .headers(Map.of(EXCEPTION_IF_NOT_EXISTS, "*"))
                                         .build()),
                 "Error during uploading resource to path: " + pathWithUserDir);
     }
@@ -57,7 +58,7 @@ public class MinioBaseStorage implements BaseFileStorage {
                                                 .bucket(minioConfig.getBucketName())
                                                 .object(source)
                                                 .build())
-                                        .headers(Map.of("x-amz-if-none-match", "*"))
+                                        .headers(Map.of(EXCEPTION_IF_NOT_EXISTS, "*"))
                                         .build()),
                 "Error during moving resource from: %s - to: %s".formatted(source, target));
     }

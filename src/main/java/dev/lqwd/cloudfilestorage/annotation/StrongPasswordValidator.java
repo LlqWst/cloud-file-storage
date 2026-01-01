@@ -9,7 +9,6 @@ public class StrongPasswordValidator implements ConstraintValidator<StrongPasswo
     private int min;
     private int max;
 
-
     @Override
     public void initialize(StrongPassword constraintAnnotation) {
         this.min = constraintAnnotation.min();

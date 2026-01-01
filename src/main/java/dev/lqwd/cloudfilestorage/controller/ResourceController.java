@@ -32,7 +32,6 @@ public class ResourceController extends BaseController implements ResourceApi {
         return buildOkResponse(findService.getResource(rawPath, userDetails.getId()));
     }
 
-
     @Override
     public ResponseEntity<List<ResourceResponseDto>> uploadResource(CustomUserDetails userDetails,
                                                                     MultipartFile[] resources,

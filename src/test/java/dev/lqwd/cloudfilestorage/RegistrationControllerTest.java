@@ -1,8 +1,9 @@
 package dev.lqwd.cloudfilestorage;
 
-
 import dev.lqwd.cloudfilestorage.entity.User;
 import dev.lqwd.cloudfilestorage.repository.UserRepository;
+import dev.lqwd.cloudfilestorage.repository.storage.minio.MinioBucketStorage;
+import io.minio.MinioClient;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,9 +15,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.junit.jupiter.Testcontainers;
-
 
 import java.util.Optional;
 
@@ -24,6 +25,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 
 @SpringBootTest
 @Testcontainers
@@ -33,6 +35,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class RegistrationControllerTest {
 
     public static final String SIGN_UP_URL = "/api/auth/sign-up";
+    public static final String PASSWORD_DEFAULT_MESSAGE = "Password must be 5-20 characters long";
+    public static final String USERNAME_DEFAULT_MESSAGE = "Please provide username 5-20 characters long (valid chars: a-zA-Z0-9 ~!#$%^&*()_=+/'\\\".-)";
+
+    @MockitoBean
+    private MinioClient minioClient;
+
+    @MockitoBean
+    private MinioBucketStorage minioBucketStorage;
 
     @Autowired
     private MockMvc mockMvc;
@@ -42,12 +52,6 @@ public class RegistrationControllerTest {
 
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-    @Test
-    void shouldRegister_With_AppropriateEmail() throws Exception {
-
-        String username = "test@gmail.com";
-        registerWithAppropriateUsername(username);
-    }
 
     @Test
     void shouldThrowException_When_DuplicateUserName() throws Exception {
@@ -145,10 +149,8 @@ public class RegistrationControllerTest {
     private void signUpWithInappropriateUsername(String username) throws Exception {
         String password = "test_password";
         String jsonPath = "$.message";
-        String jsonPathValue =
-                "Please provide username 6-20 characters long (char '@' not supported for username), or correct email";
 
-        doSignUp(username, password, HttpStatus.BAD_REQUEST.value(), jsonPath, jsonPathValue);
+        doSignUp(username, password, HttpStatus.BAD_REQUEST.value(), jsonPath, USERNAME_DEFAULT_MESSAGE);
 
         Optional<User> user = userRepository.findByUsername(username);
         Assertions.assertTrue(user.isEmpty());
@@ -157,9 +159,8 @@ public class RegistrationControllerTest {
     private void signUpWithInappropriatePassword(String password) throws Exception {
         String username = "test_user";
         String jsonPath = "$.message";
-        String jsonPathValue = "Password must be 6-64 characters long";
 
-        doSignUp(username, password, HttpStatus.BAD_REQUEST.value(), jsonPath, jsonPathValue);
+        doSignUp(username, password, HttpStatus.BAD_REQUEST.value(), jsonPath, PASSWORD_DEFAULT_MESSAGE);
 
         Optional<User> user = userRepository.findByUsername(username);
         Assertions.assertTrue(user.isEmpty());

@@ -2,9 +2,9 @@ package dev.lqwd.cloudfilestorage.service.storage.operations;
 
 import dev.lqwd.cloudfilestorage.dto.resource.ResourceResponseDto;
 import dev.lqwd.cloudfilestorage.service.storage.provider.minio.FindMinioService;
-import dev.lqwd.cloudfilestorage.infrastructure.PathValidator;
-import dev.lqwd.cloudfilestorage.path_processor.PathProcessor;
-import dev.lqwd.cloudfilestorage.path_processor.ProcessedPath;
+import dev.lqwd.cloudfilestorage.infrastructure.validator.PathValidator;
+import dev.lqwd.cloudfilestorage.infrastructure.path_processor.PathProcessor;
+import dev.lqwd.cloudfilestorage.infrastructure.path_processor.ProcessedPath;
 import dev.lqwd.cloudfilestorage.service.storage.provider.minio.ValidationMinioService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

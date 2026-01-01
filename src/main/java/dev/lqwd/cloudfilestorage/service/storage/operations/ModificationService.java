@@ -3,16 +3,21 @@ package dev.lqwd.cloudfilestorage.service.storage.operations;
 import dev.lqwd.cloudfilestorage.dto.resource.ResourceResponseDto;
 import dev.lqwd.cloudfilestorage.entity.Type;
 import dev.lqwd.cloudfilestorage.exception.BadRequestException;
-import dev.lqwd.cloudfilestorage.mapper.ResourceResponseMapper;
+import dev.lqwd.cloudfilestorage.infrastructure.mapper.ResourceResponseMapper;
 import dev.lqwd.cloudfilestorage.service.storage.provider.minio.FindMinioService;
 import dev.lqwd.cloudfilestorage.service.storage.provider.minio.ModificationsMinioService;
-import dev.lqwd.cloudfilestorage.path_processor.PathProcessor;
-import dev.lqwd.cloudfilestorage.path_processor.ProcessedPath;
+import dev.lqwd.cloudfilestorage.infrastructure.path_processor.PathProcessor;
+import dev.lqwd.cloudfilestorage.infrastructure.path_processor.ProcessedPath;
 import dev.lqwd.cloudfilestorage.service.storage.provider.minio.ValidationMinioService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+/*
+TODO: возможен race condition, т.к. сначала идет проверка.
+ Возможно, следует блокировать папку вовремя чека.
+ MINIO перезаписывает файлы, если они существуют при перемещении.
+ */
 
 @Service
 @Slf4j

@@ -1,10 +1,11 @@
 package dev.lqwd.cloudfilestorage;
 
-
 import dev.lqwd.cloudfilestorage.entity.Role;
 import dev.lqwd.cloudfilestorage.entity.User;
 import dev.lqwd.cloudfilestorage.entity.UserRole;
 import dev.lqwd.cloudfilestorage.repository.UserRepository;
+import dev.lqwd.cloudfilestorage.repository.storage.minio.MinioBucketStorage;
+import io.minio.MinioClient;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -17,6 +18,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -25,6 +27,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 
 @SpringBootTest
 @Testcontainers
@@ -38,6 +41,12 @@ public class SecurityTest {
     private static final String GET_ME_URL = "/api/user/me";
     private static final String APPROPRIATE_USERNAME = "user123";
     private static final String APPROPRIATE_PASSWORD = "password123";
+
+    @MockitoBean
+    private MinioClient minioClient;
+
+    @MockitoBean
+    private MinioBucketStorage minioBucketStorage;
 
     @Autowired
     private MockMvc mockMvc;

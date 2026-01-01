@@ -15,6 +15,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+
 @RequestMapping("/api")
 @Tag(name = "Username controller", description = "Return the username")
 public interface UsernameApi {

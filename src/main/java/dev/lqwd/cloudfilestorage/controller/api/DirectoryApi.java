@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+
 @RequestMapping("/api/directory")
 @Tag(
         name = "Directory operations controller",
@@ -128,17 +129,17 @@ public interface DirectoryApi {
             )
     })
     ResponseEntity<DirectoryResponseDto> createDir(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                                  @Parameter(
-                                                          description = "The path to new folder",
-                                                          required = true,
-                                                          examples = {
-                                                                  @ExampleObject(
-                                                                          name = "test folder in root directory",
-                                                                          value = "test123/"
-                                                                  ),
-                                                          }
-                                                  )
-                                                  @RequestParam(name = "path") String rawPath);
+                                                   @Parameter(
+                                                           description = "The path to new folder",
+                                                           required = true,
+                                                           examples = {
+                                                                   @ExampleObject(
+                                                                           name = "test folder in root directory",
+                                                                           value = "test123/"
+                                                                   ),
+                                                           }
+                                                   )
+                                                   @RequestParam(name = "path") String rawPath);
 
     @GetMapping
     @Operation(

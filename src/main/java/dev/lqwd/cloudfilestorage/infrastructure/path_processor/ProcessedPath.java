@@ -1,4 +1,4 @@
-package dev.lqwd.cloudfilestorage.path_processor;
+package dev.lqwd.cloudfilestorage.infrastructure.path_processor;
 
 import dev.lqwd.cloudfilestorage.entity.Type;
 import lombok.Builder;

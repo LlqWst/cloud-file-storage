@@ -20,6 +20,7 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
 
 import java.util.List;
 
+
 @RequestMapping("/api/resource")
 @Tag(
         name = "Resource operations controller",

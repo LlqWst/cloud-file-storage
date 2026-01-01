@@ -1,9 +1,9 @@
 package dev.lqwd.cloudfilestorage.service.storage.operations;
 
 import dev.lqwd.cloudfilestorage.dto.resource.ResourceResponseDto;
-import dev.lqwd.cloudfilestorage.mapper.ResourceResponseMapper;
-import dev.lqwd.cloudfilestorage.path_processor.PathProcessor;
-import dev.lqwd.cloudfilestorage.path_processor.ProcessedPath;
+import dev.lqwd.cloudfilestorage.infrastructure.mapper.ResourceResponseMapper;
+import dev.lqwd.cloudfilestorage.infrastructure.path_processor.PathProcessor;
+import dev.lqwd.cloudfilestorage.infrastructure.path_processor.ProcessedPath;
 import dev.lqwd.cloudfilestorage.service.storage.provider.minio.ValidationMinioService;
 import dev.lqwd.cloudfilestorage.service.storage.provider.minio.UploadMinioService;
 import lombok.RequiredArgsConstructor;

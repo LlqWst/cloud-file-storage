@@ -1,8 +1,8 @@
-package dev.lqwd.cloudfilestorage.parser.minio;
+package dev.lqwd.cloudfilestorage.infrastructure.parser.minio;
 
 import dev.lqwd.cloudfilestorage.dto.resource.ResourceResponseDto;
-import dev.lqwd.cloudfilestorage.parser.ResourceTypeParser;
-import dev.lqwd.cloudfilestorage.parser.PathParsHelper;
+import dev.lqwd.cloudfilestorage.infrastructure.parser.ResourceTypeParser;
+import dev.lqwd.cloudfilestorage.infrastructure.parser.PathParsHelper;
 import io.minio.StatObjectResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

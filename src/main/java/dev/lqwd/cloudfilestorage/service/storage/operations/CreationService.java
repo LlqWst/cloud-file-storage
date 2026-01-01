@@ -1,14 +1,19 @@
 package dev.lqwd.cloudfilestorage.service.storage.operations;
 
 import dev.lqwd.cloudfilestorage.dto.resource.DirectoryResponseDto;
-import dev.lqwd.cloudfilestorage.mapper.ResourceResponseMapper;
+import dev.lqwd.cloudfilestorage.infrastructure.mapper.ResourceResponseMapper;
 import dev.lqwd.cloudfilestorage.service.storage.provider.minio.CreationMinioService;
-import dev.lqwd.cloudfilestorage.path_processor.PathProcessor;
-import dev.lqwd.cloudfilestorage.path_processor.ProcessedPath;
+import dev.lqwd.cloudfilestorage.infrastructure.path_processor.PathProcessor;
+import dev.lqwd.cloudfilestorage.infrastructure.path_processor.ProcessedPath;
 import dev.lqwd.cloudfilestorage.service.storage.provider.minio.ValidationMinioService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+/*
+TODO: возможен race condition, т.к. сначала идет проверка.
+ Возможно, следует блокировать папку вовремя чека.
+ MINIO не выбрасывает exception, если папка существует
+ */
 
 @Service
 @RequiredArgsConstructor

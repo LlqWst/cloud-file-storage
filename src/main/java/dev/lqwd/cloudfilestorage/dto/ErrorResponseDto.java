@@ -8,7 +8,7 @@ public record ErrorResponseDto(
 
         @Schema(
                 description = "Error message",
-                example = "Internal error exception"
+                example = "Internal error"
         )
         String message
 ) {

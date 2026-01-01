@@ -18,7 +18,10 @@ import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @RequestMapping("/api/auth")
-@Tag(name = "Registration controller", description = "Operations related to registration and auto login")
+@Tag(
+        name = "Registration controller",
+        description = "Operations related to registration and auto login"
+)
 public interface RegistrationApi {
 
     @PostMapping("/sign-up")

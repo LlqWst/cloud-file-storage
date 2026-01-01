@@ -10,6 +10,7 @@ import org.apache.tomcat.util.http.fileupload.impl.FileCountLimitExceededExcepti
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.data.redis.serializer.SerializationException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.stream.Collectors;
@@ -60,12 +62,25 @@ public class ApplicationExceptionHandler extends BaseHandler {
         return buildConflictResponse(e.getMessage());
     }
 
-    @ExceptionHandler({BadRequestException.class,
+    @ExceptionHandler({
+            BadRequestException.class,
             MissingServletRequestParameterException.class,
-            HttpRequestMethodNotSupportedException.class})
+            HttpRequestMethodNotSupportedException.class,
+            MissingServletRequestPartException .class
+    })
     public ResponseEntity<ErrorResponseDto> handleBadRequestException(Exception e) {
 
         log.warn("Exception occurred:  {}", e.getMessage(), e);
+        return buildBadRequestResponse(e.getMessage());
+    }
+
+    @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+    public ResponseEntity<ErrorResponseDto> handleNullContentType(HttpMediaTypeNotSupportedException e) {
+
+        log.warn("Exception occurred:  {}", e.getMessage(), e);
+        if(e.getContentType() == null){
+            return buildBadRequestResponse("Missing body type");
+        }
         return buildBadRequestResponse(e.getMessage());
     }
 
@@ -76,8 +91,10 @@ public class ApplicationExceptionHandler extends BaseHandler {
         return buildBadRequestResponse(MAX_UPLOAD_SIZE_MESSAGE);
     }
 
-    @ExceptionHandler({FileCountLimitExceededException.class,
-            MultipartException.class})
+    @ExceptionHandler({
+            FileCountLimitExceededException.class,
+            MultipartException.class
+    })
     public ResponseEntity<ErrorResponseDto> handleFileCountLimitException(Exception e) {
 
         log.warn("Exception occurred:  {}", e.getMessage(), e);
@@ -87,21 +104,25 @@ public class ApplicationExceptionHandler extends BaseHandler {
         return buildBadRequestResponse(e.getMessage());
     }
 
-    @ExceptionHandler({NotFoundException.class,
-            NoResourceFoundException.class})
+    @ExceptionHandler({
+            NotFoundException.class,
+            NoResourceFoundException.class
+    })
     public ResponseEntity<ErrorResponseDto> handleNotFoundException(Exception e) {
 
         log.warn("Exception occurred:  {}", e.getMessage(), e);
         return buildNotFoundResponse(e.getMessage());
     }
 
-    @ExceptionHandler({Exception.class,
+    @ExceptionHandler({
+            Exception.class,
             InternalErrorException.class,
-            SerializationException.class})
+            SerializationException.class
+    })
     public ResponseEntity<ErrorResponseDto> handleUniversalException(Exception e) {
 
         log.error("Exception occurred:  {}", e.getMessage(), e);
-        return buildInternalServerErrorResponse("Internal error exception");
+        return buildInternalServerErrorResponse("Internal error");
     }
 
 }

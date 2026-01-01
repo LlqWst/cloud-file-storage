@@ -8,6 +8,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 public abstract class BaseController {
 
+    private final static String RESOURCE_DOWNLOAD_HEADER = "attachment; filename=\"%s\"";
+
     protected <T> ResponseEntity<T> buildOkResponse(T body) {
         return ResponseEntity
                 .ok()
@@ -34,7 +36,7 @@ public abstract class BaseController {
                 .ok()
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .header(HttpHeaders.CONTENT_DISPOSITION,
-                        "attachment; filename=\"" + fileName + "\"")
+                        RESOURCE_DOWNLOAD_HEADER.formatted(fileName))
                 .body(body);
     }
 

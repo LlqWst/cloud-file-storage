@@ -5,13 +5,13 @@ import dev.lqwd.cloudfilestorage.dto.RegistrationRequestDto;
 import dev.lqwd.cloudfilestorage.dto.UserResponseDto;
 import dev.lqwd.cloudfilestorage.entity.User;
 import dev.lqwd.cloudfilestorage.service.AuthService;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 
 @RestController
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class RegistrationController extends BaseController implements RegistrationApi {
 
     private final AuthService authService;

@@ -53,7 +53,7 @@ public class SecurityConfig {
             "/webjars/**",
             "/swagger-ui/index.html"
     };
-    private static final String[] WHITELIST = {
+    private static final String[] PUBLIC_ENDPOINTS = {
             "/api/auth/**"
     };
 
@@ -103,7 +103,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .requestCache(RequestCacheConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(WHITELIST).permitAll()
+                        .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
                         .requestMatchers(SWAGGER_WHITELIST).permitAll()
                         .anyRequest().authenticated()
                 )

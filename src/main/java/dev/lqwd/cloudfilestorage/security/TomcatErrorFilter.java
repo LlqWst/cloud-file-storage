@@ -31,7 +31,7 @@ public class TomcatErrorFilter implements Filter {
             httpResponse.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
 
             new ObjectMapper()
-                    .writeValue(httpResponse.getOutputStream(), new ErrorResponseDto("Internal error exception"));
+                    .writeValue(httpResponse.getOutputStream(), new ErrorResponseDto("Internal error"));
         }
     }
 }

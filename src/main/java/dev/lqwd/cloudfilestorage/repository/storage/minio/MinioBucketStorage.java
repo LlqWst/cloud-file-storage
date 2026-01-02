@@ -1,12 +1,10 @@
 package dev.lqwd.cloudfilestorage.repository.storage.minio;
 
-import dev.lqwd.cloudfilestorage.config.MinioConfiguration;
 import dev.lqwd.cloudfilestorage.repository.storage.StorageBucket;
 import io.minio.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.event.EventListener;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 
@@ -15,37 +13,37 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class MinioBucketStorage implements StorageBucket {
 
-    private final MinioConfiguration minioConfig;
+    @Value("${app.bucket.name}")
+    private String bucketName;
+
     private final MinioClient minioClient;
     private final MinioOperationTemplate operationTemplate;
 
-
-    @EventListener(ApplicationReadyEvent.class)
-    public void onApplicationReady() {
+    public void createBucketIfNotExists() {
         if (!isBucketExists()) {
             createRootBucket();
-            log.info("Bucket '{}' created", minioConfig.getBucketName());
+            log.info("Bucket '{}' created", bucketName);
         } else {
-            log.debug("Bucket '{}' already exists", minioConfig.getBucketName());
+            log.debug("Bucket '{}' already exists", bucketName);
         }
     }
 
-    private boolean isBucketExists() {
+    public boolean isBucketExists() {
         return operationTemplate.execute(() ->
                         minioClient.bucketExists(
                                 BucketExistsArgs.builder()
-                                        .bucket(minioConfig.getBucketName())
+                                        .bucket(bucketName)
                                         .build()),
-                "Error during checking for the existence of a bucket" + minioConfig.getBucketName());
+                "Error during checking for the existence of a bucket " + bucketName);
     }
 
-    private void createRootBucket() {
+    public void createRootBucket() {
         operationTemplate.execute(() ->
                     minioClient.makeBucket(
                             MakeBucketArgs.builder()
-                                    .bucket(minioConfig.getBucketName())
+                                    .bucket(bucketName)
                                     .build()),
-                "Error during creation of Minio bucket: " + minioConfig.getBucketName());
+                "Error during creation of Minio bucket: " + bucketName);
     }
 
 }

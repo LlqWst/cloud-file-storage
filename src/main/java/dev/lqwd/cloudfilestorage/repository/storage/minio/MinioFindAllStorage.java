@@ -1,11 +1,11 @@
 package dev.lqwd.cloudfilestorage.repository.storage.minio;
 
-import dev.lqwd.cloudfilestorage.config.MinioConfiguration;
 import dev.lqwd.cloudfilestorage.exception.StorageException;
 import dev.lqwd.cloudfilestorage.repository.storage.FindAllResourcesStorage;
 import io.minio.*;
 import io.minio.messages.Item;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -16,10 +16,11 @@ import java.util.stream.StreamSupport;
 @RequiredArgsConstructor
 public class MinioFindAllStorage implements FindAllResourcesStorage<Item> {
 
+    @Value("${app.bucket.name}")
+    private String bucketName;
+
     private final MinioClient minioClient;
     private final MinioOperationTemplate operationTemplate;
-    private final MinioConfiguration minioConfig;
-
 
     public List<Item> findResources(String pathWithUserDir, boolean isRecursive) {
         return operationTemplate.execute(() ->
@@ -34,7 +35,7 @@ public class MinioFindAllStorage implements FindAllResourcesStorage<Item> {
     private Iterable<Result<Item>> getResultItems(String pathWithUserDir, boolean isRecursive) {
         return minioClient.listObjects(
                 ListObjectsArgs.builder()
-                        .bucket(minioConfig.getBucketName())
+                        .bucket(bucketName)
                         .prefix(pathWithUserDir)
                         .recursive(isRecursive)
                         .build());

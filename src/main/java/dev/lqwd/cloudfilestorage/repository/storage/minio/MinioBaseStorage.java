@@ -1,10 +1,10 @@
 package dev.lqwd.cloudfilestorage.repository.storage.minio;
 
-import dev.lqwd.cloudfilestorage.config.MinioConfiguration;
 import dev.lqwd.cloudfilestorage.repository.storage.BaseFileStorage;
 import io.minio.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -18,8 +18,11 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class MinioBaseStorage implements BaseFileStorage {
 
-    public static final String EXCEPTION_IF_NOT_EXISTS = "x-amz-if-none-match";
-    private final MinioConfiguration minioConfig;
+    @Value("${app.bucket.name}")
+    private String bucketName;
+
+    private static final String EXCEPTION_IF_NOT_EXISTS = "x-amz-if-none-match";
+
     private final MinioClient minioClient;
     private final MinioOperationTemplate operationTemplate;
 
@@ -28,7 +31,7 @@ public class MinioBaseStorage implements BaseFileStorage {
         operationTemplate.execute(() ->
                         minioClient.putObject(
                                 PutObjectArgs.builder()
-                                        .bucket(minioConfig.getBucketName())
+                                        .bucket(bucketName)
                                         .object(pathWithUserDir)
                                         .stream(new ByteArrayInputStream(new byte[]{}), 0, -1)
                                         .headers(Map.of(EXCEPTION_IF_NOT_EXISTS, "*"))
@@ -40,7 +43,7 @@ public class MinioBaseStorage implements BaseFileStorage {
         operationTemplate.execute(() ->
                         minioClient.putObject(
                                 PutObjectArgs.builder()
-                                        .bucket(minioConfig.getBucketName())
+                                        .bucket(bucketName)
                                         .object(pathWithUserDir + file.getOriginalFilename())
                                         .stream(file.getInputStream(), file.getSize(), -1)
                                         .headers(Map.of(EXCEPTION_IF_NOT_EXISTS, "*"))
@@ -52,10 +55,10 @@ public class MinioBaseStorage implements BaseFileStorage {
         operationTemplate.execute(() ->
                         minioClient.copyObject(
                                 CopyObjectArgs.builder()
-                                        .bucket(minioConfig.getBucketName())
+                                        .bucket(bucketName)
                                         .object(target)
                                         .source(CopySource.builder()
-                                                .bucket(minioConfig.getBucketName())
+                                                .bucket(bucketName)
                                                 .object(source)
                                                 .build())
                                         .headers(Map.of(EXCEPTION_IF_NOT_EXISTS, "*"))
@@ -67,7 +70,7 @@ public class MinioBaseStorage implements BaseFileStorage {
         operationTemplate.execute(() ->
                         minioClient.removeObject(
                                 RemoveObjectArgs.builder()
-                                        .bucket(minioConfig.getBucketName())
+                                        .bucket(bucketName)
                                         .object(pathWithUserDir)
                                         .build()),
                 "Error during deletion of resource: " + pathWithUserDir);
@@ -77,7 +80,7 @@ public class MinioBaseStorage implements BaseFileStorage {
         return operationTemplate.execute(() ->
                         minioClient.getObject(
                                 GetObjectArgs.builder()
-                                        .bucket(minioConfig.getBucketName())
+                                        .bucket(bucketName)
                                         .object(pathWithUserDir)
                                         .build()),
                 "Error during download file: " + pathWithUserDir);

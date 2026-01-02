@@ -6,16 +6,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 
 
-@Getter
 @Configuration
+@Getter
 @Slf4j
+@Profile({"prod", "dev"})
 public class MinioConfiguration {
-
-    @Value("${app.bucket.name}")
-    private String bucketName;
-
 
     @Bean
     public MinioClient minioClient(@Value("${MINIO_ENDPOINT}") String endpoint,

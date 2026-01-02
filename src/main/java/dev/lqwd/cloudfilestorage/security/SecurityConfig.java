@@ -1,6 +1,5 @@
 package dev.lqwd.cloudfilestorage.security;
 
-
 import dev.lqwd.cloudfilestorage.security.json_auth.JsonAuthenticationFilter;
 import dev.lqwd.cloudfilestorage.security.user_details.CustomUserDetailsService;
 import jakarta.servlet.http.HttpServletResponse;

@@ -18,6 +18,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -34,6 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Import(TestcontainersConfiguration.class)
+@ActiveProfiles("test")
 public class SecurityTest {
 
     private static final String SIGN_IN_URL = "/api/auth/sign-in";
@@ -42,17 +44,17 @@ public class SecurityTest {
     private static final String APPROPRIATE_USERNAME = "user123";
     private static final String APPROPRIATE_PASSWORD = "password123";
 
-    @MockitoBean
-    private MinioClient minioClient;
-
-    @MockitoBean
-    private MinioBucketStorage minioBucketStorage;
-
     @Autowired
     private MockMvc mockMvc;
 
     @Autowired
     private UserRepository userRepository;
+
+    @MockitoBean
+    private MinioClient minioClient;
+
+    @MockitoBean
+    private MinioBucketStorage minioBucketStorage;
 
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 

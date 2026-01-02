@@ -17,6 +17,7 @@ import java.io.InputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+
 @Service
 @RequiredArgsConstructor
 public class DownloadService {
@@ -28,7 +29,6 @@ public class DownloadService {
     private final DownloadMinioService downloadStorageService;
     private final ValidationMinioService validationStorageService;
     private final FindMinioService findStorageService;
-
 
     public DownloadedResponseDto download(String rawPath, long id) {
         ProcessedPath path = pathProcessor.processResource(rawPath);

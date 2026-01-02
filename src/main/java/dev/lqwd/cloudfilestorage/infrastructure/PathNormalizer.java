@@ -24,7 +24,6 @@ public class PathNormalizer {
         }
 
         String trimmedPath = path.trim()
-                .replace("\\", SLASH)
                 .replaceAll("/{2,}", SLASH);
 
         return trimmedPath.equals(SLASH) ? EMPTY : trimmedPath;

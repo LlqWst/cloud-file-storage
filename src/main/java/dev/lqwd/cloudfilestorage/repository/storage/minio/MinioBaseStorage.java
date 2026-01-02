@@ -26,7 +26,6 @@ public class MinioBaseStorage implements BaseFileStorage {
     private final MinioClient minioClient;
     private final MinioOperationTemplate operationTemplate;
 
-
     public void createDirectory(String pathWithUserDir) {
         operationTemplate.execute(() ->
                         minioClient.putObject(

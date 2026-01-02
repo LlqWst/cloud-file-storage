@@ -19,7 +19,6 @@ public class MinioFindStorage implements FindResourceStorage<StatObjectResponse>
     private final MinioClient minioClient;
     private final MinioOperationTemplate operationTemplate;
 
-
     public Optional<StatObjectResponse> findResource(String pathWithUserDir) {
         return operationTemplate.findResource(() ->
                         minioClient.statObject(

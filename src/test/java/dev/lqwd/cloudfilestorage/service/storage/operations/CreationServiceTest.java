@@ -23,7 +23,7 @@ class CreationServiceTest extends BaseServiceTest {
     }
 
     @Test
-    void ShouldThrowException_When_CreateFolder_Without_EndSlash() {
+    void ShouldThrowBadRequestException_When_CreateFolder_Without_EndSlash() {
         BadRequestException exception = assertThrows(BadRequestException.class, () ->
                 creationService.createDir(TEST_FOLDER_WITHOUT_END_SLASH, TEST_ID));
 
@@ -32,7 +32,7 @@ class CreationServiceTest extends BaseServiceTest {
     }
 
     @Test
-    void ShouldThrowException_When_CreateFolderDuplicatedFolder() {
+    void ShouldThrowAlreadyExistException_When_CreateFolderDuplicatedFolder() {
         creationService.createDir(TEST_CORRECT_FOLDER, TEST_ID);
         AlreadyExistException exception = assertThrows(AlreadyExistException.class, () ->
                 creationService.createDir(TEST_CORRECT_FOLDER, TEST_ID));
@@ -42,7 +42,7 @@ class CreationServiceTest extends BaseServiceTest {
     }
 
     @Test
-    void ShouldThrowException_When_CreateFolder_With_ParentPathDoesntExists() {
+    void ShouldThrowNotFoundException_When_CreateFolder_With_ParentPathDoesntExists() {
         NotFoundException exception = assertThrows(NotFoundException.class, () ->
                 creationService.createDir(TEST_FOLDER_WITH_PARENT, TEST_ID));
 
@@ -50,7 +50,7 @@ class CreationServiceTest extends BaseServiceTest {
     }
 
     @Test
-    void ShouldThrowException_When_CreateFolder_With_NameHasOneOfForbiddenChar() {
+    void ShouldThrowBadRequestException_When_CreateFolder_With_NameHasOneOfForbiddenChar() {
         FORBIDDEN_CHARS.forEach(symbol -> {
                     Exception exception = assertThrows(BadRequestException.class, () ->
                             creationService.createDir(TEST_FOLDER_WITHOUT_END_SLASH + symbol + SLASH, TEST_ID)
@@ -64,7 +64,7 @@ class CreationServiceTest extends BaseServiceTest {
     }
 
     @Test
-    void ShouldThrowException_When_CreateFolder_With_NameIsRoot() {
+    void ShouldThrowBadRequestException_When_CreateFolder_With_NameIsRoot() {
         Set<String> TEST_PARAMETERS = Set.of(EMPTY, SLASH);
 
         TEST_PARAMETERS.forEach(parameter -> {
@@ -78,7 +78,7 @@ class CreationServiceTest extends BaseServiceTest {
     }
 
     @Test
-    void ShouldThrowException_When_CreateFolder_With_NameIsNull() {
+    void ShouldThrowBadRequestException_When_CreateFolder_With_NameIsNull() {
         Exception exception = assertThrows(BadRequestException.class, () ->
                 creationService.createDir(null, TEST_ID));
 
@@ -88,7 +88,7 @@ class CreationServiceTest extends BaseServiceTest {
     }
 
     @Test
-    void ShouldThrowException_When_CreateFolder_When_FileExistsWithTheSameName() {
+    void ShouldThrowAlreadyExistException_When_CreateFolder_When_FileExistsWithTheSameName() {
         uploadTestFileInRootDir();
         AlreadyExistException exception = assertThrows(AlreadyExistException.class, () ->
                 creationService.createDir(TEST_CORRECT_FILE + SLASH, TEST_ID));

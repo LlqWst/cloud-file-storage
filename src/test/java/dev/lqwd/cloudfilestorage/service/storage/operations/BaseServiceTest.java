@@ -2,7 +2,6 @@ package dev.lqwd.cloudfilestorage.service.storage.operations;
 
 import dev.lqwd.cloudfilestorage.TestcontainersConfiguration;
 import dev.lqwd.cloudfilestorage.repository.storage.minio.MinioBucketStorage;
-import dev.lqwd.cloudfilestorage.service.storage.provider.minio.ModificationsMinioService;
 import dev.lqwd.cloudfilestorage.service.storage.provider.minio.ValidationMinioService;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeAll;
@@ -28,19 +27,21 @@ import java.util.Set;
 @ActiveProfiles("test")
 abstract class BaseServiceTest {
 
-    protected static final long TEST_ID = 1;
-    protected static final String TEST_BUCKET = "test-bucket";
+
     protected static final String ROOT = "";
     protected static final String EMPTY = "";
     protected static final String SLASH = "/";
     protected static final Set<Character> FORBIDDEN_CHARS = Set.of('*', ':', '<', '>', '\\', '|', '?');
     protected static final String FILE_CONTENT_TYPE = "text/plain";
     protected static final String MULTIPART_HTTP_PARAMETER = "object";
+    private static final String CONTENT = "Test file content";
 
+    protected static final long TEST_ID = 1;
+    protected static final String TEST_BUCKET = "test-bucket";
     protected static final String TEST_CORRECT_FILE = "file.txt";
-    protected static final String TEST_CORRECT_FOLDER = "folder_test/";
-    protected static final String TEST_PARENT_FOLDER = "parent_path/";
     protected static final String TEST_FOLDER_WITHOUT_END_SLASH = "folder_test";
+    protected static final String TEST_CORRECT_FOLDER = TEST_FOLDER_WITHOUT_END_SLASH + SLASH;
+    protected static final String TEST_PARENT_FOLDER = "parent_path/";
     protected static final String TEST_FOLDER_WITH_PARENT = TEST_PARENT_FOLDER + TEST_CORRECT_FOLDER;
 
     @Autowired
@@ -53,7 +54,7 @@ abstract class BaseServiceTest {
     protected ValidationMinioService validationProviderService;
 
     @Autowired
-    protected ModificationsMinioService modificationsProviderService;
+    protected ModificationService modificationService;
 
     @Autowired
     protected FindService findService;
@@ -70,7 +71,11 @@ abstract class BaseServiceTest {
     void setUp() {
         bucketProviderStorage.createBucketIfNotExists();
         creationService.createUserRootDir(TEST_ID);
-        modificationsProviderService.removeDir(ROOT, TEST_ID);
+        modificationService.removeResource(ROOT, TEST_ID);
+    }
+
+    protected static @NotNull MockMultipartFile createFile(String fileName) {
+        return createFile(fileName,CONTENT + System.currentTimeMillis());
     }
 
     protected static @NotNull MockMultipartFile createFile(String fileName, String content) {
@@ -83,15 +88,18 @@ abstract class BaseServiceTest {
     }
 
     protected void uploadTestFileInRootDir() {
-        String content = "Test file content";
-        MultipartFile[] file = new MockMultipartFile[]{
-                createFile(TEST_CORRECT_FILE, content)
-        };
+        MultipartFile[] file = getMultipartFiles();
         uploadService.upload(ROOT, TEST_ID, file);
     }
 
     protected void createTestFolderInRootDir(){
         creationService.createDir(TEST_CORRECT_FOLDER, TEST_ID);
+    }
+
+    private static MultipartFile @NotNull [] getMultipartFiles() {
+        return new MockMultipartFile[]{
+                createFile(TEST_CORRECT_FILE)
+        };
     }
 
 }

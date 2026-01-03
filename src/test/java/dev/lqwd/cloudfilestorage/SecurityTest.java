@@ -89,7 +89,7 @@ public class SecurityTest {
     }
 
     @Test
-    public void shouldThrowBadRequest_When_UsernameLessThan6Char() throws Exception {
+    public void shouldThrowBadRequest_When_UsernameLessThan5Char() throws Exception {
         String username = "123";
         String password = "password123";
         String jsonPath = "$.message";
@@ -99,7 +99,7 @@ public class SecurityTest {
     }
 
     @Test
-    public void shouldThrowBadRequest_When_PasswordLessThan6Char() throws Exception {
+    public void shouldThrowBadRequest_When_PasswordLessThan5Char() throws Exception {
         String username = "username123";
         String password = "pass";
         String jsonPath = "$.message";
@@ -121,7 +121,6 @@ public class SecurityTest {
     @Test
     @WithAnonymousUser
     public void shouldThrowUnauthorized_When_GetRestrictedUrlUnauthorized() throws Exception {
-
         mockMvc.perform(get(GET_ME_URL))
                 .andDo(print())
                 .andExpect(status().is(HttpStatus.UNAUTHORIZED.value()));
@@ -141,7 +140,6 @@ public class SecurityTest {
     @Test
     @WithAnonymousUser
     public void shouldThrowUnauthorized_When_UnauthorizedLogout() throws Exception {
-
         mockMvc.perform(post(SIGN_OUT_URL))
                 .andDo(print())
                 .andExpect(status().is(HttpStatus.UNAUTHORIZED.value()));
@@ -150,7 +148,6 @@ public class SecurityTest {
     @Test
     @WithMockUser
     public void shouldThrowUnauthorized_When_AuthorizedLogout() throws Exception {
-
         mockMvc.perform(post(SIGN_OUT_URL))
                 .andDo(print())
                 .andExpect(status().is(HttpStatus.NO_CONTENT.value()));

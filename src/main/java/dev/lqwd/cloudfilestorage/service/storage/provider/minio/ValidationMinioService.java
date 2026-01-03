@@ -46,9 +46,9 @@ public class ValidationMinioService implements ValidationStorageService {
         }
     }
 
-    public void validateParentPath(long id, String parentPathTo) {
-        if (!isExist(parentPathTo, id)) {
-            throw new NotFoundException("Parent path doesn't exist: " + parentPathTo);
+    public void validateParentPath(long id, String parentPath) {
+        if (!isExist(parentPath, id)) {
+            throw new NotFoundException("Parent path doesn't exist: " + parentPath);
         }
     }
 

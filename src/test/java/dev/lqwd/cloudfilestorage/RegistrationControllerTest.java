@@ -54,84 +54,73 @@ public class RegistrationControllerTest {
 
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-
     @Test
     void shouldThrowException_When_DuplicateUserName() throws Exception {
-
         String username = "username124";
         String password = "test_password";
         String jsonPath = "$.message";
         String jsonPathValue = "User already exists";
         registerWithAppropriateUsername(username);
+
         doSignUp(username, password, HttpStatus.CONFLICT.value(), jsonPath, jsonPathValue);
     }
 
     @Test
     void shouldRegister_With_AppropriateUsername() throws Exception {
-
         String username = "test_username";
         registerWithAppropriateUsername(username);
     }
 
     @Test
     void shouldReturnJsonErrorMessage_With_InappropriateUsername() throws Exception {
-
         String username = "test";
         signUpWithInappropriateUsername(username);
     }
 
     @Test
     void shouldReturnJsonErrorMessage_With_NullUsername() throws Exception {
-
         String username = null;
         signUpWithInappropriateUsername(username);
     }
 
     @Test
     void shouldReturnJsonErrorMessage_With_EmptyUsername() throws Exception {
-
         String username = "";
         signUpWithInappropriateUsername(username);
     }
 
     @Test
     void shouldReturnJsonErrorMessage_With_BlankUsername() throws Exception {
-
         String username = "             ";
         signUpWithInappropriateUsername(username);
     }
 
     @Test
     void shouldReturnJsonErrorMessage_With_InappropriateEmail() throws Exception {
-
         String username = "test@gmail...com";
         signUpWithInappropriateUsername(username);
     }
 
     @Test
     void shouldReturnJsonErrorMessage_With_InappropriatePassword() throws Exception {
-
         String password = "test";
         signUpWithInappropriatePassword(password);
     }
 
     @Test
     void shouldReturnJsonErrorMessage_With_NullPassword() throws Exception {
-
         String password = null;
         signUpWithInappropriatePassword(password);
     }
 
     @Test
     void shouldReturnJsonErrorMessage_With_EmptyPassword() throws Exception {
-
         String password = "";
         signUpWithInappropriatePassword(password);
     }
 
     @Test
     void shouldReturnJsonErrorMessage_With_BlankPassword() throws Exception {
-
         String password = "          ";
         signUpWithInappropriatePassword(password);
     }

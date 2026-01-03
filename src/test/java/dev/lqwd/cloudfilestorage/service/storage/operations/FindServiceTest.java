@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class FindServiceTest extends BaseServiceTest {
 
     @Test
-    void ShouldThrowException_When_FileDoesntExists() {
+    void ShouldThrowNotFoundException_When_FileDoesntExists() {
         NotFoundException exception = assertThrows(NotFoundException.class, () ->
                 findService.getResource(TEST_CORRECT_FILE, TEST_ID));
 
@@ -33,7 +33,7 @@ class FindServiceTest extends BaseServiceTest {
     }
 
     @Test
-    void ShouldReturnResources_From_RootDir() {
+    void ShouldReturnResourcesFromRootDir() {
         createTestFolderInRootDir();
         uploadTestFileInRootDir();
 
@@ -58,19 +58,19 @@ class FindServiceTest extends BaseServiceTest {
         createTestFolderInRootDir();
         uploadTestFileInRootDir();
 
-        String newFolder = TEST_CORRECT_FOLDER + "new_folder/";
-        creationService.createDir(newFolder, TEST_ID);
+        String newFolderName1 = "new_folder";
+        String newFolder1 = TEST_CORRECT_FOLDER + newFolderName1 + SLASH;
+        creationService.createDir(newFolder1, TEST_ID);
 
         String newFolderName2 = "new_fi_folder";
-        String newFolder_2 = TEST_CORRECT_FOLDER + newFolderName2 + SLASH;
-        creationService.createDir(newFolder_2, TEST_ID);
+        String newFolder2 = TEST_CORRECT_FOLDER + newFolderName2 + SLASH;
+        creationService.createDir(newFolder2, TEST_ID);
 
-        String content = "test 123";
         String newFileName = "fi.txt";
         MultipartFile[] file = new MockMultipartFile[] {
-                createFile(newFileName, content)
+                createFile(newFileName)
         };
-        uploadService.upload(newFolder, TEST_ID, file);
+        uploadService.upload(newFolder1, TEST_ID, file);
 
         Set<String> expectedNames = Set.of(
                 newFileName,
@@ -78,8 +78,8 @@ class FindServiceTest extends BaseServiceTest {
                 newFolderName2
         );
 
-        String query = "fi";
-        List<ResourceResponseDto> answer = findService.searchResource(query, TEST_ID);
+        String queryForSearch = "fi";
+        List<ResourceResponseDto> answer = findService.searchResource(queryForSearch, TEST_ID);
         assertNotNull(answer);
         assertEquals(expectedNames.size(), answer.size());
 

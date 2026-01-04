@@ -27,7 +27,13 @@ import java.util.Set;
 @ActiveProfiles("test")
 abstract class BaseServiceTest {
 
+    protected static final String NAME_201_CHARS = "_123456789_123456789_123456789_123456789_123456789" +
+                                                   "_123456789_123456789_123456789_123456789_123456789" +
+                                                   "_123456789_123456789_123456789_123456789_123456789" +
+                                                   "_123456789_123456789_123456789_123456789_123456789" +
+                                                   "_";
 
+    protected static final int MAX_NAME_LENGTH = 200;
     protected static final String ROOT = "";
     protected static final String EMPTY = "";
     protected static final String SLASH = "/";

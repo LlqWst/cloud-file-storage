@@ -17,9 +17,7 @@ public class PathNormalizer {
     private static final int END_SLASH = 1;
 
     public String normalize(String path) {
-        if (path == null ||
-            path.isBlank()) {
-
+        if (path == null || path.isBlank()) {
             return EMPTY;
         }
 
@@ -29,7 +27,7 @@ public class PathNormalizer {
         return trimmedPath.equals(SLASH) ? EMPTY : trimmedPath;
     }
 
-    public String normalize(Path path) {
+    public String replaceBackSlashToSlash(Path path) {
         return path.toString()
                 .replace("\\", SLASH);
     }

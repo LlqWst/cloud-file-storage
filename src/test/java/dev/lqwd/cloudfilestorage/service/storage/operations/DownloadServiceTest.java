@@ -36,7 +36,7 @@ class DownloadServiceTest extends BaseServiceTest {
         assertDoesNotThrow(() -> answer.writeTo(outputStream));
 
         assertArrayEquals(file.getBytes(), outputStream.toByteArray());
-        assertEquals(new String(file.getBytes()), outputStream.toString(StandardCharsets.UTF_8));
+        assertEquals(new String(file.getBytes(), StandardCharsets.UTF_8), outputStream.toString(StandardCharsets.UTF_8));
     }
 
     @Test
@@ -50,7 +50,7 @@ class DownloadServiceTest extends BaseServiceTest {
     }
 
     @Test
-    void ShouldDownloadFolder() throws IOException {
+    void ShouldDownloadFolderInZip() throws IOException {
         String folderPath = TEST_PARENT_FOLDER;
 
         String innerFolderName = "inner folder/";
@@ -81,20 +81,15 @@ class DownloadServiceTest extends BaseServiceTest {
         answer.writeTo(outputStream);
         byte[] zipBytes = outputStream.toByteArray();
 
-        byte[] contentFile1Bytes = contentFile1.getBytes();
-        byte[] contentFile2Bytes = contentFile2.getBytes();
-        byte[] contentFile3Bytes = contentFile3.getBytes();
-        byte[] emptyBytes = new byte[0];
-
         Map<String, byte[]> expectedResources = new HashMap<>(
                 Map.of(
-                        fileName1, contentFile1Bytes,
-                        fileName2, contentFile2Bytes,
-                        innerPathForFile3, contentFile3Bytes,
-                        innerFolderName, emptyBytes
+                        fileName1, contentFile1.getBytes(),
+                        fileName2, contentFile2.getBytes(),
+                        innerPathForFile3, contentFile3.getBytes(),
+                        innerFolderName, new byte[0]
                 ));
-        Map<String, byte[]> answerResources = new HashMap<>();
 
+        Map<String, byte[]> answerResources = new HashMap<>();
         try (ZipInputStream zis = new ZipInputStream(new ByteArrayInputStream(zipBytes))) {
             ZipEntry entry;
             while ((entry = zis.getNextEntry()) != null) {
@@ -114,7 +109,14 @@ class DownloadServiceTest extends BaseServiceTest {
                     "Отсутствует файл: " + expectedFileName);
 
             assertArrayEquals(expectedContent, answerResources.get(expectedFileName),
-                    "Неверное содержимое файла: " + expectedFileName);
+                    "Неверное содержимое файла в байтах: " + expectedFileName);
+
+            assertEquals(
+                    new String(expectedContent, StandardCharsets.UTF_8),
+                    new String(answerResources.get(expectedFileName), StandardCharsets.UTF_8),
+                    "Неверное содержимое файла: " + expectedFileName
+            );
+
         }
     }
 

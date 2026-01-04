@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-@Profile({"prod", "dev"})
+@Profile({"prod", "dev", "docker"})
 public class BucketInitializer {
 
     private final MinioBucketStorage bucketStorage;

@@ -1,6 +1,7 @@
 volumes:
   postgres_data:
   minio_data:
+  redis_data:
 
 services:
   postgres:
@@ -11,9 +12,29 @@ services:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASS}
     ports:
-      - "5433:5432"
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql
+
+  back:
+    container_name: back
+    build: .
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      DB_URL: ${DB_URL}
+      DB_USER: ${DB_USER}
+      DB_PASS: ${DB_PASS}
+      MINIO_ENDPOINT: ${MINIO_ENDPOINT}
+      MINIO_ADMIN: ${MINIO_ADMIN}
+      MINIO_PASS: ${MINIO_PASS}
+      REDIS_PASS: ${REDIS_PASS}
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+      SERVER_URL: ${SERVER_URL}
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
 
   minio:
     image: minio/minio:latest
@@ -29,9 +50,22 @@ services:
       - minio_data:/data
     command: server /data --console-address ":9001"
 
+  nginx:
+    container_name: nginx
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    depends_on:
+      - back
+
   redis:
+    container_name: redis
     image: 'redis:latest'
     environment:
       REDIS_PASSWORD: ${REDIS_PASS}
     ports:
       - '6379:6379'
+    volumes:
+      - redis_data:/data

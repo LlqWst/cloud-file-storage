@@ -57,7 +57,11 @@ public class SecurityConfig {
 
     private static final List<String> ALLOWED_ORIGINS = Arrays.asList(
             "http://localhost:3000",
-            "http://localhost:8080"
+            "http://localhost:8080",
+            "http://localhost:80",
+            "http://217.60.5.12:8080",
+            "http://217.60.5.12:80",
+            "http://217.60.5.12:3000"
     );
 
     private final CustomUserDetailsService customUserDetailsService;

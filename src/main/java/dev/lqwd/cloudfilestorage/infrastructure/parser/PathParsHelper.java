@@ -23,7 +23,7 @@ public class PathParsHelper {
                 path.getFileName());
 
         if (name.isPresent()) {
-            return pathNormalizer.normalize(name.get());
+            return pathNormalizer.replaceBackSlashToSlash(name.get());
         }
         return EMPTY;
     }
@@ -33,7 +33,7 @@ public class PathParsHelper {
         if (parentPath == null) {
             return EMPTY;
         }
-        return pathNormalizer.normalize(parentPath) + SLASH;
+        return pathNormalizer.replaceBackSlashToSlash(parentPath) + SLASH;
     }
 
     public Type getType(String resourcePath) {

@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Profile;
 @Configuration
 @Getter
 @Slf4j
-@Profile({"prod", "dev"})
+@Profile({"prod", "dev", "docker"})
 public class MinioConfiguration {
 
     @Bean

@@ -83,4 +83,4 @@ docker-compose up -d --build
 ---
 
 ## 📚 Дополнительная информация
-Проект был завершен в рамках [Java Backend Learning Roadmap](https://zhukovsd.github.io/java-backend-learning-course/projects/weather-viewer/)
+Проект был завершен в рамках [Java Backend Learning Roadmap](https://zhukovsd.github.io/java-backend-learning-course/projects/cloud-file-storage/)

@@ -57,27 +57,17 @@
 
 ### 3️⃣ **Деплой через Docker-compose**
 
-Для Linux/MAC:
-
-Перейдите в папку с файлом `docer-compose`
-```bash
-cd /путь/к/проекту
-```
-Разверните проект
-```bash
-docker-compose up -d --build
-```
-
-Для Windows:
+Для Linux/MAC/Windows:
 
 Перейдите в папку с файлом `docker-compose`
-```shell
+```bash
 cd /путь/к/проекту
 ```
 Разверните проект
-```shell
+```bash
 docker-compose up -d --build
 ```
+
 - App available at [app](http://localhost:3000)
 - Minio console at [minio](http://127.0.0.1:9001/login) login - admin_pub, pass - admin_pub
 ---

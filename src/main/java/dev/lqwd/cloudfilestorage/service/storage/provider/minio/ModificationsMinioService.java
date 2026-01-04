@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.regex.Pattern;
+
 
 @Service
 @Slf4j
@@ -30,7 +32,8 @@ public class ModificationsMinioService implements ModificationsStorageService {
     public void moveDir(String from, String to, long id) {
         findMinioService.findAllResourcesPath(from, id)
                 .forEach(source -> {
-                    String target = source.replaceFirst(from, to);
+                    String target = source.replaceFirst(
+                            Pattern.quote(from), to);
                     moveResource(source, target);
                 });
     }

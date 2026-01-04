@@ -2,6 +2,7 @@ package dev.lqwd.cloudfilestorage.service.storage.operations;
 
 import dev.lqwd.cloudfilestorage.dto.resource.ResourceResponseDto;
 import dev.lqwd.cloudfilestorage.exception.AlreadyExistException;
+import dev.lqwd.cloudfilestorage.exception.BadRequestException;
 import dev.lqwd.cloudfilestorage.exception.NotFoundException;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockMultipartFile;
@@ -193,6 +194,24 @@ class ModificationServiceTest extends BaseServiceTest {
 
         assertEquals(expect3.size(), answer3.size());
         assertEquals(expect3, answer3);
+    }
+
+    @Test
+    void ShouldThrowBadRequestException_When_MoveToItself() {
+        String folderName1 = "1";
+        String folderPath1 = folderName1 + SLASH;
+        creationService.createDir(folderPath1, TEST_ID);
+
+        String folderName2 = "2";
+        String innerFolder = folderPath1 + folderName2 + SLASH;
+        creationService.createDir(innerFolder, TEST_ID);
+
+        String folder1NewPath = folderPath1 + folderPath1;
+        BadRequestException exception = assertThrows(BadRequestException.class, () ->
+                modificationService.moveResource(folderPath1, folder1NewPath, TEST_ID));
+
+
+        assertEquals("You cannot copy resource to itself", exception.getMessage());
     }
 
 }

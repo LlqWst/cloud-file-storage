@@ -24,12 +24,14 @@
 ## 🖥️ Принцип работы
 
 ### 🔑 Аутентификация
-- **Sign up** → Регистрация нового пользователя c автоматический Sign in
+- **Sign up** → Регистрация и Sign in нового пользователя
 - **Sign in и Log out** → аутентификация возложена на Spring Security
 - **Session** → сессии хранятся в Redis
 
-### 💾 Cloud storage
-- Возможность создавать папки
+### ☁️ Cloud storage
+
+#### **Возможности:**
+- Создавать папки
 - Загружать папки рекурсивно
 - Загружать файлы
 - Перемещать файлы/папки
@@ -38,7 +40,7 @@
 
 ### 📋 Swagger (документация)
 - Проект использует **Swagger/OpenAPI** для автоматической генерации документации REST API.
-- **Swagger UI** (интерактивная документация, доступна после деплоя приложения): http://localhost:8080/swagger-ui/index.html#/
+- **Swagger UI** (интерактивная документация, доступна после деплоя приложения): [swagger](http://localhost:8080/swagger-ui/index.html#/)
 
 ---
 
@@ -75,8 +77,8 @@ cd /путь/к/проекту
 ```shell
 docker-compose up -d --build
 ```
-- App available at [http://localhost:3000](http://localhost:8080/weather-viewer/)
-
+- App available at [app](http://localhost:3000)
+- Minio console at [minio](http://127.0.0.1:9001/login) login - admin_pub, pass - admin_pub
 ---
 
 ## 📚 Дополнительная информация

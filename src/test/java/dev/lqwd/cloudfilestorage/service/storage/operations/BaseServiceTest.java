@@ -1,7 +1,7 @@
 package dev.lqwd.cloudfilestorage.service.storage.operations;
 
 import dev.lqwd.cloudfilestorage.TestcontainersConfiguration;
-import dev.lqwd.cloudfilestorage.repository.storage.StorageBucket;
+import dev.lqwd.cloudfilestorage.repository.storage.BucketStorage;
 import dev.lqwd.cloudfilestorage.service.storage.provider.ValidationStorageService;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeAll;
@@ -51,7 +51,7 @@ abstract class BaseServiceTest {
     protected static final String TEST_FOLDER_WITH_PARENT = TEST_PARENT_FOLDER + TEST_CORRECT_FOLDER;
 
     @Autowired
-    protected StorageBucket bucketProviderStorage;
+    protected BucketStorage bucketProviderStorage;
 
     @Autowired
     protected CreationService creationService;

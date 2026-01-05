@@ -5,7 +5,7 @@ import dev.lqwd.cloudfilestorage.entity.Type;
 import dev.lqwd.cloudfilestorage.exception.BadRequestException;
 import dev.lqwd.cloudfilestorage.infrastructure.mapper.ResourceResponseMapper;
 import dev.lqwd.cloudfilestorage.service.storage.provider.FindStorageService;
-import dev.lqwd.cloudfilestorage.service.storage.provider.ModificationsStorageService;
+import dev.lqwd.cloudfilestorage.service.storage.provider.ModificationStorageService;
 import dev.lqwd.cloudfilestorage.service.storage.provider.ValidationStorageService;
 import dev.lqwd.cloudfilestorage.infrastructure.path_processor.PathProcessor;
 import dev.lqwd.cloudfilestorage.infrastructure.path_processor.ProcessedPath;
@@ -26,7 +26,7 @@ public class ModificationService {
 
     private static final String SLASH = "/";
 
-    private final ModificationsStorageService modificationsStorageService;
+    private final ModificationStorageService modificationsStorageService;
     private final ValidationStorageService validationStorageService;
     private final FindStorageService findStorageService;
     private final PathProcessor pathProcessor;

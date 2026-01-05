@@ -5,7 +5,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.InputStream;
 
 
-public interface BaseFileStorage {
+public interface ResourceStorage {
 
     InputStream downloadByPath(String pathWithUserDir);
 

@@ -1,7 +1,7 @@
 package dev.lqwd.cloudfilestorage.repository.storage;
 
 
-public interface StorageBucket {
+public interface BucketStorage {
 
     void createBucketIfNotExists();
 

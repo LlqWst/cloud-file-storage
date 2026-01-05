@@ -1,6 +1,6 @@
 package dev.lqwd.cloudfilestorage.repository.storage.minio;
 
-import dev.lqwd.cloudfilestorage.repository.storage.StorageBucket;
+import dev.lqwd.cloudfilestorage.repository.storage.BucketStorage;
 import io.minio.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 @RequiredArgsConstructor
-public class MinioBucketStorage implements StorageBucket {
+public class MinioBucketStorage implements BucketStorage {
 
     @Value("${app.bucket.name}")
     private String bucketName;

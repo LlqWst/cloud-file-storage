@@ -1,6 +1,6 @@
 HELP.md
 .gradle
-dev_compose.yaml
+compose.yaml
 build/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
@@ -41,4 +41,5 @@ out/
 /gradle/
 /.env
 /src/main/java/dev/lqwd/cloudfilestorage/controller/ForTesting.java
-/dev_compose.yaml
+/compose.yaml
+/pub_Dockerfile

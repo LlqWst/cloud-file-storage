@@ -1,7 +1,7 @@
 package dev.lqwd.cloudfilestorage.repository.storage.minio;
 
 import dev.lqwd.cloudfilestorage.exception.StorageException;
-import dev.lqwd.cloudfilestorage.repository.storage.FindAllResourcesStorage;
+import dev.lqwd.cloudfilestorage.repository.storage.FindAlStorage;
 import io.minio.*;
 import io.minio.messages.Item;
 import lombok.RequiredArgsConstructor;
@@ -9,12 +9,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 
 @Component
 @RequiredArgsConstructor
-public class MinioFindAllStorage implements FindAllResourcesStorage<Item> {
+public class MinioFindAllStorage implements FindAlStorage<Item> {
 
     @Value("${app.bucket.name}")
     private String bucketName;
@@ -23,12 +24,21 @@ public class MinioFindAllStorage implements FindAllResourcesStorage<Item> {
     private final MinioOperationTemplate operationTemplate;
 
     public List<Item> findResources(String pathWithUserDir, boolean isRecursive) {
+       return findItems(pathWithUserDir, isRecursive).toList();
+    }
+
+    public List<String> findAllResourcePaths(String pathWithUserDir, boolean isRecursive) {
+        return findItems(pathWithUserDir, isRecursive)
+                .map(Item::objectName)
+                .toList();
+    }
+
+    private Stream<Item> findItems(String pathWithUserDir, boolean isRecursive) {
         return operationTemplate.execute(() ->
                         StreamSupport.stream(
                                         getResultItems(pathWithUserDir, isRecursive)
                                                 .spliterator(), false)
-                                .map(this::safeGetItem)
-                                .toList(),
+                                .map(this::safeGetItem),
                 "Error during getting of directory's resources. path: " + pathWithUserDir);
     }
 

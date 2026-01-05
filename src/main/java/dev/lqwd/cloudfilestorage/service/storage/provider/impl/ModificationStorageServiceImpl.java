@@ -1,8 +1,8 @@
-package dev.lqwd.cloudfilestorage.service.storage.provider.minio;
+package dev.lqwd.cloudfilestorage.service.storage.provider.impl;
 
 import dev.lqwd.cloudfilestorage.infrastructure.UserDirectoryProvider;
-import dev.lqwd.cloudfilestorage.repository.storage.minio.MinioBaseStorage;
-import dev.lqwd.cloudfilestorage.service.storage.provider.ModificationsStorageService;
+import dev.lqwd.cloudfilestorage.repository.storage.ResourceStorage;
+import dev.lqwd.cloudfilestorage.service.storage.provider.ModificationStorageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -13,24 +13,24 @@ import java.util.regex.Pattern;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class ModificationsMinioService implements ModificationsStorageService {
+public class ModificationStorageServiceImpl implements ModificationStorageService {
 
     private final UserDirectoryProvider userDirectoryProvider;
-    private final MinioBaseStorage minioBaseStorage;
-    private final FindMinioService findMinioService;
+    private final ResourceStorage resourceStorage;
+    private final FindStorageServiceImpl findService;
 
     public void removeDir(String dirPath, long id) {
-        findMinioService.findAllResourcesPath(dirPath, id)
-                .forEach(minioBaseStorage::removeResource);
+        findService.findAllResourcesPath(dirPath, id)
+                .forEach(resourceStorage::removeResource);
     }
 
     public void removeFile(String path, long id) {
         String pathWithUserDir = getPathWithUserDir(path, id);
-        minioBaseStorage.removeResource(pathWithUserDir);
+        resourceStorage.removeResource(pathWithUserDir);
     }
 
     public void moveDir(String from, String to, long id) {
-        findMinioService.findAllResourcesPath(from, id)
+        findService.findAllResourcesPath(from, id)
                 .forEach(source -> {
                     String target = source.replaceFirst(
                             Pattern.quote(from), to);
@@ -45,8 +45,8 @@ public class ModificationsMinioService implements ModificationsStorageService {
     }
 
     private void moveResource(String source, String target) {
-        minioBaseStorage.copyResource(source, target);
-        minioBaseStorage.removeResource(source);
+        resourceStorage.copyResource(source, target);
+        resourceStorage.removeResource(source);
     }
 
     private String getPathWithUserDir(String path, long id) {

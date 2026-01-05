@@ -1,11 +1,11 @@
-package dev.lqwd.cloudfilestorage.service.storage.provider.minio;
+package dev.lqwd.cloudfilestorage.service.storage.provider.impl;
 
 import dev.lqwd.cloudfilestorage.exception.AlreadyExistException;
 import dev.lqwd.cloudfilestorage.exception.NotFoundException;
-import dev.lqwd.cloudfilestorage.repository.storage.minio.MinioFindStorage;
+import dev.lqwd.cloudfilestorage.repository.storage.FindStorage;
 import dev.lqwd.cloudfilestorage.infrastructure.PathNormalizer;
 import dev.lqwd.cloudfilestorage.infrastructure.UserDirectoryProvider;
-import dev.lqwd.cloudfilestorage.service.storage.provider.ValidationStorageService;
+import io.minio.StatObjectResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -14,13 +14,13 @@ import org.springframework.stereotype.Service;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class ValidationMinioService implements ValidationStorageService {
+public class ValidationStorageServiceImpl implements dev.lqwd.cloudfilestorage.service.storage.provider.ValidationStorageService {
 
     private static final String SLASH = "/";
 
     private final PathNormalizer pathNormalizer;
     private final UserDirectoryProvider userDirectoryProvider;
-    private final MinioFindStorage minioFindStorage;
+    private final FindStorage<StatObjectResponse> findStorage;
 
     public boolean isExistIgnoreEndSlash(String path, long id) {
         String pathWithoutEndSlash = pathNormalizer.getPathWithoutEndSlash(path);
@@ -30,7 +30,7 @@ public class ValidationMinioService implements ValidationStorageService {
 
     public boolean isExist(String path, long id) {
         log.debug("checking for the existence of a resource");
-        return minioFindStorage.findResource(userDirectoryProvider.provide(path, id))
+        return findStorage.findResource(userDirectoryProvider.provide(path, id))
                 .isPresent();
     }
 

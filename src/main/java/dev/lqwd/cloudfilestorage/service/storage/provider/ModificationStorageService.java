@@ -1,6 +1,6 @@
 package dev.lqwd.cloudfilestorage.service.storage.provider;
 
-public interface ModificationsStorageService {
+public interface ModificationStorageService {
 
     void removeDir(String dirPath, long id);
 

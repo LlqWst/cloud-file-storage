@@ -1,6 +1,6 @@
 package dev.lqwd.cloudfilestorage.repository.storage.minio;
 
-import dev.lqwd.cloudfilestorage.repository.storage.BaseFileStorage;
+import dev.lqwd.cloudfilestorage.repository.storage.ResourceStorage;
 import io.minio.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +16,7 @@ import java.util.Map;
 @Component
 @Slf4j
 @RequiredArgsConstructor
-public class MinioBaseStorage implements BaseFileStorage {
+public class MinioResourceStorage implements ResourceStorage {
 
     @Value("${app.bucket.name}")
     private String bucketName;

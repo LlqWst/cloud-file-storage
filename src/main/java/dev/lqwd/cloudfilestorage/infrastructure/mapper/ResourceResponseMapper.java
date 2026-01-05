@@ -2,6 +2,7 @@ package dev.lqwd.cloudfilestorage.infrastructure.mapper;
 
 import dev.lqwd.cloudfilestorage.dto.resource.DirectoryResponseDto;
 import dev.lqwd.cloudfilestorage.dto.resource.FileResponseDto;
+import dev.lqwd.cloudfilestorage.dto.resource.ParsedResourceDto;
 import dev.lqwd.cloudfilestorage.dto.resource.ResourceResponseDto;
 import dev.lqwd.cloudfilestorage.infrastructure.path_processor.ProcessedPath;
 import org.mapstruct.Mapper;
@@ -14,18 +15,27 @@ public interface ResourceResponseMapper {
     @Mapping(source = "resourceName", target = "name")
     @Mapping(source = "type", target = "type")
     DirectoryResponseDto toDirResponseDTO(ProcessedPath path);
+    DirectoryResponseDto toDirResponseDTO(ParsedResourceDto dto);
 
     @Mapping(source = "path.parentPath", target = "path")
     @Mapping(source = "path.resourceName", target = "name")
     @Mapping(source = "path.type", target = "type")
     @Mapping(source = "size", target = "size")
     FileResponseDto toFileResponseDTO(ProcessedPath path, long size);
+    FileResponseDto toFileResponseDTO(ParsedResourceDto dto);
 
     default ResourceResponseDto toResponseDTO(ProcessedPath path, long size) {
-
         return switch (path.type()) {
             case DIRECTORY -> toDirResponseDTO(path);
             case FILE -> toFileResponseDTO(path, size);
         };
     }
+
+    default ResourceResponseDto toResponseDTO(ParsedResourceDto dto) {
+        return switch (dto.type()) {
+            case DIRECTORY -> toDirResponseDTO(dto);
+            case FILE -> toFileResponseDTO(dto);
+        };
+    }
+
 }

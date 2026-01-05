@@ -1,6 +1,6 @@
 package dev.lqwd.cloudfilestorage.repository.storage.minio;
 
-import dev.lqwd.cloudfilestorage.repository.storage.FindResourceStorage;
+import dev.lqwd.cloudfilestorage.repository.storage.FindStorage;
 import io.minio.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,7 +11,7 @@ import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
-public class MinioFindStorage implements FindResourceStorage<StatObjectResponse> {
+public class MinioFindStorage implements FindStorage<StatObjectResponse> {
 
     @Value("${app.bucket.name}")
     private String bucketName;

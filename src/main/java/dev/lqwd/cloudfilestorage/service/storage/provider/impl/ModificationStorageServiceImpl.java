@@ -19,16 +19,19 @@ public class ModificationStorageServiceImpl implements ModificationStorageServic
     private final ResourceStorage resourceStorage;
     private final FindStorageServiceImpl findService;
 
+    @Override
     public void removeDir(String dirPath, long id) {
         findService.findAllResourcesPath(dirPath, id)
                 .forEach(resourceStorage::removeResource);
     }
 
+    @Override
     public void removeFile(String path, long id) {
         String pathWithUserDir = getPathWithUserDir(path, id);
         resourceStorage.removeResource(pathWithUserDir);
     }
 
+    @Override
     public void moveDir(String from, String to, long id) {
         findService.findAllResourcesPath(from, id)
                 .forEach(source -> {
@@ -38,6 +41,7 @@ public class ModificationStorageServiceImpl implements ModificationStorageServic
                 });
     }
 
+    @Override
     public void moveFile(String from, String to, long id) {
         String fromWithUserDir = getPathWithUserDir(from, id);
         String toWithUserDir = getPathWithUserDir(to, id);

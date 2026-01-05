@@ -14,14 +14,10 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface StrongPassword {
 
-    String message() default "Password must be {min}-{max} characters long";
+    String message() default "Incorrect password";
 
     Class<?>[] groups() default {};
 
     Class<? extends Payload>[] payload() default {};
-
-    int min() default 5;
-
-    int max() default 20;
 
 }

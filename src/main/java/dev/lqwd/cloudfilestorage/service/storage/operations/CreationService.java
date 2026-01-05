@@ -45,6 +45,7 @@ public class CreationService {
     public DirectoryResponseDto createDir(String rawPath, long id) {
         ProcessedPath path = pathProcessor.processDir(rawPath);
         validateOnRootPath(path.resourceName());
+
         String requestedPath = path.requestedPath();
         validationStorageService.validateParentPath(id, path.parentPath());
         validationStorageService.validateOnExistence(requestedPath, id);

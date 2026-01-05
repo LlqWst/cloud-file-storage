@@ -23,10 +23,12 @@ public class MinioFindAllStorage implements FindAlStorage<Item> {
     private final MinioClient minioClient;
     private final MinioOperationTemplate operationTemplate;
 
+    @Override
     public List<Item> findResources(String pathWithUserDir, boolean isRecursive) {
        return findItems(pathWithUserDir, isRecursive).toList();
     }
 
+    @Override
     public List<String> findAllResourcePaths(String pathWithUserDir, boolean isRecursive) {
         return findItems(pathWithUserDir, isRecursive)
                 .map(Item::objectName)

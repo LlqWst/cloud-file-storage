@@ -25,11 +25,11 @@ class CreationServiceTest extends BaseServiceTest {
     @Test
     void ShouldThrowBadRequestException_When_TooLargeName() {
         Exception exception = assertThrows(BadRequestException.class, () ->
-                creationService.createDir(NAME_201_CHARS, TEST_ID));
+                creationService.createDir(getNameMoreThanMaxNameLength(), TEST_ID));
 
         assertEquals(
                 "The resource name '%s' exceeded max allowed name length %d."
-                        .formatted(NAME_201_CHARS, MAX_NAME_LENGTH),
+                        .formatted(getNameMoreThanMaxNameLength(), maxLengthName),
                 exception.getMessage());
     }
 
@@ -62,13 +62,13 @@ class CreationServiceTest extends BaseServiceTest {
 
     @Test
     void ShouldThrowBadRequestException_When_CreateFolder_With_NameHasOneOfForbiddenChar() {
-        FORBIDDEN_CHARS.forEach(symbol -> {
+        forbiddenSet.forEach(symbol -> {
                     Exception exception = assertThrows(BadRequestException.class, () ->
                             creationService.createDir(TEST_FOLDER_WITHOUT_END_SLASH + symbol + SLASH, TEST_ID)
                     );
                     assertEquals(
                             "Please enter a resource name that doesn't include any of these chars: "
-                            + FORBIDDEN_CHARS,
+                            + forbiddenSet,
                             exception.getMessage());
                 }
         );

@@ -46,7 +46,7 @@ public class ModificationService {
     }
 
     public ResourceResponseDto moveResource(String from, String to, long id) {
-        log.info("Пришел запрос на move из {} в {}", from, to);
+        log.info("Received a request to move from {} to {}", from, to);
 
         ProcessedPath pathFrom = pathProcessor.processResource(from);
         ProcessedPath pathTo = pathProcessor.processResource(to);
@@ -55,12 +55,6 @@ public class ModificationService {
 
         String requestedPathFrom = getRequestedPath(pathFrom);
         String requestedPathTo = getRequestedPath(pathTo);
-
-        log.info("После Processed requested path из {} в {}", requestedPathFrom, requestedPathTo);
-
-        if(requestedPathFrom.equals(pathTo.parentPath())){
-            throw new BadRequestException("You cannot copy resource to itself");
-        }
 
         String toParentPath = pathTo.parentPath();
         validateOnMoveToItself(requestedPathFrom, toParentPath);
@@ -80,7 +74,7 @@ public class ModificationService {
 
     private static void validateOnMoveToItself(String requestedPathFrom, String toParentPath) {
         if(requestedPathFrom.equals(toParentPath)){
-            throw new BadRequestException("You cannot copy resource to itself");
+            throw new BadRequestException("You cannot cut resource to itself");
         }
     }
 

@@ -1,6 +1,6 @@
 package dev.lqwd.cloudfilestorage.service.storage.provider.impl;
 
-import dev.lqwd.cloudfilestorage.dto.resource.ParsedResourceDto;
+import dev.lqwd.cloudfilestorage.infrastructure.parser.storage.ParsedResource;
 import dev.lqwd.cloudfilestorage.dto.resource.ResourceResponseDto;
 import dev.lqwd.cloudfilestorage.exception.NotFoundException;
 import dev.lqwd.cloudfilestorage.infrastructure.UserDirectoryProvider;
@@ -35,6 +35,7 @@ public class FindStorageServiceImpl implements FindStorageService {
     private final StorageResponseParser<StatObjectResponse> findParser;
     private final ResourceResponseMapper mapper;
 
+    @Override
     public ResourceResponseDto findResource(String path, long id) {
         String pathWithUserDir = getPathWithUserDir(path, id);
         return findStorage.findResource(pathWithUserDir)
@@ -42,7 +43,27 @@ public class FindStorageServiceImpl implements FindStorageService {
                 .map(mapper::toResponseDTO)
                 .orElseThrow(() -> new NotFoundException("Resource doesn't exists: " + path));
     }
+    
+    @Override
+    public List<String> findDirResourcesNameWithoutDirRecursive(String path, long id) {
+        String pathWithUserDir = getPathWithUserDir(path, id);
+        return findAlStorage.findAllResourcePaths(pathWithUserDir, true)
+                .stream()
+                .filter(excludePath(pathWithUserDir))
+                .toList();
+    }
+    
+    @Override
+    public List<String> findAllResourcesPath(String path, long id) {
+        String userDir = userDirectoryProvider.provide(id);
+        String pathWithUserDir = getPathWithUserDir(path, id);
+        return findAlStorage.findAllResourcePaths(pathWithUserDir, true)
+                .stream()
+                .filter(excludePath(userDir))
+                .toList();
+    }
 
+    @Override
     public List<ResourceResponseDto> findDirResourcesWithoutDir(String path, long id) {
         String pathWithUserDir = getPathWithUserDir(path, id);
         return findAlStorage.findResources(pathWithUserDir, false)
@@ -52,24 +73,8 @@ public class FindStorageServiceImpl implements FindStorageService {
                 .map(mapper::toResponseDTO)
                 .toList();
     }
-
-    public List<String> findDirResourcesNameWithoutDirRecursive(String path, long id) {
-        String pathWithUserDir = getPathWithUserDir(path, id);
-        return findAlStorage.findAllResourcePaths(pathWithUserDir, true)
-                .stream()
-                .filter(storagePath -> !storagePath.equals(pathWithUserDir))
-                .toList();
-    }
-
-    public List<String> findAllResourcesPath(String path, long id) {
-        String userDir = userDirectoryProvider.provide(id);
-        String pathWithUserDir = getPathWithUserDir(path, id);
-        return findAlStorage.findAllResourcePaths(pathWithUserDir, true)
-                .stream()
-                .filter(storagePath -> !storagePath.equals(userDir))
-                .toList();
-    }
-
+    
+    @Override
     public Stream<ResourceResponseDto> findAllResources(long id) {
         String userDir = userDirectoryProvider.provide(id);
         String pathWithUserDir = getPathWithUserDir(USER_ROOT, id);
@@ -79,12 +84,17 @@ public class FindStorageServiceImpl implements FindStorageService {
                 .filter(excludeResource(userDir))
                 .map(mapper::toResponseDTO);
     }
-
+    
     @NotNull
-    private static Predicate<ParsedResourceDto> excludeResource(String resource) {
+    private static Predicate<ParsedResource> excludeResource(String resource) {
         return dto -> !dto.fullPath().equals(resource);
     }
 
+    @NotNull
+    private static Predicate<String> excludePath(String pathWithUserDir) {
+        return storagePath -> !storagePath.equals(pathWithUserDir);
+    }
+    
     private String getPathWithUserDir(String path, long id) {
         return userDirectoryProvider.provide(path, id);
     }

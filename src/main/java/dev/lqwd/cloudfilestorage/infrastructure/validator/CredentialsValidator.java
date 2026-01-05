@@ -2,6 +2,7 @@ package dev.lqwd.cloudfilestorage.infrastructure.validator;
 
 import dev.lqwd.cloudfilestorage.exception.BadRequestException;
 import lombok.NoArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 
@@ -9,13 +10,23 @@ import org.springframework.stereotype.Component;
 @NoArgsConstructor
 public class CredentialsValidator {
 
-    public static final int MIN_LENGTH = 5;
-    public static final int MAX_LENGTH_USERNAME = 20;
-    public static final int MAX_LENGTH_PASSWORD = 20;
+    @Value("${app.min.length.username}")
+    private int minLengthUsername;
+
+    @Value("${app.max.length.username}")
+    private int maxLengthUsername;
+
+    @Value("${app.min.length.password}")
+    private int minLengthPassword;
+
+    @Value("${app.max.length.password}")
+    private int maxLengthPassword;
 
     public void validateCredentials(String username, String password) {
-        if (isBlank(username) || isIncorrectUsernameLength(username)
-            || isBlank(password) || isIncorrectPasswordLength(password)) {
+        if (isBlank(username) ||
+            isBlank(password) ||
+            isIncorrectUsernameLength(username) ||
+            isIncorrectPasswordLength(password)) {
 
             throw new BadRequestException("Bad credentials");
         }
@@ -26,10 +37,10 @@ public class CredentialsValidator {
     }
 
     private boolean isIncorrectUsernameLength(String username) {
-        return username.length() < MIN_LENGTH || username.length() > MAX_LENGTH_USERNAME;
+        return username.length() < minLengthUsername || username.length() > maxLengthUsername;
     }
 
     private boolean isIncorrectPasswordLength(String username) {
-        return username.length() < MIN_LENGTH || username.length() > MAX_LENGTH_PASSWORD;
+        return username.length() < minLengthPassword || username.length() > maxLengthPassword;
     }
 }

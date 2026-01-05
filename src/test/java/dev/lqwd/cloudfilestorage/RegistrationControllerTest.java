@@ -7,6 +7,7 @@ import io.minio.MinioClient;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -36,9 +37,24 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("test")
 public class RegistrationControllerTest {
 
+    @Value("${app.min.length.username}")
+    private int minUsername;
+
+    @Value("${app.max.length.username}")
+    private int maxUsername;
+
+    @Value("${app.pattern.username}")
+    private String pattern;
+
+    @Value("${app.min.length.password}")
+    private int minPass;
+
+    @Value("${app.max.length.password}")
+    private int maxPass;
+
+    private static final String USERNAME_MESSAGE_TEMPLATE = "Please provide username %d-%d chars long (valid chars: %s)";
+    private static final String PASSWORD_MESSAGE_TEMPLATE = "Password must be %d-%d characters long";
     public static final String SIGN_UP_URL = "/api/auth/sign-up";
-    public static final String PASSWORD_DEFAULT_MESSAGE = "Password must be 5-20 characters long";
-    public static final String USERNAME_DEFAULT_MESSAGE = "Please provide username 5-20 characters long (valid chars: a-zA-Z0-9 ~!#$%^&*()_=+/'\\\".-)";
 
     @MockitoBean
     private MinioClient minioClient;
@@ -141,7 +157,8 @@ public class RegistrationControllerTest {
         String password = "test_password";
         String jsonPath = "$.message";
 
-        doSignUp(username, password, HttpStatus.BAD_REQUEST.value(), jsonPath, USERNAME_DEFAULT_MESSAGE);
+        doSignUp(username, password, HttpStatus.BAD_REQUEST.value(),
+                jsonPath, USERNAME_MESSAGE_TEMPLATE.formatted(minUsername, maxUsername, pattern));
 
         Optional<User> user = userRepository.findByUsername(username);
         Assertions.assertTrue(user.isEmpty());
@@ -151,7 +168,8 @@ public class RegistrationControllerTest {
         String username = "test_user";
         String jsonPath = "$.message";
 
-        doSignUp(username, password, HttpStatus.BAD_REQUEST.value(), jsonPath, PASSWORD_DEFAULT_MESSAGE);
+        doSignUp(username, password, HttpStatus.BAD_REQUEST.value(),
+                jsonPath, PASSWORD_MESSAGE_TEMPLATE.formatted(minPass, maxPass));
 
         Optional<User> user = userRepository.findByUsername(username);
         Assertions.assertTrue(user.isEmpty());

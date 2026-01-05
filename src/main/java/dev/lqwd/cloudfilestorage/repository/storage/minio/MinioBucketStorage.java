@@ -19,6 +19,7 @@ public class MinioBucketStorage implements BucketStorage {
     private final MinioClient minioClient;
     private final MinioOperationTemplate operationTemplate;
 
+    @Override
     public void createBucketIfNotExists() {
         if (!isBucketExists()) {
             createRootBucket();
@@ -28,6 +29,7 @@ public class MinioBucketStorage implements BucketStorage {
         }
     }
 
+    @Override
     public boolean isBucketExists() {
         return operationTemplate.execute(() ->
                         minioClient.bucketExists(
@@ -37,6 +39,7 @@ public class MinioBucketStorage implements BucketStorage {
                 "Error during checking for the existence of a bucket " + bucketName);
     }
 
+    @Override
     public void createRootBucket() {
         operationTemplate.execute(() ->
                     minioClient.makeBucket(

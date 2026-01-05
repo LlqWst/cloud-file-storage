@@ -16,10 +16,12 @@ public class DownloadStorageServiceImpl implements DownloadStorageService {
     private final UserDirectoryProvider userDirectoryProvider;
     private final ResourceStorage resourceStorage;
 
+    @Override
     public InputStream downloadFile(String path, long id) {
         return resourceStorage.downloadByPath(userDirectoryProvider.provide(path, id));
     }
 
+    @Override
     public InputStream downloadFile(String pathWithUserDir) {
         return resourceStorage.downloadByPath(pathWithUserDir);
     }

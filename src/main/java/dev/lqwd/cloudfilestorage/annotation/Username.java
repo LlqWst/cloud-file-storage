@@ -11,7 +11,7 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Username {
 
-    String message() default "Please provide username 5-20 characters long (valid chars: a-zA-Z0-9 ~!#$%^&*()_=+/'\\\".-)";
+    String message() default "Incorrect username";
 
     Class<?>[] groups() default {};
 

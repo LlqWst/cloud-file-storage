@@ -33,6 +33,11 @@ public class FindService {
         return findStorageService.findDirResourcesWithoutDir(requestedPath, id);
     }
 
+    /*
+    TODO: Для поиска по query загружаются все ресурсы пользователя.
+     Необходим более оптимальный подход
+     */
+
     public List<ResourceResponseDto> searchResource(String query, long id) {
         validator.validatePath(query);
         return findStorageService.findAllResources(id)

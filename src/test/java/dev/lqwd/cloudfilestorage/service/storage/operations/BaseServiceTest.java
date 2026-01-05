@@ -3,10 +3,12 @@ package dev.lqwd.cloudfilestorage.service.storage.operations;
 import dev.lqwd.cloudfilestorage.TestcontainersConfiguration;
 import dev.lqwd.cloudfilestorage.repository.storage.BucketStorage;
 import dev.lqwd.cloudfilestorage.service.storage.provider.ValidationStorageService;
+import jakarta.annotation.PostConstruct;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -27,17 +29,22 @@ import java.util.Set;
 @ActiveProfiles("test")
 abstract class BaseServiceTest {
 
-    protected static final String NAME_201_CHARS = "_123456789_123456789_123456789_123456789_123456789" +
-                                                   "_123456789_123456789_123456789_123456789_123456789" +
-                                                   "_123456789_123456789_123456789_123456789_123456789" +
-                                                   "_123456789_123456789_123456789_123456789_123456789" +
-                                                   "_";
+    @Value("${app.max.length.name}")
+    protected int maxLengthName;
 
-    protected static final int MAX_NAME_LENGTH = 200;
+    @Value("${app.path.forbidden.chars}")
+    private String[] forbiddenCharacters;
+
+    protected Set<String> forbiddenSet;
+
+    @PostConstruct
+    public void init() {
+        forbiddenSet = Set.of(forbiddenCharacters);
+    }
+
     protected static final String ROOT = "";
     protected static final String EMPTY = "";
     protected static final String SLASH = "/";
-    protected static final Set<Character> FORBIDDEN_CHARS = Set.of('*', ':', '<', '>', '\\', '|', '?');
     protected static final String FILE_CONTENT_TYPE = "text/plain";
     protected static final String MULTIPART_HTTP_PARAMETER = "object";
     private static final String CONTENT = "Test file content";
@@ -78,6 +85,10 @@ abstract class BaseServiceTest {
         bucketProviderStorage.createBucketIfNotExists();
         creationService.createUserRootDir(TEST_ID);
         modificationService.removeResource(ROOT, TEST_ID);
+    }
+
+    protected String getNameMoreThanMaxNameLength(){
+        return "a".repeat(maxLengthName + 1);
     }
 
     protected static @NotNull MockMultipartFile createFile(String fileName) {

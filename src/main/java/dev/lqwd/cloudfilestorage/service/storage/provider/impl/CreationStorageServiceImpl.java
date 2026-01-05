@@ -14,6 +14,7 @@ public class CreationStorageServiceImpl implements CreationStorageService {
     private final UserDirectoryProvider userDirectoryProvider;
     private final ResourceStorage resourceStorage;
 
+    @Override
     public void createDirectory(String path, long id) {
         resourceStorage.createDirectory(userDirectoryProvider.provide(path, id));
     }

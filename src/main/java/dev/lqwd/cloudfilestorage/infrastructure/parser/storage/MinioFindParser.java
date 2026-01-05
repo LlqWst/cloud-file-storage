@@ -1,6 +1,5 @@
 package dev.lqwd.cloudfilestorage.infrastructure.parser.storage;
 
-import dev.lqwd.cloudfilestorage.dto.resource.ParsedResourceDto;
 import dev.lqwd.cloudfilestorage.infrastructure.parser.PathParsHelper;
 import io.minio.StatObjectResponse;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +15,8 @@ public class MinioFindParser implements ResourceTypeParser, StorageResponseParse
 
     private final PathParsHelper pathHelper;
 
-    public ParsedResourceDto pars(StatObjectResponse statObject) {
+    @Override
+    public ParsedResource pars(StatObjectResponse statObject) {
         String fullPath = statObject.object();
         Path path = Paths.get(fullPath);
         String requestedPath = pathHelper.removeUserDir(pathHelper.getParentPath(path));
@@ -30,4 +30,3 @@ public class MinioFindParser implements ResourceTypeParser, StorageResponseParse
     }
 
 }
-

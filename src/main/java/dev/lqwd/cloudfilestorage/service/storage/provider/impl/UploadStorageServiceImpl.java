@@ -14,6 +14,7 @@ public class UploadStorageServiceImpl implements dev.lqwd.cloudfilestorage.servi
     private final UserDirectoryProvider userDirectoryProvider;
     private final ResourceStorage resourceStorage;
 
+    @Override
     public void uploadResource(String path, long id, MultipartFile file) {
         resourceStorage.uploadResource(userDirectoryProvider.provide(path, id), file);
     }

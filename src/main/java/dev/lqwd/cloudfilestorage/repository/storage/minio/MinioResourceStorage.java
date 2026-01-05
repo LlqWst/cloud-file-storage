@@ -26,6 +26,7 @@ public class MinioResourceStorage implements ResourceStorage {
     private final MinioClient minioClient;
     private final MinioOperationTemplate operationTemplate;
 
+    @Override
     public void createDirectory(String pathWithUserDir) {
         operationTemplate.execute(() ->
                         minioClient.putObject(
@@ -38,6 +39,7 @@ public class MinioResourceStorage implements ResourceStorage {
                 "Error during creation of directory: " + pathWithUserDir);
     }
 
+    @Override
     public void uploadResource(String pathWithUserDir, MultipartFile file) {
         operationTemplate.execute(() ->
                         minioClient.putObject(
@@ -50,6 +52,7 @@ public class MinioResourceStorage implements ResourceStorage {
                 "Error during uploading resource to path: " + pathWithUserDir);
     }
 
+    @Override
     public void copyResource(String source, String target) {
         operationTemplate.execute(() ->
                         minioClient.copyObject(
@@ -65,6 +68,7 @@ public class MinioResourceStorage implements ResourceStorage {
                 "Error during moving resource from: %s - to: %s".formatted(source, target));
     }
 
+    @Override
     public void removeResource(String pathWithUserDir) {
         operationTemplate.execute(() ->
                         minioClient.removeObject(
@@ -75,6 +79,7 @@ public class MinioResourceStorage implements ResourceStorage {
                 "Error during deletion of resource: " + pathWithUserDir);
     }
 
+    @Override
     public InputStream downloadByPath(String pathWithUserDir) {
         return operationTemplate.execute(() ->
                         minioClient.getObject(

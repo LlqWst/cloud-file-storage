@@ -1,7 +1,9 @@
 package dev.lqwd.cloudfilestorage.infrastructure.validator;
 
 import dev.lqwd.cloudfilestorage.exception.BadRequestException;
+import jakarta.annotation.PostConstruct;
 import lombok.NoArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
@@ -12,9 +14,26 @@ import java.util.Set;
 @NoArgsConstructor
 public class PathValidator {
 
-    private static final Set<Character> FORBIDDEN_CHARS = Set.of('*', ':', '<', '>', '\\', '|', '?');
+    @Value("${app.path.forbidden.chars}")
+    private Character[] forbiddenCharacters;
+
+    private Set<Character> forbiddenSet;
     private static final String SLASH = "/";
-    public static final int MAX_NAME_LENGTH = 200;
+
+    @Value("${app.max.length.name}")
+    private int maxLengthName;
+
+    @PostConstruct
+    public void init() {
+        forbiddenSet = Set.of(forbiddenCharacters);
+    }
+
+    public void validatePath(String path) {
+        validateOnNull(path);
+        validateOnForbiddenChars(path);
+        validateOnBeginningSlash(path);
+        validateNameLength(path);
+    }
 
     public void validateDirPath(String path) {
         validatePath(path);
@@ -24,13 +43,6 @@ public class PathValidator {
     public void validateFilePath(String path) {
         validatePath(path);
         validateOnAbsenceEndSlash(path);
-    }
-
-    public void validatePath(String path) {
-        validateOnNull(path);
-        validateOnForbiddenChars(path);
-        validateOnBeginningSlash(path);
-        validateNameLength(path);
     }
 
     private static void validateOnEndSlash(String path) {
@@ -51,11 +63,11 @@ public class PathValidator {
         }
     }
 
-    private static void validateOnForbiddenChars(String path) {
+    private void validateOnForbiddenChars(String path) {
         for (char c : path.toCharArray()) {
-            if (FORBIDDEN_CHARS.contains(c)) {
+            if (forbiddenSet.contains(c)) {
                 throw new BadRequestException(
-                        "Please enter a resource name that doesn't include any of these chars: " + FORBIDDEN_CHARS);
+                        "Please enter a resource name that doesn't include any of these chars: " + forbiddenSet);
             }
         }
     }
@@ -72,9 +84,9 @@ public class PathValidator {
     }
 
     private void validateOnMaxLength(String path) {
-        if (path.length() >= MAX_NAME_LENGTH) {
+        if (path.length() >= maxLengthName) {
             throw new BadRequestException(
-                    "The resource name '%s' exceeded max allowed name length %d.".formatted(path, MAX_NAME_LENGTH));
+                    "The resource name '%s' exceeded max allowed name length %d.".formatted(path, maxLengthName));
         }
     }
 

@@ -22,30 +22,35 @@ public class ValidationStorageServiceImpl implements dev.lqwd.cloudfilestorage.s
     private final UserDirectoryProvider userDirectoryProvider;
     private final FindStorage<StatObjectResponse> findStorage;
 
+    @Override
     public boolean isExistIgnoreEndSlash(String path, long id) {
         String pathWithoutEndSlash = pathNormalizer.getPathWithoutEndSlash(path);
         String pathWithEndSlash = pathWithoutEndSlash + SLASH;
         return isExist(pathWithoutEndSlash, id) || isExist(pathWithEndSlash, id);
     }
 
+    @Override
     public boolean isExist(String path, long id) {
         log.debug("checking for the existence of a resource");
         return findStorage.findResource(userDirectoryProvider.provide(path, id))
                 .isPresent();
     }
 
+    @Override
     public void validateOnExistence(String path, long id) {
         if (isExistIgnoreEndSlash(path, id)) {
             throw new AlreadyExistException("Resource already exists: " + path);
         }
     }
 
+    @Override
     public void validateOnAbsence(String path, long id) {
         if (!isExist(path, id)) {
             throw new NotFoundException("Resource doesn't exists: " + path);
         }
     }
 
+    @Override
     public void validateParentPath(long id, String parentPath) {
         if (!isExist(parentPath, id)) {
             throw new NotFoundException("Parent path doesn't exist: " + parentPath);

@@ -211,7 +211,7 @@ class ModificationServiceTest extends BaseServiceTest {
                 modificationService.moveResource(folderPath1, folder1NewPath, TEST_ID));
 
 
-        assertEquals("You cannot copy resource to itself", exception.getMessage());
+        assertEquals("You cannot cut resource to itself", exception.getMessage());
     }
 
 }

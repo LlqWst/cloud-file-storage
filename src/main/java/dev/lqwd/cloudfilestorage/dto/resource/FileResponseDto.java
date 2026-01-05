@@ -36,4 +36,5 @@ public record FileResponseDto(
         )
         Type type
 
-) implements ResourceResponseDto {}
+) implements ResourceResponseDto {
+}

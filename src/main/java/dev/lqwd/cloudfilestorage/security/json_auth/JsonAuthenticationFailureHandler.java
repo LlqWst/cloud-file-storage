@@ -1,6 +1,5 @@
 package dev.lqwd.cloudfilestorage.security.json_auth;
 
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.lqwd.cloudfilestorage.dto.ErrorResponseDto;
 import dev.lqwd.cloudfilestorage.exception.BadRequestException;
@@ -38,7 +37,6 @@ public class JsonAuthenticationFailureHandler {
             case BadRequestException _ -> response(e.getMessage(), HttpStatus.BAD_REQUEST.value(), response);
             default -> response("Internal error", HttpStatus.BAD_REQUEST.value(), response);
         }
-
     }
 
     private void response(String message, int httpStatus, HttpServletResponse response) throws IOException {

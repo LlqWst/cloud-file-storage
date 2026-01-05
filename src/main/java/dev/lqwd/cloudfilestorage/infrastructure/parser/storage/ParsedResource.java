@@ -1,11 +1,11 @@
-package dev.lqwd.cloudfilestorage.dto.resource;
+package dev.lqwd.cloudfilestorage.infrastructure.parser.storage;
 
 import dev.lqwd.cloudfilestorage.entity.Type;
 import lombok.Builder;
 
 
 @Builder
-public record ParsedResourceDto(
+public record ParsedResource(
 
         String fullPath,
 

@@ -4,8 +4,8 @@ import dev.lqwd.cloudfilestorage.dto.resource.ResourceResponseDto;
 import dev.lqwd.cloudfilestorage.infrastructure.mapper.ResourceResponseMapper;
 import dev.lqwd.cloudfilestorage.infrastructure.path_processor.PathProcessor;
 import dev.lqwd.cloudfilestorage.infrastructure.path_processor.ProcessedPath;
-import dev.lqwd.cloudfilestorage.service.storage.provider.minio.ValidationMinioService;
-import dev.lqwd.cloudfilestorage.service.storage.provider.minio.UploadMinioService;
+import dev.lqwd.cloudfilestorage.service.storage.provider.UploadStorageService;
+import dev.lqwd.cloudfilestorage.service.storage.provider.ValidationStorageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,8 +18,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UploadService {
 
-    private final UploadMinioService uploadStorageService;
-    private final ValidationMinioService validationStorageService;
+    private final UploadStorageService uploadStorageService;
+    private final ValidationStorageService validationStorageService;
     private final PathProcessor pathProcessor;
     private final ResourceResponseMapper mapper;
     private final CreationService creationService;

@@ -3,11 +3,11 @@ package dev.lqwd.cloudfilestorage.service.storage.operations;
 import dev.lqwd.cloudfilestorage.dto.resource.DownloadedResponseDto;
 import dev.lqwd.cloudfilestorage.entity.Type;
 import dev.lqwd.cloudfilestorage.exception.InternalErrorException;
-import dev.lqwd.cloudfilestorage.service.storage.provider.minio.DownloadMinioService;
-import dev.lqwd.cloudfilestorage.service.storage.provider.minio.FindMinioService;
+import dev.lqwd.cloudfilestorage.service.storage.provider.DownloadStorageService;
+import dev.lqwd.cloudfilestorage.service.storage.provider.FindStorageService;
+import dev.lqwd.cloudfilestorage.service.storage.provider.ValidationStorageService;
 import dev.lqwd.cloudfilestorage.infrastructure.path_processor.PathProcessor;
 import dev.lqwd.cloudfilestorage.infrastructure.path_processor.ProcessedPath;
-import dev.lqwd.cloudfilestorage.service.storage.provider.minio.ValidationMinioService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
@@ -26,9 +26,9 @@ public class DownloadService {
     private static final String SLASH = "/";
 
     private final PathProcessor pathProcessor;
-    private final DownloadMinioService downloadStorageService;
-    private final ValidationMinioService validationStorageService;
-    private final FindMinioService findStorageService;
+    private final DownloadStorageService downloadStorageService;
+    private final ValidationStorageService validationStorageService;
+    private final FindStorageService findStorageService;
 
     public DownloadedResponseDto download(String rawPath, long id) {
         ProcessedPath path = pathProcessor.processResource(rawPath);

@@ -1,8 +1,8 @@
 package dev.lqwd.cloudfilestorage.service.storage.operations;
 
 import dev.lqwd.cloudfilestorage.TestcontainersConfiguration;
-import dev.lqwd.cloudfilestorage.repository.storage.minio.MinioBucketStorage;
-import dev.lqwd.cloudfilestorage.service.storage.provider.minio.ValidationMinioService;
+import dev.lqwd.cloudfilestorage.repository.storage.StorageBucket;
+import dev.lqwd.cloudfilestorage.service.storage.provider.ValidationStorageService;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -51,13 +51,13 @@ abstract class BaseServiceTest {
     protected static final String TEST_FOLDER_WITH_PARENT = TEST_PARENT_FOLDER + TEST_CORRECT_FOLDER;
 
     @Autowired
-    protected MinioBucketStorage bucketProviderStorage;
+    protected StorageBucket bucketProviderStorage;
 
     @Autowired
     protected CreationService creationService;
 
     @Autowired
-    protected ValidationMinioService validationProviderService;
+    protected ValidationStorageService validationProviderService;
 
     @Autowired
     protected ModificationService modificationService;

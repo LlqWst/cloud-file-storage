@@ -1,11 +1,11 @@
 package dev.lqwd.cloudfilestorage.service.storage.operations;
 
 import dev.lqwd.cloudfilestorage.dto.resource.ResourceResponseDto;
-import dev.lqwd.cloudfilestorage.service.storage.provider.minio.FindMinioService;
+import dev.lqwd.cloudfilestorage.service.storage.provider.FindStorageService;
+import dev.lqwd.cloudfilestorage.service.storage.provider.ValidationStorageService;
 import dev.lqwd.cloudfilestorage.infrastructure.validator.PathValidator;
 import dev.lqwd.cloudfilestorage.infrastructure.path_processor.PathProcessor;
 import dev.lqwd.cloudfilestorage.infrastructure.path_processor.ProcessedPath;
-import dev.lqwd.cloudfilestorage.service.storage.provider.minio.ValidationMinioService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,8 +16,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class FindService {
 
-    private final FindMinioService findStorageService;
-    private final ValidationMinioService validationStorageService;
+    private final FindStorageService findStorageService;
+    private final ValidationStorageService validationStorageService;
     private final PathProcessor pathProcessor;
     private final PathValidator validator;
 

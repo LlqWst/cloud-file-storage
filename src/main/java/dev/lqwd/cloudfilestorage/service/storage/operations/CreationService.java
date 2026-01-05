@@ -3,10 +3,10 @@ package dev.lqwd.cloudfilestorage.service.storage.operations;
 import dev.lqwd.cloudfilestorage.dto.resource.DirectoryResponseDto;
 import dev.lqwd.cloudfilestorage.exception.BadRequestException;
 import dev.lqwd.cloudfilestorage.infrastructure.mapper.ResourceResponseMapper;
-import dev.lqwd.cloudfilestorage.service.storage.provider.minio.CreationMinioService;
+import dev.lqwd.cloudfilestorage.service.storage.provider.CreationStorageService;
+import dev.lqwd.cloudfilestorage.service.storage.provider.ValidationStorageService;
 import dev.lqwd.cloudfilestorage.infrastructure.path_processor.PathProcessor;
 import dev.lqwd.cloudfilestorage.infrastructure.path_processor.ProcessedPath;
-import dev.lqwd.cloudfilestorage.service.storage.provider.minio.ValidationMinioService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -23,8 +23,8 @@ public class CreationService {
     private static final String EMPTY = "";
     private static final String SLASH = "/";
 
-    private final CreationMinioService creationStorageService;
-    private final ValidationMinioService validationStorageService;
+    private final CreationStorageService creationStorageService;
+    private final ValidationStorageService validationStorageService;
     private final PathProcessor pathProcessor;
     private final ResourceResponseMapper mapper;
 

@@ -30,9 +30,9 @@ public class JsonAuthenticationSuccessHandler implements AuthenticationSuccessHa
         response.setStatus(HttpStatus.OK.value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
-        log.debug("authentication was successful: {}", authentication.getName());
-        UserResponseDto userResponseDTO = new UserResponseDto(authentication.getName());
-        objectMapper.writeValue(response.getWriter(), userResponseDTO);
+        String userName = authentication.getName();
+        log.debug("authentication was successful: {}", userName);
+        objectMapper.writeValue(response.getWriter(), new UserResponseDto(userName));
     }
 
 }

@@ -70,7 +70,6 @@ public class SecurityConfig {
             .withDefaults()
             .matcher(SIGN_OUT_URL);
 
-
     @Bean
     public SecurityContextRepository securityContextRepository() {
         return new HttpSessionSecurityContextRepository();
@@ -89,6 +88,10 @@ public class SecurityConfig {
                 .passwordEncoder(passwordEncoder());
         return builder.build();
     }
+
+    /*
+    TODO: добавить csrf. При включении фронт не передает заголовок, только cookie.
+     */
 
     @Bean
     public SecurityFilterChain securityFilterChain(

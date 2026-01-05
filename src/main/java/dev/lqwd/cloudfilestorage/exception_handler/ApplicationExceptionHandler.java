@@ -46,13 +46,13 @@ public class ApplicationExceptionHandler extends BaseHandler {
             MethodArgumentNotValidException e) {
 
         log.warn("Exception occurred:  {}", e.getMessage(), e);
-        String message = e.getBindingResult()
+
+        return buildBadRequestResponse(e.getBindingResult()
                 .getFieldErrors()
                 .stream()
                 .map(DefaultMessageSourceResolvable::getDefaultMessage)
-                .collect(Collectors.joining("; "));
-
-        return buildBadRequestResponse(message);
+                .collect(Collectors.joining("; "))
+        );
     }
 
     @ExceptionHandler(AlreadyExistException.class)
@@ -65,23 +65,29 @@ public class ApplicationExceptionHandler extends BaseHandler {
     @ExceptionHandler({
             BadRequestException.class,
             MissingServletRequestParameterException.class,
-            HttpRequestMethodNotSupportedException.class,
-            MissingServletRequestPartException .class
+            MissingServletRequestPartException.class
     })
     public ResponseEntity<ErrorResponseDto> handleBadRequestException(Exception e) {
 
         log.warn("Exception occurred:  {}", e.getMessage(), e);
+
+        if (e instanceof MissingServletRequestParameterException ex) {
+            return buildBadRequestResponse("Missing required parameter: " + ex.getParameterName());
+        } else if (e instanceof MissingServletRequestPartException ex) {
+            return buildBadRequestResponse("Missing required parameter: " + ex.getRequestPartName());
+        }
         return buildBadRequestResponse(e.getMessage());
+
     }
 
     @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
     public ResponseEntity<ErrorResponseDto> handleNullContentType(HttpMediaTypeNotSupportedException e) {
 
         log.warn("Exception occurred:  {}", e.getMessage(), e);
-        if(e.getContentType() == null){
+        if (e.getContentType() == null) {
             return buildBadRequestResponse("Missing body type");
         }
-        return buildBadRequestResponse(e.getMessage());
+        return buildBadRequestResponse("Incorrect body Type");
     }
 
     @ExceptionHandler(MaxUploadSizeExceededException.class)
@@ -101,17 +107,28 @@ public class ApplicationExceptionHandler extends BaseHandler {
         if (isInstanceOf(e, FileCountLimitExceededException.class)) {
             return buildBadRequestResponse(MAX_UPLOAD_FILES);
         }
-        return buildBadRequestResponse(e.getMessage());
+        return buildBadRequestResponse("Failed to process uploaded");
     }
 
-    @ExceptionHandler({
-            NotFoundException.class,
-            NoResourceFoundException.class
-    })
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ErrorResponseDto> handleMethodNotSupported(HttpRequestMethodNotSupportedException e) {
+
+        log.warn("Exception occurred:  {}", e.getMessage(), e);
+        return buildNotAllowed("Method not supported: " + e.getMethod());
+    }
+
+    @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<ErrorResponseDto> handleNotFoundException(Exception e) {
 
         log.warn("Exception occurred:  {}", e.getMessage(), e);
         return buildNotFoundResponse(e.getMessage());
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ErrorResponseDto> handleNoResourceFoundException(Exception e) {
+
+        log.warn("Exception occurred:  {}", e.getMessage(), e);
+        return buildNotFoundResponse("Not Found");
     }
 
     @ExceptionHandler({

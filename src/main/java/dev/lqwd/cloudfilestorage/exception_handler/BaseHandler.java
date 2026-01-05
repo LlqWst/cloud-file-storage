@@ -33,6 +33,13 @@ public abstract class BaseHandler {
     }
 
 
+    protected ResponseEntity<ErrorResponseDto> buildNotAllowed(String message) {
+        return ResponseEntity
+                .status(HttpStatus.METHOD_NOT_ALLOWED)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(getBody(message));
+    }
+
     protected ResponseEntity<ErrorResponseDto> buildNotFoundResponse(String message) {
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)

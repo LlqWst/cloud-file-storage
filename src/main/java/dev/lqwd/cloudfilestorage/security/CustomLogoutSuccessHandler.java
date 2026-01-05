@@ -20,8 +20,8 @@ public class CustomLogoutSuccessHandler implements LogoutSuccessHandler {
                                 Authentication auth) {
 
         if (auth != null &&
-            auth.isAuthenticated()
-            && !(auth instanceof AnonymousAuthenticationToken)) {
+            auth.isAuthenticated() &&
+            !(auth instanceof AnonymousAuthenticationToken)) {
 
             response.setStatus(HttpStatus.NO_CONTENT.value());
         } else {

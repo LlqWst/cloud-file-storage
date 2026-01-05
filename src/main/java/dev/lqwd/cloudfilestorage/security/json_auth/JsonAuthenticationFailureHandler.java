@@ -10,6 +10,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Component;
 
@@ -25,25 +26,27 @@ public class JsonAuthenticationFailureHandler {
 
     public void onException(HttpServletRequest request,
                             HttpServletResponse response,
-                            Exception ex) throws IOException {
+                            Exception e) throws IOException {
 
-        log.warn("Exception occurred while authenticate:  {}", ex.getMessage(), ex);
+        log.warn("Exception occurred while authenticate:  {}", e.getMessage(), e);
 
-        int httpStatus;
-        if (ex instanceof AuthenticationException) {
-            httpStatus = HttpStatus.UNAUTHORIZED.value();
-        } else if (ex instanceof BadRequestException) {
-            httpStatus = HttpStatus.BAD_REQUEST.value();
-        } else {
-            httpStatus = HttpStatus.INTERNAL_SERVER_ERROR.value();
+        switch (e) {
+            case BadCredentialsException _ ->
+                    response("Bad credentials", HttpStatus.UNAUTHORIZED.value(), response);
+            case AuthenticationException _ ->
+                    response("Authentication failed", HttpStatus.UNAUTHORIZED.value(), response);
+            case BadRequestException _ -> response(e.getMessage(), HttpStatus.BAD_REQUEST.value(), response);
+            default -> response("Internal error", HttpStatus.BAD_REQUEST.value(), response);
         }
 
+    }
+
+    private void response(String message, int httpStatus, HttpServletResponse response) throws IOException {
         response.setStatus(httpStatus);
         response.setCharacterEncoding("UTF-8");
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
-        ErrorResponseDto errorResponseDTO = new ErrorResponseDto(ex.getMessage());
-        objectMapper.writeValue(response.getWriter(), errorResponseDTO);
+        objectMapper.writeValue(response.getWriter(), new ErrorResponseDto(message));
     }
 
 }

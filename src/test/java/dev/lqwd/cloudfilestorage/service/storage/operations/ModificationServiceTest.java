@@ -145,13 +145,13 @@ class ModificationServiceTest extends BaseServiceTest {
 
     @Test
     void ShouldMoveFolderRecursive() {
-        String folderName1 = "1";
+        String folderName1 = "+";
         String folderPath1 = folderName1 + SLASH;
 
         String folderName2 = "2";
         String folderPath2 = folderName2 + SLASH;
 
-        String fileName1 = "1";
+        String fileName1 = "+";
         String filePath1 = folderPath1 + fileName1;
 
         String fileName2 = "2";

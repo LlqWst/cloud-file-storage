@@ -6,7 +6,10 @@ import dev.lqwd.cloudfilestorage.entity.UserRole;
 import dev.lqwd.cloudfilestorage.repository.UserRepository;
 import dev.lqwd.cloudfilestorage.repository.storage.minio.MinioBucketStorage;
 import io.minio.MinioClient;
-import org.junit.jupiter.api.*;
+import jakarta.servlet.http.Cookie;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -14,7 +17,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -23,8 +25,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -34,7 +36,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Testcontainers
 @AutoConfigureMockMvc
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Import(TestcontainersConfiguration.class)
+@Import({TestcontainersConfiguration.class, TestRedisProvider.class})
 @ActiveProfiles("test")
 public class SecurityTest {
 
@@ -56,8 +58,11 @@ public class SecurityTest {
     @MockitoBean
     private MinioBucketStorage minioBucketStorage;
 
-    private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private TestRedisProvider redisProvider;
 
     @BeforeEach
     public void registerUser() {
@@ -80,12 +85,26 @@ public class SecurityTest {
     @AfterEach
     public void tearDown() {
         userRepository.deleteAll();
+        redisProvider.clearBd();
     }
 
     @Test
     public void shouldSignIn_With_AppropriateCredentials() throws Exception {
-        String jsonPath = "$.username";
-        doSignIn(APPROPRIATE_USERNAME, APPROPRIATE_PASSWORD, HttpStatus.OK.value(), jsonPath, APPROPRIATE_USERNAME);
+        Cookie[] cookies = SignInWithAppropriateCredentials();
+        String sessionId = redisProvider.getSessionId(cookies);
+        redisProvider.validateRedisSavedSession(sessionId);
+    }
+
+    @Test
+    public void shouldSignOut_When_Authorized() throws Exception {
+        Cookie[] cookies = SignInWithAppropriateCredentials();
+        String sessionId = redisProvider.getSessionId(cookies);
+        redisProvider.validateRedisSavedSession(sessionId);
+        mockMvc.perform(post(SIGN_OUT_URL)
+                        .cookie(cookies))
+                .andDo(print())
+                .andExpect(status().is(HttpStatus.NO_CONTENT.value()));
+        redisProvider.validateRedisDontHaveSession(sessionId);
     }
 
     @Test
@@ -145,21 +164,19 @@ public class SecurityTest {
                 .andExpect(status().is(HttpStatus.UNAUTHORIZED.value()));
     }
 
-    @Test
-    @WithMockUser
-    public void shouldThrowUnauthorized_When_AuthorizedLogout() throws Exception {
-        mockMvc.perform(post(SIGN_OUT_URL))
-                .andDo(print())
-                .andExpect(status().is(HttpStatus.NO_CONTENT.value()));
+    private Cookie[] SignInWithAppropriateCredentials() throws Exception {
+        String jsonPath = "$.username";
+        return doSignIn(APPROPRIATE_USERNAME, APPROPRIATE_PASSWORD,
+                HttpStatus.OK.value(), jsonPath, APPROPRIATE_USERNAME);
     }
 
-    private void doSignIn(String username,
+    private Cookie[] doSignIn(String username,
                           String password,
                           int status,
                           String jsonPath,
                           String jsonPathValue) throws Exception {
 
-        mockMvc.perform(post(SIGN_IN_URL)
+        return mockMvc.perform(post(SIGN_IN_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
@@ -169,7 +186,8 @@ public class SecurityTest {
                                 """.formatted(username, password)))
                 .andDo(print())
                 .andExpect(status().is(status))
-                .andExpect(jsonPath(jsonPath).value(jsonPathValue));
+                .andExpect(jsonPath(jsonPath).value(jsonPathValue))
+                .andReturn().getResponse().getCookies();
     }
 
 }

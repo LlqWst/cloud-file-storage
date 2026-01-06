@@ -4,6 +4,7 @@ import dev.lqwd.cloudfilestorage.entity.User;
 import dev.lqwd.cloudfilestorage.repository.UserRepository;
 import dev.lqwd.cloudfilestorage.repository.storage.minio.MinioBucketStorage;
 import io.minio.MinioClient;
+import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +15,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -33,7 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Testcontainers
 @AutoConfigureMockMvc
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Import(TestcontainersConfiguration.class)
+@Import({TestcontainersConfiguration.class, TestRedisProvider.class})
 @ActiveProfiles("test")
 public class RegistrationControllerTest {
 
@@ -68,7 +68,20 @@ public class RegistrationControllerTest {
     @Autowired
     private UserRepository userRepository;
 
-    private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    @Autowired
+    private TestRedisProvider redisProvider;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Test
+    void shouldRegister_With_AppropriateUsername() throws Exception {
+        String username = "test_username";
+        Cookie[] cookies = registerWithAppropriateUsername(username);
+        String sessionId = redisProvider.getSessionId(cookies);
+        redisProvider.validateRedisSavedSession(sessionId);
+        redisProvider.clearBd();
+    }
 
     @Test
     void shouldThrowException_When_DuplicateUserName() throws Exception {
@@ -79,12 +92,6 @@ public class RegistrationControllerTest {
         registerWithAppropriateUsername(username);
 
         doSignUp(username, password, HttpStatus.CONFLICT.value(), jsonPath, jsonPathValue);
-    }
-
-    @Test
-    void shouldRegister_With_AppropriateUsername() throws Exception {
-        String username = "test_username";
-        registerWithAppropriateUsername(username);
     }
 
     @Test
@@ -141,16 +148,17 @@ public class RegistrationControllerTest {
         signUpWithInappropriatePassword(password);
     }
 
-    private void registerWithAppropriateUsername(String username) throws Exception {
+    private Cookie[] registerWithAppropriateUsername(String username) throws Exception {
         String password = "test_password";
         String jsonPath = "$.username";
 
-        doSignUp(username, password, HttpStatus.CREATED.value(), jsonPath, username);
+        Cookie[] cookies = doSignUp(username, password, HttpStatus.CREATED.value(), jsonPath, username);
 
         User savedUser = userRepository.findByUsername(username).orElseThrow();
 
         Assertions.assertEquals(username, savedUser.getUsername());
         Assertions.assertTrue(passwordEncoder.matches(password, savedUser.getPassword()));
+        return cookies;
     }
 
     private void signUpWithInappropriateUsername(String username) throws Exception {
@@ -175,13 +183,13 @@ public class RegistrationControllerTest {
         Assertions.assertTrue(user.isEmpty());
     }
 
-    private void doSignUp(String username,
-                          String password,
-                          int status,
-                          String jsonPath,
-                          String jsonPathValue) throws Exception {
+    private Cookie[] doSignUp(String username,
+                            String password,
+                            int status,
+                            String jsonPath,
+                            String jsonPathValue) throws Exception {
 
-        mockMvc.perform(post(SIGN_UP_URL)
+        return mockMvc.perform(post(SIGN_UP_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
@@ -191,7 +199,8 @@ public class RegistrationControllerTest {
                                 """.formatted(username, password)))
                 .andDo(print())
                 .andExpect(status().is(status))
-                .andExpect(jsonPath(jsonPath).value(jsonPathValue));
+                .andExpect(jsonPath(jsonPath).value(jsonPathValue))
+                .andReturn().getResponse().getCookies();
     }
 
 }

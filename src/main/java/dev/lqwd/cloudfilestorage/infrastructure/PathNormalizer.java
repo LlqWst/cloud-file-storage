@@ -1,6 +1,5 @@
 package dev.lqwd.cloudfilestorage.infrastructure;
 
-import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
@@ -8,7 +7,6 @@ import java.nio.file.Path;
 
 
 @Component
-@NoArgsConstructor
 public class PathNormalizer {
 
     private static final String SLASH = "/";

@@ -1,13 +1,11 @@
 package dev.lqwd.cloudfilestorage.infrastructure.validator;
 
 import dev.lqwd.cloudfilestorage.exception.BadRequestException;
-import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 
 @Component
-@NoArgsConstructor
 public class CredentialsValidator {
 
     @Value("${app.min.length.username}")

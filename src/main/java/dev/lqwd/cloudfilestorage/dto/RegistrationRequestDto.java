@@ -17,7 +17,7 @@ public record RegistrationRequestDto(
         @Pattern(regexp = usernamePattern, message = USERNAME_HAS_INVALID_CHARS_ERROR_MESSAGE)
         @Schema(
                 description = "Username",
-                example = "Test1",
+                example = "username_test",
                 requiredMode = Schema.RequiredMode.REQUIRED,
                 minLength = minLengthUsername,
                 maxLength = maxLengthUsername,

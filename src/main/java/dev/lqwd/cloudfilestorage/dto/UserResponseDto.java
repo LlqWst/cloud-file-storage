@@ -10,7 +10,7 @@ public record UserResponseDto(
 
         @Schema(
                 description = "Username",
-                example = "Test1"
+                example = "name_test"
         )
         String username
 ) {

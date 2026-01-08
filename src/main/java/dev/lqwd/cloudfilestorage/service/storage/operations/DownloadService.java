@@ -2,16 +2,16 @@ package dev.lqwd.cloudfilestorage.service.storage.operations;
 
 import dev.lqwd.cloudfilestorage.dto.resource.DownloadedResponseDto;
 import dev.lqwd.cloudfilestorage.exception.InternalErrorException;
+import dev.lqwd.cloudfilestorage.infrastructure.path.processor.PathProcessor;
+import dev.lqwd.cloudfilestorage.infrastructure.path.processor.ProcessedPath;
 import dev.lqwd.cloudfilestorage.service.storage.provider.DownloadStorageService;
 import dev.lqwd.cloudfilestorage.service.storage.provider.FindStorageService;
 import dev.lqwd.cloudfilestorage.service.storage.provider.ValidationStorageService;
-import dev.lqwd.cloudfilestorage.infrastructure.path.processor.PathProcessor;
-import dev.lqwd.cloudfilestorage.infrastructure.path.processor.ProcessedPath;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -69,19 +69,17 @@ public class DownloadService {
         };
     }
 
+    @SneakyThrows
     private void processResource(ZipOutputStream zipOut, String resourceName, String baseFolder) {
         String entryName = getPathAfterBaseFolder(resourceName, baseFolder);
-        try {
-            zipOut.putNextEntry(new ZipEntry(entryName));
-            copyToZip(zipOut, resourceName);
-            zipOut.closeEntry();
-            zipOut.flush();
-        } catch (IOException e) {
-            throw new InternalErrorException("Error processing resource: " + resourceName, e);
-        }
+        zipOut.putNextEntry(new ZipEntry(entryName));
+        copyToZip(zipOut, resourceName);
+        zipOut.closeEntry();
+        zipOut.flush();
     }
 
-    private void copyToZip(ZipOutputStream zipOut, String resourcePath) throws IOException {
+    @SneakyThrows
+    private void copyToZip(ZipOutputStream zipOut, String resourcePath) {
         try (InputStream fileStream = downloadStorageService.downloadFile(resourcePath)) {
             fileStream.transferTo(zipOut);
         }

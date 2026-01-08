@@ -10,5 +10,5 @@ public interface UserResponseMapper {
 
     @Mapping(source = "username", target = "username")
     UserResponseDto toUserResponseDto(User user);
-
+    UserResponseDto toUserResponseDto(String userName);
 }

@@ -1,11 +1,11 @@
 package dev.lqwd.cloudfilestorage.service.storage.provider;
 
-import java.io.InputStream;
+import dev.lqwd.cloudfilestorage.infrastructure.path.processor.ProcessedPath;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 public interface DownloadStorageService {
 
-    InputStream downloadFile(String path, long id);
+    StreamingResponseBody getFileBytes(long id, String requestedPath);
 
-    InputStream downloadFile(String pathWithUserDir);
-
+    StreamingResponseBody getZipBytes(long id, String requestedPath, ProcessedPath path);
 }

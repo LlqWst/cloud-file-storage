@@ -1,22 +1,23 @@
 package dev.lqwd.cloudfilestorage.service.storage.operations;
 
 import dev.lqwd.cloudfilestorage.dto.resource.ResourceResponseDto;
-import dev.lqwd.cloudfilestorage.entity.Type;
-import dev.lqwd.cloudfilestorage.exception.BadRequestException;
+import dev.lqwd.cloudfilestorage.infrastructure.MoveResourceValidator;
 import dev.lqwd.cloudfilestorage.infrastructure.mapper.ResourceResponseMapper;
 import dev.lqwd.cloudfilestorage.service.storage.provider.FindStorageService;
 import dev.lqwd.cloudfilestorage.service.storage.provider.ModificationStorageService;
 import dev.lqwd.cloudfilestorage.service.storage.provider.ValidationStorageService;
-import dev.lqwd.cloudfilestorage.infrastructure.path_processor.PathProcessor;
-import dev.lqwd.cloudfilestorage.infrastructure.path_processor.ProcessedPath;
+import dev.lqwd.cloudfilestorage.infrastructure.path.processor.PathProcessor;
+import dev.lqwd.cloudfilestorage.infrastructure.path.processor.ProcessedPath;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import static dev.lqwd.cloudfilestorage.util.PathTypeUtils.isDirectory;
+
 /*
 TODO: возможен race condition, т.к. сначала идет проверка.
- Возможно, следует блокировать папку во время чека.
- MINIO перезаписывает папку, если существует файл с именем папки
+      Возможно, следует блокировать папку во время чека.
+      MINIO перезаписывает папку, если существует файл с именем папки
  */
 
 @Service
@@ -24,17 +25,16 @@ TODO: возможен race condition, т.к. сначала идет прове
 @RequiredArgsConstructor
 public class ModificationService {
 
-    private static final String SLASH = "/";
-
     private final ModificationStorageService modificationsStorageService;
-    private final ValidationStorageService validationStorageService;
     private final FindStorageService findStorageService;
+    private final ValidationStorageService validationStorageService;
+    private final MoveResourceValidator moveValidator;
     private final PathProcessor pathProcessor;
     private final ResourceResponseMapper mapper;
 
     public void removeResource(String rawPath, long id) {
         ProcessedPath path = pathProcessor.processResource(rawPath);
-        String requestedPath = getRequestedPath(path);
+        String requestedPath = path.requestedPath();
         validationStorageService.validateOnAbsence(requestedPath, id);
 
         log.debug("start deleting resource, {}", path.requestedPath());
@@ -51,18 +51,10 @@ public class ModificationService {
         ProcessedPath pathFrom = pathProcessor.processResource(from);
         ProcessedPath pathTo = pathProcessor.processResource(to);
 
-        validateOnEqualsType(pathFrom.type(), pathTo.type());
+        String requestedPathFrom = pathFrom.requestedPath();
+        String requestedPathTo = pathTo.requestedPath();
 
-        String requestedPathFrom = getRequestedPath(pathFrom);
-        String requestedPathTo = getRequestedPath(pathTo);
-
-        String toParentPath = pathTo.parentPath();
-        validateOnMoveToItself(requestedPathFrom, toParentPath);
-        validateOnRootPath(requestedPathFrom);
-
-        validationStorageService.validateParentPath(id, toParentPath);
-        validationStorageService.validateOnAbsence(requestedPathFrom, id);
-        validationStorageService.validateOnExistence(requestedPathTo, id);
+        moveValidator.validate(pathFrom, pathTo, id);
 
         if (isDirectory(pathFrom)) {
             modificationsStorageService.moveDir(requestedPathFrom, requestedPathTo, id);
@@ -70,32 +62,6 @@ public class ModificationService {
         }
         modificationsStorageService.moveFile(requestedPathFrom, requestedPathTo, id);
         return findStorageService.findResource(requestedPathTo, id);
-    }
-
-    private static void validateOnMoveToItself(String requestedPathFrom, String toParentPath) {
-        if(requestedPathFrom.equals(toParentPath)){
-            throw new BadRequestException("You cannot cut resource to itself");
-        }
-    }
-
-    private static void validateOnRootPath(String requestedPathFrom) {
-        if (requestedPathFrom.equals(SLASH) || requestedPathFrom.isBlank()) {
-            throw new BadRequestException("You can't move the root directory");
-        }
-    }
-
-    private static void validateOnEqualsType(Type typeFrom, Type typeTo) {
-        if (!typeFrom.equals(typeTo)) {
-            throw new BadRequestException("The resource types must match");
-        }
-    }
-
-    private static String getRequestedPath(ProcessedPath path) {
-        return path.requestedPath();
-    }
-
-    private static boolean isDirectory(ProcessedPath path) {
-        return path.type().equals(Type.DIRECTORY);
     }
 
 }

@@ -9,8 +9,9 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.Arrays;
 import java.util.List;
 
+import static dev.lqwd.cloudfilestorage.util.RepeatableErrorMessage.RESOURCE_ALREADY_EXISTS_ERROR_MESSAGE;
 import static org.junit.jupiter.api.Assertions.*;
-
+import static dev.lqwd.cloudfilestorage.util.PathConstant.ROOT;
 
 class UploadServiceTest extends BaseServiceTest {
 
@@ -80,7 +81,7 @@ class UploadServiceTest extends BaseServiceTest {
         AlreadyExistException exception = assertThrows(AlreadyExistException.class, () ->
                 uploadService.upload(ROOT, TEST_ID, files));
 
-        assertEquals("Resource already exists: " + uploadedFile, exception.getMessage());
+        assertEquals(RESOURCE_ALREADY_EXISTS_ERROR_MESSAGE + uploadedFile, exception.getMessage());
 
         List<ResourceResponseDto> answer = findService.getResources(ROOT, TEST_ID);
         assertNotNull(answer);

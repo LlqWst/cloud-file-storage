@@ -5,23 +5,24 @@ import dev.lqwd.cloudfilestorage.exception.BadRequestException;
 import dev.lqwd.cloudfilestorage.infrastructure.mapper.ResourceResponseMapper;
 import dev.lqwd.cloudfilestorage.service.storage.provider.CreationStorageService;
 import dev.lqwd.cloudfilestorage.service.storage.provider.ValidationStorageService;
-import dev.lqwd.cloudfilestorage.infrastructure.path_processor.PathProcessor;
-import dev.lqwd.cloudfilestorage.infrastructure.path_processor.ProcessedPath;
+import dev.lqwd.cloudfilestorage.infrastructure.path.processor.PathProcessor;
+import dev.lqwd.cloudfilestorage.infrastructure.path.processor.ProcessedPath;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import static dev.lqwd.cloudfilestorage.util.PathConstant.SLASH;
+import static dev.lqwd.cloudfilestorage.util.PathConstant.EMPTY;
+import static dev.lqwd.cloudfilestorage.util.RepeatableErrorMessage.RESOURCE_NAME_IS_EMPTY_ERROR_MESSAGE;
+
 /*
 TODO: возможен race condition, т.к. сначала идет проверка.
- Возможно, следует блокировать папку во время чека.
- MINIO не выбрасывает exception, если существует файл с именем, создаваемой папки
+      Возможно, следует блокировать папку во время чека.
+      MINIO не выбрасывает exception, если существует файл с именем, создаваемой папки
  */
 
 @Service
 @RequiredArgsConstructor
 public class CreationService {
-
-    private static final String EMPTY = "";
-    private static final String SLASH = "/";
 
     private final CreationStorageService creationStorageService;
     private final ValidationStorageService validationStorageService;
@@ -44,9 +45,9 @@ public class CreationService {
 
     public DirectoryResponseDto createDir(String rawPath, long id) {
         ProcessedPath path = pathProcessor.processDir(rawPath);
-        validateOnRootPath(path.resourceName());
-
         String requestedPath = path.requestedPath();
+
+        validateOnRootPath(path.resourceName());
         validationStorageService.validateParentPath(id, path.parentPath());
         validationStorageService.validateOnExistence(requestedPath, id);
 
@@ -56,7 +57,7 @@ public class CreationService {
 
     private static void validateOnRootPath(String path) {
         if (path.isBlank() || SLASH.equals(path)) {
-            throw new BadRequestException("Resource name is empty or equals '/'");
+            throw new BadRequestException(RESOURCE_NAME_IS_EMPTY_ERROR_MESSAGE);
         }
     }
 

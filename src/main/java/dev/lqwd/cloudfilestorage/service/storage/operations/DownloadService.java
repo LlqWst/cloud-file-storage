@@ -1,13 +1,12 @@
 package dev.lqwd.cloudfilestorage.service.storage.operations;
 
 import dev.lqwd.cloudfilestorage.dto.resource.DownloadedResponseDto;
-import dev.lqwd.cloudfilestorage.entity.Type;
 import dev.lqwd.cloudfilestorage.exception.InternalErrorException;
 import dev.lqwd.cloudfilestorage.service.storage.provider.DownloadStorageService;
 import dev.lqwd.cloudfilestorage.service.storage.provider.FindStorageService;
 import dev.lqwd.cloudfilestorage.service.storage.provider.ValidationStorageService;
-import dev.lqwd.cloudfilestorage.infrastructure.path_processor.PathProcessor;
-import dev.lqwd.cloudfilestorage.infrastructure.path_processor.ProcessedPath;
+import dev.lqwd.cloudfilestorage.infrastructure.path.processor.PathProcessor;
+import dev.lqwd.cloudfilestorage.infrastructure.path.processor.ProcessedPath;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
@@ -17,13 +16,15 @@ import java.io.InputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import static dev.lqwd.cloudfilestorage.util.PathConstant.SLASH;
+import static dev.lqwd.cloudfilestorage.util.PathTypeUtils.isDirectory;
+
 
 @Service
 @RequiredArgsConstructor
 public class DownloadService {
 
     private static final String ZIP_EXTENSION = ".zip";
-    private static final String SLASH = "/";
 
     private final PathProcessor pathProcessor;
     private final DownloadStorageService downloadStorageService;
@@ -76,7 +77,7 @@ public class DownloadService {
             zipOut.closeEntry();
             zipOut.flush();
         } catch (IOException e) {
-            throw new InternalErrorException("Error processing: " + resourceName, e);
+            throw new InternalErrorException("Error processing resource: " + resourceName, e);
         }
     }
 
@@ -89,10 +90,6 @@ public class DownloadService {
     private String getPathAfterBaseFolder(String fullPath, String baseFolder) {
         String folderWithSlash = baseFolder + SLASH;
         return fullPath.substring(fullPath.indexOf(folderWithSlash) + folderWithSlash.length());
-    }
-
-    private static boolean isDirectory(ProcessedPath path) {
-        return path.type().equals(Type.DIRECTORY);
     }
 
 }

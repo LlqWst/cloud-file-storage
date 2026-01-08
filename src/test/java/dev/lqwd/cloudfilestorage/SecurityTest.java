@@ -4,7 +4,7 @@ import dev.lqwd.cloudfilestorage.entity.Role;
 import dev.lqwd.cloudfilestorage.entity.User;
 import dev.lqwd.cloudfilestorage.entity.UserRole;
 import dev.lqwd.cloudfilestorage.repository.UserRepository;
-import dev.lqwd.cloudfilestorage.repository.storage.minio.MinioBucketStorage;
+import dev.lqwd.cloudfilestorage.infrastructure.storage.minio.MinioBucketStorage;
 import io.minio.MinioClient;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.AfterEach;
@@ -25,6 +25,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import static dev.lqwd.cloudfilestorage.util.RepeatableErrorMessage.BAD_CREDENTIALS_ERROR_MESSAGE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -112,9 +113,8 @@ public class SecurityTest {
         String username = "123";
         String password = "password123";
         String jsonPath = "$.message";
-        String jsonPathValue = "Bad credentials";
 
-        doSignIn(username, password, HttpStatus.BAD_REQUEST.value(), jsonPath, jsonPathValue);
+        doSignIn(username, password, HttpStatus.BAD_REQUEST.value(), jsonPath, BAD_CREDENTIALS_ERROR_MESSAGE);
     }
 
     @Test
@@ -122,9 +122,8 @@ public class SecurityTest {
         String username = "username123";
         String password = "pass";
         String jsonPath = "$.message";
-        String jsonPathValue = "Bad credentials";
 
-        doSignIn(username, password, HttpStatus.BAD_REQUEST.value(), jsonPath, jsonPathValue);
+        doSignIn(username, password, HttpStatus.BAD_REQUEST.value(), jsonPath, BAD_CREDENTIALS_ERROR_MESSAGE);
     }
 
     @Test
@@ -132,9 +131,8 @@ public class SecurityTest {
         String username = "username124";
         String password = "password123";
         String jsonPath = "$.message";
-        String jsonPathValue = "Bad credentials";
 
-        doSignIn(username, password, HttpStatus.UNAUTHORIZED.value(), jsonPath, jsonPathValue);
+        doSignIn(username, password, HttpStatus.UNAUTHORIZED.value(), jsonPath, BAD_CREDENTIALS_ERROR_MESSAGE);
     }
 
     @Test

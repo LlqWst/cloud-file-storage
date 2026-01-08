@@ -2,9 +2,9 @@ package dev.lqwd.cloudfilestorage.infrastructure.mapper;
 
 import dev.lqwd.cloudfilestorage.dto.resource.DirectoryResponseDto;
 import dev.lqwd.cloudfilestorage.dto.resource.FileResponseDto;
-import dev.lqwd.cloudfilestorage.infrastructure.parser.storage.ParsedResource;
+import dev.lqwd.cloudfilestorage.infrastructure.storage.parser.ParsedResource;
 import dev.lqwd.cloudfilestorage.dto.resource.ResourceResponseDto;
-import dev.lqwd.cloudfilestorage.infrastructure.path_processor.ProcessedPath;
+import dev.lqwd.cloudfilestorage.infrastructure.path.processor.ProcessedPath;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

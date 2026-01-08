@@ -10,7 +10,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static dev.lqwd.cloudfilestorage.util.RepeatableErrorMessage.RESOURCE_NOT_EXISTS_ERROR_MESSAGE;
 import static org.junit.jupiter.api.Assertions.*;
+import static dev.lqwd.cloudfilestorage.util.PathConstant.ROOT;
+import static dev.lqwd.cloudfilestorage.util.PathConstant.SLASH;
 
 
 class FindServiceTest extends BaseServiceTest {
@@ -20,7 +23,7 @@ class FindServiceTest extends BaseServiceTest {
         NotFoundException exception = assertThrows(NotFoundException.class, () ->
                 findService.getResource(TEST_CORRECT_FILE, TEST_ID));
 
-        assertEquals("Resource doesn't exists: " + TEST_CORRECT_FILE, exception.getMessage());
+        assertEquals(RESOURCE_NOT_EXISTS_ERROR_MESSAGE + TEST_CORRECT_FILE, exception.getMessage());
     }
 
     @Test

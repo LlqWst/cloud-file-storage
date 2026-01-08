@@ -4,7 +4,7 @@ import dev.lqwd.cloudfilestorage.dto.ErrorResponseDto;
 import dev.lqwd.cloudfilestorage.dto.resource.DirectoryResponseDto;
 import dev.lqwd.cloudfilestorage.dto.resource.FileResponseDto;
 import dev.lqwd.cloudfilestorage.dto.resource.ResourceResponseDto;
-import dev.lqwd.cloudfilestorage.security.user_details.CustomUserDetails;
+import dev.lqwd.cloudfilestorage.security.userdetails.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.*;

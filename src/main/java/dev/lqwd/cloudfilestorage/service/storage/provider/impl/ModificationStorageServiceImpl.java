@@ -1,7 +1,8 @@
 package dev.lqwd.cloudfilestorage.service.storage.provider.impl;
 
 import dev.lqwd.cloudfilestorage.infrastructure.UserDirectoryProvider;
-import dev.lqwd.cloudfilestorage.repository.storage.ResourceStorage;
+import dev.lqwd.cloudfilestorage.infrastructure.storage.ResourceStorage;
+import dev.lqwd.cloudfilestorage.service.storage.provider.FindStorageService;
 import dev.lqwd.cloudfilestorage.service.storage.provider.ModificationStorageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +18,7 @@ public class ModificationStorageServiceImpl implements ModificationStorageServic
 
     private final UserDirectoryProvider userDirectoryProvider;
     private final ResourceStorage resourceStorage;
-    private final FindStorageServiceImpl findService;
+    private final FindStorageService findService;
 
     @Override
     public void removeDir(String dirPath, long id) {

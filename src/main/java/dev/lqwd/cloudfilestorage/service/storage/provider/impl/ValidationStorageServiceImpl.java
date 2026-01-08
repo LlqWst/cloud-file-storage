@@ -2,21 +2,22 @@ package dev.lqwd.cloudfilestorage.service.storage.provider.impl;
 
 import dev.lqwd.cloudfilestorage.exception.AlreadyExistException;
 import dev.lqwd.cloudfilestorage.exception.NotFoundException;
-import dev.lqwd.cloudfilestorage.repository.storage.FindStorage;
-import dev.lqwd.cloudfilestorage.infrastructure.PathNormalizer;
+import dev.lqwd.cloudfilestorage.infrastructure.storage.FindStorage;
+import dev.lqwd.cloudfilestorage.infrastructure.path.PathNormalizer;
 import dev.lqwd.cloudfilestorage.infrastructure.UserDirectoryProvider;
 import io.minio.StatObjectResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import static dev.lqwd.cloudfilestorage.util.PathConstant.SLASH;
+import static dev.lqwd.cloudfilestorage.util.RepeatableErrorMessage.*;
+
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class ValidationStorageServiceImpl implements dev.lqwd.cloudfilestorage.service.storage.provider.ValidationStorageService {
-
-    private static final String SLASH = "/";
 
     private final PathNormalizer pathNormalizer;
     private final UserDirectoryProvider userDirectoryProvider;
@@ -39,21 +40,21 @@ public class ValidationStorageServiceImpl implements dev.lqwd.cloudfilestorage.s
     @Override
     public void validateOnExistence(String path, long id) {
         if (isExistIgnoreEndSlash(path, id)) {
-            throw new AlreadyExistException("Resource already exists: " + path);
+            throw new AlreadyExistException(RESOURCE_ALREADY_EXISTS_ERROR_MESSAGE + path);
         }
     }
 
     @Override
     public void validateOnAbsence(String path, long id) {
         if (!isExist(path, id)) {
-            throw new NotFoundException("Resource doesn't exists: " + path);
+            throw new NotFoundException(RESOURCE_NOT_EXISTS_ERROR_MESSAGE + path);
         }
     }
 
     @Override
     public void validateParentPath(long id, String parentPath) {
         if (!isExist(parentPath, id)) {
-            throw new NotFoundException("Parent path doesn't exist: " + parentPath);
+            throw new NotFoundException(PARENT_PATH_NOT_EXISTS_ERROR_MESSAGE + parentPath);
         }
     }
 

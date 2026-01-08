@@ -1,17 +1,18 @@
 package dev.lqwd.cloudfilestorage.infrastructure;
 
-import org.springframework.beans.factory.annotation.Value;
+import dev.lqwd.cloudfilestorage.dto.property.StorageProperties;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 
 @Component
+@RequiredArgsConstructor
 public class UserDirectoryProvider {
 
-    @Value("${app.root.template.name}")
-    private String userRootTemplate;
+    private final StorageProperties storageProperties;
 
     public String provide(long id) {
-        return userRootTemplate.formatted(id);
+        return storageProperties.rootTemplate().formatted(id);
     }
 
     public String provide(String path, long id) {

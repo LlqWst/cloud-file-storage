@@ -1,7 +1,6 @@
 package dev.lqwd.cloudfilestorage.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
@@ -12,21 +11,18 @@ import org.springframework.session.data.redis.config.annotation.web.http.EnableR
 
 @Configuration
 @EnableRedisHttpSession
-@RequiredArgsConstructor
 public class RedisSessionConfig {
-
-    private final JacksonConfig jacksonConfig;
 
     @Bean
     public RedisSerializer<Object> springSessionDefaultRedisSerializer() {
 
-        ObjectMapper mapper = jacksonConfig.objectMapper().copy();
+        /*
+            Создаем еще один object mapper для Redis, т.к. редис добавляет поле @class
+         */
 
-        mapper.registerModules(SecurityJackson2Modules.getModules(getClass().getClassLoader()));
-        return new GenericJackson2JsonRedisSerializer(mapper);
+        ObjectMapper redisMapper = new ObjectMapper();
+        redisMapper.registerModules(SecurityJackson2Modules.getModules(getClass().getClassLoader()));
+        return new GenericJackson2JsonRedisSerializer(redisMapper);
     }
 
 }
-
-
-

@@ -1,14 +1,14 @@
 package dev.lqwd.cloudfilestorage;
 
+import com.jayway.jsonpath.JsonPath;
 import dev.lqwd.cloudfilestorage.entity.User;
 import dev.lqwd.cloudfilestorage.repository.UserRepository;
-import dev.lqwd.cloudfilestorage.repository.storage.minio.MinioBucketStorage;
+import dev.lqwd.cloudfilestorage.infrastructure.storage.minio.MinioBucketStorage;
 import io.minio.MinioClient;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -19,10 +19,15 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.util.Arrays;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
+import static dev.lqwd.cloudfilestorage.util.RepeatableErrorMessage.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -37,24 +42,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("test")
 public class RegistrationControllerTest {
 
-    @Value("${app.min.length.username}")
-    private int minUsername;
-
-    @Value("${app.max.length.username}")
-    private int maxUsername;
-
-    @Value("${app.pattern.username}")
-    private String pattern;
-
-    @Value("${app.min.length.password}")
-    private int minPass;
-
-    @Value("${app.max.length.password}")
-    private int maxPass;
-
-    private static final String USERNAME_MESSAGE_TEMPLATE = "Please provide username %d-%d chars long (valid chars: %s)";
-    private static final String PASSWORD_MESSAGE_TEMPLATE = "Password must be %d-%d characters long";
     public static final String SIGN_UP_URL = "/api/auth/sign-up";
+    public static final String DELIMITER = "; ";
 
     @MockitoBean
     private MinioClient minioClient;
@@ -88,72 +77,86 @@ public class RegistrationControllerTest {
         String username = "username124";
         String password = "test_password";
         String jsonPath = "$.message";
-        String jsonPathValue = "User already exists";
         registerWithAppropriateUsername(username);
 
-        doSignUp(username, password, HttpStatus.CONFLICT.value(), jsonPath, jsonPathValue);
+        doSignUpWithCookie(username, password, HttpStatus.CONFLICT.value(), jsonPath, USER_ALREADY_EXISTS_ERROR_MESSAGE);
     }
 
     @Test
     void shouldReturnJsonErrorMessage_With_InappropriateUsername() throws Exception {
         String username = "test";
-        signUpWithInappropriateUsername(username);
+        signUpWithInappropriateUsername(username, USERNAME_IS_INCORRECT_ERROR_MESSAGE);
     }
 
     @Test
     void shouldReturnJsonErrorMessage_With_NullUsername() throws Exception {
         String username = null;
-        signUpWithInappropriateUsername(username);
+        signUpWithInappropriateUsername(username, USERNAME_IS_INCORRECT_ERROR_MESSAGE);
     }
 
     @Test
     void shouldReturnJsonErrorMessage_With_EmptyUsername() throws Exception {
         String username = "";
-        signUpWithInappropriateUsername(username);
+        signUpWithInappropriateUsername(username, USERNAME_IS_BLANK_ERROR_MESSAGE +
+                                                  DELIMITER +
+                                                  USERNAME_IS_INCORRECT_ERROR_MESSAGE +
+                                                  DELIMITER +
+                                                  USERNAME_HAS_INVALID_CHARS_ERROR_MESSAGE);
     }
 
     @Test
     void shouldReturnJsonErrorMessage_With_BlankUsername() throws Exception {
         String username = "             ";
-        signUpWithInappropriateUsername(username);
+        signUpWithInappropriateUsername(username, USERNAME_IS_BLANK_ERROR_MESSAGE);
     }
 
     @Test
     void shouldReturnJsonErrorMessage_With_InappropriateEmail() throws Exception {
         String username = "test@gmail...com";
-        signUpWithInappropriateUsername(username);
+        signUpWithInappropriateUsername(username, USERNAME_HAS_INVALID_CHARS_ERROR_MESSAGE);
     }
 
     @Test
     void shouldReturnJsonErrorMessage_With_InappropriatePassword() throws Exception {
         String password = "test";
-        signUpWithInappropriatePassword(password);
+        signUpWithInappropriatePassword(password, PASSWORD_IS_INCORRECT_ERROR_MESSAGE);
     }
 
     @Test
     void shouldReturnJsonErrorMessage_With_NullPassword() throws Exception {
         String password = null;
-        signUpWithInappropriatePassword(password);
+        signUpWithInappropriatePassword(password, PASSWORD_IS_INCORRECT_ERROR_MESSAGE);
     }
 
     @Test
     void shouldReturnJsonErrorMessage_With_EmptyPassword() throws Exception {
         String password = "";
-        signUpWithInappropriatePassword(password);
+        signUpWithInappropriatePassword(password, PASSWORD_HAS_SPACES_ERROR_MESSAGE +
+                                                  DELIMITER +
+                                                  PASSWORD_IS_INCORRECT_ERROR_MESSAGE +
+                                                  DELIMITER +
+                                                  PASSWORD_IS_BLANK_ERROR_MESSAGE);
     }
 
     @Test
     void shouldReturnJsonErrorMessage_With_BlankPassword() throws Exception {
         String password = "          ";
-        signUpWithInappropriatePassword(password);
+        signUpWithInappropriatePassword(password, PASSWORD_HAS_SPACES_ERROR_MESSAGE +
+                                                  DELIMITER +
+                                                  PASSWORD_IS_BLANK_ERROR_MESSAGE);
+    }
+
+    @Test
+    void shouldReturnJsonErrorMessage_With_SpacesPassword() throws Exception {
+        String password = "       f   ";
+        signUpWithInappropriatePassword(password, PASSWORD_HAS_SPACES_ERROR_MESSAGE);
     }
 
     private Cookie[] registerWithAppropriateUsername(String username) throws Exception {
         String password = "test_password";
         String jsonPath = "$.username";
 
-        Cookie[] cookies = doSignUp(username, password, HttpStatus.CREATED.value(), jsonPath, username);
-
+        Cookie[] cookies = doSignUpWithCookie(username, password, HttpStatus.CREATED.value(), jsonPath, username);
         User savedUser = userRepository.findByUsername(username).orElseThrow();
 
         Assertions.assertEquals(username, savedUser.getUsername());
@@ -161,33 +164,62 @@ public class RegistrationControllerTest {
         return cookies;
     }
 
-    private void signUpWithInappropriateUsername(String username) throws Exception {
+    private void signUpWithInappropriateUsername(String username, String errorMessage) throws Exception {
         String password = "test_password";
         String jsonPath = "$.message";
 
-        doSignUp(username, password, HttpStatus.BAD_REQUEST.value(),
-                jsonPath, USERNAME_MESSAGE_TEMPLATE.formatted(minUsername, maxUsername, pattern));
+        doSignUpWithMessageCheck(username, password, HttpStatus.BAD_REQUEST.value(),
+                jsonPath, errorMessage);
 
         Optional<User> user = userRepository.findByUsername(username);
         Assertions.assertTrue(user.isEmpty());
     }
 
-    private void signUpWithInappropriatePassword(String password) throws Exception {
+    private void signUpWithInappropriatePassword(String password, String errorMessage) throws Exception {
         String username = "test_user";
         String jsonPath = "$.message";
 
-        doSignUp(username, password, HttpStatus.BAD_REQUEST.value(),
-                jsonPath, PASSWORD_MESSAGE_TEMPLATE.formatted(minPass, maxPass));
+        doSignUpWithMessageCheck(username, password, HttpStatus.BAD_REQUEST.value(),
+                jsonPath, errorMessage);
 
         Optional<User> user = userRepository.findByUsername(username);
         Assertions.assertTrue(user.isEmpty());
     }
 
-    private Cookie[] doSignUp(String username,
-                            String password,
-                            int status,
-                            String jsonPath,
-                            String jsonPathValue) throws Exception {
+    private Cookie[] doSignUpWithCookie(String username,
+                                        String password,
+                                        int status,
+                                        String jsonPath,
+                                        String jsonPathValue) throws Exception {
+
+        return doSignUp(username, password, status)
+                .andExpect(jsonPath(jsonPath).value(jsonPathValue))
+                .andReturn().getResponse().getCookies();
+    }
+
+    private void doSignUpWithMessageCheck(String username,
+                                          String password,
+                                          int status,
+                                          String jsonPath,
+                                          String jsonPathValue) throws Exception {
+
+        String result = doSignUp(username, password, status)
+                .andReturn().getResponse().getContentAsString();
+
+        Set<String> resValue = Arrays.stream(JsonPath.read(result, jsonPath).toString()
+                .split(DELIMITER))
+                .collect(Collectors.toSet());
+        Set<String> expValue = Arrays.stream(jsonPathValue.split(DELIMITER))
+                .collect(Collectors.toSet());
+
+        Assertions.assertEquals(resValue.size(), expValue.size());
+        resValue.forEach(x -> Assertions.assertTrue(expValue.contains(x)));
+
+    }
+
+    private ResultActions doSignUp(String username,
+                                   String password,
+                                   int status) throws Exception {
 
         return mockMvc.perform(post(SIGN_UP_URL)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -198,9 +230,7 @@ public class RegistrationControllerTest {
                                 }
                                 """.formatted(username, password)))
                 .andDo(print())
-                .andExpect(status().is(status))
-                .andExpect(jsonPath(jsonPath).value(jsonPathValue))
-                .andReturn().getResponse().getCookies();
+                .andExpect(status().is(status));
     }
 
 }

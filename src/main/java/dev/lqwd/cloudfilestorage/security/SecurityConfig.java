@@ -1,9 +1,10 @@
 package dev.lqwd.cloudfilestorage.security;
 
-import dev.lqwd.cloudfilestorage.security.json_auth.JsonAuthenticationFilter;
-import dev.lqwd.cloudfilestorage.security.user_details.CustomUserDetailsService;
+import dev.lqwd.cloudfilestorage.security.auth.json.JsonAuthenticationFilter;
+import dev.lqwd.cloudfilestorage.security.userdetails.CustomUserDetailsService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
@@ -29,7 +30,6 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 
 
@@ -55,21 +55,17 @@ public class SecurityConfig {
             "/api/auth/**"
     };
 
-    private static final List<String> ALLOWED_ORIGINS = Arrays.asList(
-            "http://localhost:3000",
-            "http://localhost:8080",
-            "http://localhost:80",
-            "http://217.60.5.12:8080",
-            "http://217.60.5.12:80",
-            "http://217.60.5.12:3000"
-    );
+    @Value("${app.cors.allowed-origins}")
+    private final List<String> ALLOWED_ORIGINS;
+
     private static final List<String> ALLOWED_METHODS = List.of(
             "GET", "POST", "PUT", "DELETE", "OPTIONS");
     private static final List<String> ALLOWED_HEADERS = List.of("*");
+    public static final String SESSION_COOKIE_NAME = "SESSION";
 
     private final CustomUserDetailsService customUserDetailsService;
     private final CustomLogoutSuccessHandler customLogoutSuccessHandler;
-    private final RequestMatcher LogoutMatcher = PathPatternRequestMatcher
+    private final RequestMatcher logoutMatcher = PathPatternRequestMatcher
             .withDefaults()
             .matcher(SIGN_OUT_URL);
 
@@ -132,11 +128,11 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .logout(conf -> conf
                         .logoutRequestMatcher(req ->
-                                LogoutMatcher.matches(req) &&
+                                logoutMatcher.matches(req) &&
                                 POST.equalsIgnoreCase(req.getMethod())
                         )
                         .logoutSuccessHandler(customLogoutSuccessHandler)
-                        .deleteCookies("SESSION")
+                        .deleteCookies(SESSION_COOKIE_NAME)
                         .invalidateHttpSession(true)
                 )
                 .addFilterBefore(tomcatErrorFilter, WebAsyncManagerIntegrationFilter.class)

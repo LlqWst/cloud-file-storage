@@ -16,7 +16,9 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import static dev.lqwd.cloudfilestorage.util.RepeatableErrorMessage.RESOURCE_NOT_EXISTS_ERROR_MESSAGE;
 import static org.junit.jupiter.api.Assertions.*;
+import static dev.lqwd.cloudfilestorage.util.PathConstant.ROOT;
 
 
 class DownloadServiceTest extends BaseServiceTest {
@@ -46,7 +48,7 @@ class DownloadServiceTest extends BaseServiceTest {
         NotFoundException exception = assertThrows(NotFoundException.class, () ->
                 downloadService.download(fileName, TEST_ID).content());
 
-        assertEquals("Resource doesn't exists: " + fileName, exception.getMessage());
+        assertEquals(RESOURCE_NOT_EXISTS_ERROR_MESSAGE + fileName, exception.getMessage());
     }
 
     @Test

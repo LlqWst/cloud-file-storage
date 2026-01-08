@@ -1,14 +1,13 @@
 package dev.lqwd.cloudfilestorage.service.storage.operations;
 
 import dev.lqwd.cloudfilestorage.TestcontainersConfiguration;
-import dev.lqwd.cloudfilestorage.repository.storage.BucketStorage;
+import dev.lqwd.cloudfilestorage.dto.property.ValidationProperties;
+import dev.lqwd.cloudfilestorage.infrastructure.storage.BucketStorage;
 import dev.lqwd.cloudfilestorage.service.storage.provider.ValidationStorageService;
-import jakarta.annotation.PostConstruct;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -18,7 +17,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.multipart.MultipartFile;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.util.Set;
+import static dev.lqwd.cloudfilestorage.util.PathConstant.SLASH;
+import static dev.lqwd.cloudfilestorage.util.PathConstant.ROOT;
 
 
 @SpringBootTest
@@ -29,22 +29,9 @@ import java.util.Set;
 @ActiveProfiles("test")
 abstract class BaseServiceTest {
 
-    @Value("${app.max.length.name}")
-    protected int maxLengthName;
+    @Autowired
+    protected ValidationProperties properties;
 
-    @Value("${app.path.forbidden.chars}")
-    private String[] forbiddenCharacters;
-
-    protected Set<String> forbiddenSet;
-
-    @PostConstruct
-    public void init() {
-        forbiddenSet = Set.of(forbiddenCharacters);
-    }
-
-    protected static final String ROOT = "";
-    protected static final String EMPTY = "";
-    protected static final String SLASH = "/";
     protected static final String FILE_CONTENT_TYPE = "text/plain";
     protected static final String MULTIPART_HTTP_PARAMETER = "object";
     private static final String CONTENT = "Test file content";
@@ -88,7 +75,7 @@ abstract class BaseServiceTest {
     }
 
     protected String getNameMoreThanMaxNameLength(){
-        return "a".repeat(maxLengthName + 1);
+        return "a".repeat(properties.maxLengthPathName() + 1);
     }
 
     protected static @NotNull MockMultipartFile createFile(String fileName) {

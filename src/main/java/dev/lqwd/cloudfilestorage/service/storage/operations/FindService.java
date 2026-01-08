@@ -3,9 +3,9 @@ package dev.lqwd.cloudfilestorage.service.storage.operations;
 import dev.lqwd.cloudfilestorage.dto.resource.ResourceResponseDto;
 import dev.lqwd.cloudfilestorage.service.storage.provider.FindStorageService;
 import dev.lqwd.cloudfilestorage.service.storage.provider.ValidationStorageService;
-import dev.lqwd.cloudfilestorage.infrastructure.validator.PathValidator;
-import dev.lqwd.cloudfilestorage.infrastructure.path_processor.PathProcessor;
-import dev.lqwd.cloudfilestorage.infrastructure.path_processor.ProcessedPath;
+import dev.lqwd.cloudfilestorage.infrastructure.path.PathValidator;
+import dev.lqwd.cloudfilestorage.infrastructure.path.processor.PathProcessor;
+import dev.lqwd.cloudfilestorage.infrastructure.path.processor.ProcessedPath;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -35,7 +35,7 @@ public class FindService {
 
     /*
     TODO: Для поиска по query загружаются все ресурсы пользователя.
-     Необходим более оптимальный подход
+          Необходим более оптимальный подход
      */
 
     public List<ResourceResponseDto> searchResource(String query, long id) {

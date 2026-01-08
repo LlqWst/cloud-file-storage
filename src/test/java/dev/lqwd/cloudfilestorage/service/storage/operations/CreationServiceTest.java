@@ -7,8 +7,10 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Set;
 
+import static dev.lqwd.cloudfilestorage.util.PathConstant.EMPTY;
+import static dev.lqwd.cloudfilestorage.util.PathConstant.SLASH;
+import static dev.lqwd.cloudfilestorage.util.RepeatableErrorMessage.*;
 import static org.junit.jupiter.api.Assertions.*;
-
 
 class CreationServiceTest extends BaseServiceTest {
 
@@ -27,9 +29,8 @@ class CreationServiceTest extends BaseServiceTest {
         Exception exception = assertThrows(BadRequestException.class, () ->
                 creationService.createDir(getNameMoreThanMaxNameLength(), TEST_ID));
 
-        assertEquals(
-                "The resource name '%s' exceeded max allowed name length %d."
-                        .formatted(getNameMoreThanMaxNameLength(), maxLengthName),
+        assertEquals(RESOURCE_EXCEEDED_LENGTH_NAME_ERROR_MESSAGE
+                        .formatted(getNameMoreThanMaxNameLength(), properties.maxLengthPathName()),
                 exception.getMessage());
     }
 
@@ -38,7 +39,7 @@ class CreationServiceTest extends BaseServiceTest {
         BadRequestException exception = assertThrows(BadRequestException.class, () ->
                 creationService.createDir(TEST_FOLDER_WITHOUT_END_SLASH, TEST_ID));
 
-        assertEquals("Resource is not a directory: directory should end with '/'",
+        assertEquals(NOT_DIRECTORY_ERROR_MESSAGE,
                 exception.getMessage());
     }
 
@@ -48,7 +49,7 @@ class CreationServiceTest extends BaseServiceTest {
         AlreadyExistException exception = assertThrows(AlreadyExistException.class, () ->
                 creationService.createDir(TEST_CORRECT_FOLDER, TEST_ID));
 
-        assertEquals("Resource already exists: " + TEST_CORRECT_FOLDER,
+        assertEquals(RESOURCE_ALREADY_EXISTS_ERROR_MESSAGE + TEST_CORRECT_FOLDER,
                 exception.getMessage());
     }
 
@@ -57,18 +58,17 @@ class CreationServiceTest extends BaseServiceTest {
         NotFoundException exception = assertThrows(NotFoundException.class, () ->
                 creationService.createDir(TEST_FOLDER_WITH_PARENT, TEST_ID));
 
-        assertEquals("Parent path doesn't exist: " + TEST_PARENT_FOLDER, exception.getMessage());
+        assertEquals(PARENT_PATH_NOT_EXISTS_ERROR_MESSAGE + TEST_PARENT_FOLDER, exception.getMessage());
     }
 
     @Test
     void ShouldThrowBadRequestException_When_CreateFolder_With_NameHasOneOfForbiddenChar() {
-        forbiddenSet.forEach(symbol -> {
+        properties.forbiddenChars().forEach(symbol -> {
                     Exception exception = assertThrows(BadRequestException.class, () ->
                             creationService.createDir(TEST_FOLDER_WITHOUT_END_SLASH + symbol + SLASH, TEST_ID)
                     );
-                    assertEquals(
-                            "Please enter a resource name that doesn't include any of these chars: "
-                            + forbiddenSet,
+                    assertEquals(RESOURCE_INCORRECT_NAME_ERROR_MESSAGE
+                            + properties.forbiddenChars(),
                             exception.getMessage());
                 }
         );
@@ -82,7 +82,7 @@ class CreationServiceTest extends BaseServiceTest {
                     Exception exception = assertThrows(BadRequestException.class, () ->
                             creationService.createDir(parameter, TEST_ID)
                     );
-                    assertEquals("Resource name is empty or equals '/'",
+                    assertEquals(RESOURCE_NAME_IS_EMPTY_ERROR_MESSAGE,
                             exception.getMessage());
                 }
         );
@@ -93,8 +93,7 @@ class CreationServiceTest extends BaseServiceTest {
         Exception exception = assertThrows(BadRequestException.class, () ->
                 creationService.createDir(null, TEST_ID));
 
-        assertEquals(
-                "Resource name is empty or equals '/'",
+        assertEquals(RESOURCE_NAME_IS_EMPTY_ERROR_MESSAGE,
                 exception.getMessage());
     }
 
@@ -104,7 +103,7 @@ class CreationServiceTest extends BaseServiceTest {
         AlreadyExistException exception = assertThrows(AlreadyExistException.class, () ->
                 creationService.createDir(TEST_CORRECT_FILE + SLASH, TEST_ID));
 
-        assertEquals("Resource already exists: " + TEST_CORRECT_FILE + SLASH,
+        assertEquals(RESOURCE_ALREADY_EXISTS_ERROR_MESSAGE + TEST_CORRECT_FILE + SLASH,
                 exception.getMessage());
     }
 

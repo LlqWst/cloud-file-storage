@@ -11,7 +11,10 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static dev.lqwd.cloudfilestorage.util.RepeatableErrorMessage.*;
 import static org.junit.jupiter.api.Assertions.*;
+import static dev.lqwd.cloudfilestorage.util.PathConstant.ROOT;
+import static dev.lqwd.cloudfilestorage.util.PathConstant.SLASH;
 
 
 class ModificationServiceTest extends BaseServiceTest {
@@ -37,7 +40,7 @@ class ModificationServiceTest extends BaseServiceTest {
         NotFoundException exception = assertThrows(NotFoundException.class, () ->
                 modificationService.removeResource(TEST_CORRECT_FOLDER, TEST_ID));
 
-        assertEquals("Resource doesn't exists: " + TEST_CORRECT_FOLDER, exception.getMessage());
+        assertEquals(RESOURCE_NOT_EXISTS_ERROR_MESSAGE + TEST_CORRECT_FOLDER, exception.getMessage());
 
     }
 
@@ -66,7 +69,7 @@ class ModificationServiceTest extends BaseServiceTest {
         AlreadyExistException exception = assertThrows(AlreadyExistException.class, () ->
                 modificationService.moveResource(secondFilePath, firstFilePath, TEST_ID));
 
-        assertEquals("Resource already exists: " + firstFilePath, exception.getMessage());
+        assertEquals(RESOURCE_ALREADY_EXISTS_ERROR_MESSAGE + firstFilePath, exception.getMessage());
     }
 
     @Test
@@ -211,7 +214,7 @@ class ModificationServiceTest extends BaseServiceTest {
                 modificationService.moveResource(folderPath1, folder1NewPath, TEST_ID));
 
 
-        assertEquals("You cannot cut resource to itself", exception.getMessage());
+        assertEquals(MOVE_TO_ITSELF_ERROR_MESSAGE, exception.getMessage());
     }
 
 }
